@@ -16,16 +16,27 @@ class TestKLP : public QObject
 
 private slots:
     void readModal();
+    void cleanupTestCase();
 
 private:
     QString const mkRootPath = "../../../../";
     QString const mkDataPath = mkRootPath + "tests/data/";
+    Result* mpModalResult = nullptr;
 };
 
 //! Read the output file which consists of modal data
 void TestKLP::readModal()
 {
-    Result(mkDataPath + "modal.klp");
+    mpModalResult = new Result(mkDataPath + "modal.klp");
+    qint64 iFrame = 0;
+    auto collection = mpModalResult->getFrameCollection(iFrame);
+    QCOMPARE(collection.naturalLength.size(), 2388);
+}
+
+//! Destroy all the data used
+void TestKLP::cleanupTestCase()
+{
+    delete mpModalResult;
 }
 
 QTEST_APPLESS_MAIN(TestKLP)

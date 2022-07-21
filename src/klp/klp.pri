@@ -2,10 +2,14 @@
 INCLUDEPATH += $${PWD}
 
 HEADERS += \
-    $$PWD/records.h \
+    $$PWD/framecollection.h \
+    $$PWD/frameobject.h \
+    $$PWD/frameobjectiterator.h \
+    $$PWD/index.h \
     $$PWD/recordtype.h \
     $$PWD/result.h
 
 SOURCES += \
-    $$PWD/records.cpp \
+    $$PWD/frameobject.cpp \
+    $$PWD/frameobjectiterator.cpp \
     $$PWD/result.cpp
