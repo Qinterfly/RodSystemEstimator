@@ -1,0 +1,8 @@
+
+DEFINES += GSL_DLL
+
+LIBS += -L$${GSL_PATH} -lgsl
+LIBS += -L$${GSL_PATH} -lgslcblas
+
+INCLUDEPATH += $${INCLUDE_PATH}
+DEPENDPATH += $${INCLUDE_PATH}

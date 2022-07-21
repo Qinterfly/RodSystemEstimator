@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>document-new.svg</file>
+        <file>document-open.svg</file>
+        <file>document-save-as.svg</file>
+        <file>statistics.svg</file>
+		<file>close-button.svg</file>
+        <file>close-button-disabled.svg</file>
+        <file>close-button-focused.svg</file>
+        <file>detach-button.svg</file>
+        <file>detach-button-disabled.svg</file>
+        <file>maximize-button.svg</file>
+        <file>maximize-button-focused.svg</file>
+        <file>restore-button.svg</file>
+        <file>restore-button-focused.svg</file>
+        <file>tabs-menu-button.svg</file>
+		<file>go-up-symbolic.symbolic.png</file>
+		<file>go-down-symbolic.symbolic.png</file>
+		<file>down-arrow.png</file>
+		<file>minus.svg</file>
+		<file>plus.svg</file>
+		<file>code.svg</file>
+		<file>idea.svg</file>
+		<file>debug-start.svg</file>
+		<file>debug-stop.svg</file>
+		<file>window-new.svg</file>
+		<file>line-chart.svg</file>
+		<file>refresh.svg</file>
+    </qresource>
+</RCC>

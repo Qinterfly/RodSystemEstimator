@@ -1,0 +1,11 @@
+archive
+bin
+data
+distribute
+doc/html
+doc/latex
+doc/temp
+preparation
+info
+*.pro.*
+TODO.txt
