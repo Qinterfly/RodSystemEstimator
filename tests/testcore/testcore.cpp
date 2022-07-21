@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date April 2021
+ * \date July 2022
  * \brief Testing of the core functionality
  */
 

@@ -10,6 +10,7 @@ include(core/core.pri)
 include(main/main.pri)
 include(central/central.pri)
 include(viewers/viewers.pri)
+include(klp/klp.pri)
 
 # Distribution
 qnx: target.path = /tmp/$${TARGET}/bin
