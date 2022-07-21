@@ -25,7 +25,7 @@ AbstractDataObject::~AbstractDataObject()
 
 }
 
-//! Modify a key existed
+//! Modify an existing key
 bool AbstractDataObject::changeItemKey(DataKeyType oldKey, DataKeyType newKey, DataHolder* items)
 {
     if (!items)
@@ -41,7 +41,7 @@ bool AbstractDataObject::changeItemKey(DataKeyType oldKey, DataKeyType newKey, D
     return true;
 }
 
-//! Remove an entity with the specified key
+//! Remove the entity paired to the specified key
 void AbstractDataObject::removeItem(DataKeyType key)
 {
     mItems.erase(key);

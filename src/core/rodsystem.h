@@ -22,9 +22,9 @@ struct Spans
 {
     Spans(int numRods) : u0(numRods), uL(numRods), L(numRods) { }
 
-    //! Constant on the left end
+    //! Constant at the left end
     std::vector<double> u0;
-    //! Constant on the right end
+    //! Constant at the right end
     std::vector<double> uL;
     //! Length of a rod, m
     std::vector<double> L;
