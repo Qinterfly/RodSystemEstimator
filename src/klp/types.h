@@ -2,16 +2,16 @@
  * \file
  * \author Pavel Lakiza
  * \date July 2022
- * \brief Specification of the record types in the KLP file
+ * \brief Specification of data types in a KLP file
  */
 
-#ifndef RECORDTYPE_H
-#define RECORDTYPE_H
+#ifndef TYPES_H
+#define TYPES_H
 
 namespace KLP
 {
 
-//! Types of records in a KLP file
+//! Types of records
 enum RecordType
 {
     R     = 2,  // Rods
@@ -27,12 +27,12 @@ enum RecordType
     Eps   = 12, // Strain
     Ul    = 13, // Projected state vector: [U1L, U2L, U3L, w1, w2, w3, Q1L, Q2L, Q3L, M1L, M2L, M3L]
     Beta  = 15, // Rotation matrix
-    Qm    = 16, // Loading factors
-    qm    = 17, // Distributed loading factors
+    Qm    = 16, // Loads
+    qm    = 17, // Distributed loads
     AE    = 18, // Aerodynamic
-    MF    = 19, // Modal frequencies
-    MV    = 20, // Modal vectors
-    ND    = 21, // Nondimensional coefficients
+    MF    = 19, // Eigenfrequencies
+    MV    = 20, // Eigenvectors
+    ND    = 21, // Nondimensional coefficients [use NondimensionalType to navigate]
     FM    = 22, // Finite element model
     ERR   = 23, // Computational errors of the state vector
     MASS  = 24, // Total mass and the center of gravity
@@ -50,6 +50,19 @@ enum RecordType
     SIZE        // Maximal size
 };
 
+//! Types of nondimensional coefficients
+enum NondimensionalType
+{
+    Time              = 0,
+    Displacement      = 1,
+    Force             = 2,
+    Moment            = 3,
+    DistributedForce  = 7,
+    DistributedMoment = 8,
+    Speed             = 9,
+    Acceleration      = 10
+};
+
 }
 
-#endif // RECORDTYPE_H
+#endif // TYPES_H

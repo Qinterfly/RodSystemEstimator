@@ -18,7 +18,7 @@ template <typename T>
 class FrameObjectIterator
 {
 public:
-    using iterator          = FrameObjectIterator<T>;
+    using self_type         = FrameObjectIterator<T>;
     using iterator_category = std::random_access_iterator_tag;
     using difference_type   = std::ptrdiff_t;
     using value_type        = T;
@@ -26,19 +26,21 @@ public:
     using reference         = T const&;
 
 public:
-    FrameObjectIterator(pointer pData = nullptr, qint64 step = 1);
+    FrameObjectIterator(pointer pData, T normFactor, qint64 step);
     ~FrameObjectIterator() {};
     // Access
-    reference operator*() const { return *mpData; }
-    pointer operator->() const { return mpData; }
-    // Increment
-    iterator& operator++() { mpData += mStep; return *this; }
+    value_type operator*() const { return *mpData * mNormFactor; }
+    // Operators
+    self_type& operator++() { mpData += mStep; return *this; }
+    self_type operator++(int) { self_type temp = *this; ++(*this); return temp; }
+    self_type operator+(const difference_type& movement) { auto pOldData = mpData; mpData += movement * mStep; self_type temp = *this; mpData = pOldData; return temp; }
     // Comparison
-    friend bool operator== (iterator const& first, iterator const& second) { return first.mpData == second.mpData; };
-    friend bool operator!= (iterator const& first, iterator const& second) { return !(first == second); };
+    friend bool operator== (self_type const& first, self_type const& second) { return first.mpData == second.mpData; };
+    friend bool operator!= (self_type const& first, self_type const& second) { return !(first == second); };
 
 private:
     pointer mpData;
+    T mNormFactor;
     qint64 const mStep;
 };
 

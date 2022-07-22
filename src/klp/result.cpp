@@ -26,7 +26,7 @@ int Result::numRods(qint64 iFrame) const
 }
 
 //! Get the object associated with the requested frame
-FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, qint64 shift) const
+FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float normFactor, qint64 shift) const
 {
     FloatFrameObject nullFrameObject;
     // Check if an index of frame is valid
@@ -39,13 +39,24 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, qint64 s
     // Construct the resulting object
     unsigned char* pBuffer = (unsigned char*) mContent.data();
     float* pData = (float*)&pBuffer[indexData.position + shift];
-    return FloatFrameObject(pData, indexData.size, indexData.step);
+    return FloatFrameObject(pData, normFactor, indexData.size, indexData.step);
 }
 
 //! Retrieve the collection of the frame objects
 FrameCollection Result::getFrameCollection(qint64 iFrame) const
 {
     FrameCollection collection;
+    // Retrieve nondimensional coeffcients
+    float normFactorDisplacement  = 1.0f;
+    float normFactorForce         = 1.0f;
+    float normFactorMoment        = 1.0f;
+    FloatFrameObject coefficients = getFrameObject(iFrame, RecordType::ND);
+    if (!coefficients.isEmpty())
+    {
+        normFactorDisplacement = *coefficients[NondimensionalType::Displacement];
+        normFactorForce        = *coefficients[NondimensionalType::Force];
+        normFactorMoment       = *coefficients[NondimensionalType::Moment];
+    }
     // Number of rods
     collection.numRods = numRods(iFrame);
     // Parameter
@@ -60,14 +71,13 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
     // State vector
     for (int i = 0; i != kNumDirections; ++i)
     {
-        collection.displacements[i] = getFrameObject(iFrame, RecordType::U, 0 + i);
-        collection.rotations[i]     = getFrameObject(iFrame, RecordType::U, 3 + i);
-        collection.forces[i]        = getFrameObject(iFrame, RecordType::U, 6 + i);
-        collection.moments[i]       = getFrameObject(iFrame, RecordType::U, 9 + i);
+        collection.displacements[i] = getFrameObject(iFrame, RecordType::U, normFactorDisplacement, i);
+        collection.rotations[i]     = getFrameObject(iFrame, RecordType::U, 1.0f, 3 + i);
+        collection.forces[i]        = getFrameObject(iFrame, RecordType::U, normFactorForce, 6 + i);
+        collection.moments[i]       = getFrameObject(iFrame, RecordType::U, normFactorMoment, 9 + i);
     }
     return collection;
 }
-
 
 //! Read all the content of the file
 bool Result::read(QString const& pathFile)

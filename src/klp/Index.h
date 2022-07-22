@@ -9,7 +9,7 @@
 #define INDEX_H
 
 #include <QtGlobal>
-#include "recordtype.h"
+#include "types.h"
 #include <vector>
 
 namespace KLP

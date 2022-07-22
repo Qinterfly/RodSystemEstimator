@@ -22,7 +22,7 @@ public:
     Result(QString const& pathFile);
     ~Result() = default;
     int numRods(qint64 iFrame) const;
-    FloatFrameObject getFrameObject(qint64 iFrame, RecordType type, qint64 shift = 0) const;
+    FloatFrameObject getFrameObject(qint64 iFrame, RecordType type, float normFactor = 1.0f, qint64 shift = 0) const;
     FrameCollection getFrameCollection(qint64 iFrame) const;
 
 private:

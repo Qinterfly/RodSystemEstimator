@@ -6,8 +6,8 @@ HEADERS += \
     $$PWD/frameobject.h \
     $$PWD/frameobjectiterator.h \
     $$PWD/index.h \
-    $$PWD/recordtype.h \
-    $$PWD/result.h
+    $$PWD/result.h \
+    $$PWD/types.h
 
 SOURCES += \
     $$PWD/frameobject.cpp \

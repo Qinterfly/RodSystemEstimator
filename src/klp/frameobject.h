@@ -21,16 +21,18 @@ public:
     using iterator = FrameObjectIterator<T>;
 
 public:
-    FrameObject(T const* pData = nullptr, qint64 size = 0, qint64 step = 1);
+    FrameObject(T const* pData = nullptr, T normFactor = 1.0, qint64 size = 0, qint64 step = 1);
     ~FrameObject() = default;
     bool isEmpty() const { return !mpData; }
     qint64 size() const { return mSize; }
-    iterator begin() { return iterator(&mpData[0], mStep); }
-    iterator end() { return iterator(&mpData[mSize], mStep); }
+    iterator begin() { return iterator(&mpData[0], mNormFactor, mStep); }
+    iterator end() { return iterator(&mpData[mSize], mNormFactor, mStep); }
+    iterator operator[](int index) { return begin() + index; }
     template<typename K> friend QDebug operator<<(QDebug stream, FrameObject<K>& frameObject);
 
 private:
     T const* mpData;
+    T mNormFactor;
     qint64 mSize;
     qint64 mStep;
 };

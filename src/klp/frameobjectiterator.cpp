@@ -12,8 +12,8 @@ template class KLP::FrameObjectIterator<float>;
 using namespace KLP;
 
 template <typename T>
-FrameObjectIterator<T>::FrameObjectIterator(pointer pData, qint64 step)
-    : mpData(pData), mStep(step)
+FrameObjectIterator<T>::FrameObjectIterator(pointer pData, T normFactor, qint64 step)
+    : mpData(pData), mNormFactor(normFactor), mStep(step)
 {
 
 }
