@@ -27,7 +27,6 @@ SOURCES += \
     $$PWD/damper.cpp \
     $$PWD/project.cpp \
     $$PWD/rodsystem.cpp \
-    $$PWD/support.cpp \
     $$PWD/utilities.cpp \
     $$PWD/array.cpp \
     $$PWD/abstractdataobject.cpp \

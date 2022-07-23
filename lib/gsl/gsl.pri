@@ -1,8 +1,11 @@
 
-DEFINES += GSL_DLL
+win32 {
+    DEFINES += GSL_DLL
+    LIBS += -L$${GSL_PATH} -lgsl -lgslcblas
+    INCLUDEPATH += $${INCLUDE_PATH}
+    DEPENDPATH += $${INCLUDE_PATH}
+} else: unix {
+    LIBS += -L/usr/lib -lgsl -lgslcblas
+}
 
-LIBS += -L$${GSL_PATH} -lgsl
-LIBS += -L$${GSL_PATH} -lgslcblas
 
-INCLUDEPATH += $${INCLUDE_PATH}
-DEPENDPATH += $${INCLUDE_PATH}

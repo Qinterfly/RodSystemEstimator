@@ -74,7 +74,7 @@ IOPair IO::open(QString const& pathFile, DataBaseCables const& dataBaseCables)
     qint64 numRods;
     stream >> numRods;
     std::vector<double> distances(numRods);
-    for (quint64 i = 0; i != numRods; ++i)
+    for (qint64 i = 0; i != numRods; ++i)
     {
         stream >> tValue;
         distances[i] = tValue;

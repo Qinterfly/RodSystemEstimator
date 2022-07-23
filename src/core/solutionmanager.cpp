@@ -22,7 +22,10 @@ static QString const skFileNameOptimizationInput = "dampinput.txt";
 
 SolutionManager::SolutionManager(QString const& rootPath, QString const& relativeInputPath, QString const& relativeOutputPath)
 {
-    mRootPath = rootPath;
+    mRootPath = QFileInfo(rootPath).absoluteFilePath();
+    QChar separator = QDir::separator();
+    if (!mRootPath.endsWith(separator))
+        mRootPath.append(separator);
     mInputPath  = mRootPath + relativeInputPath;
     mOutputPath = mRootPath + relativeOutputPath;
 }
@@ -71,7 +74,11 @@ void SolutionManager::solveRodSystem(Project& project, SolutionOptions const& op
     // Write the input data
     project.writeCalcData(mInputPath, options);
     // Run the solver
+#ifdef Q_OS_WINDOWS
     mpRodSystemSolver->start();
+#elif defined(Q_OS_LINUX)
+    mpRodSystemSolver->start("wine", {QString("start /d %1 %2").arg(mRootPath, skNameRodSystemSolver)});
+#endif
 }
 
 //! Check if the solution process if finished
@@ -118,7 +125,11 @@ void SolutionManager::solveOptimization(Project& project, SolutionOptions const&
     writeOptimizationInput(mOutputPath + skFileNameOptimizationInput, numDampers, options);
     runParserProcess();
     // Run the optimizer
+#ifdef Q_OS_WINDOWS
     mpOptimizationSolver->start();
+#elif defined(Q_OS_LINUX)
+    mpOptimizationSolver->start("wine", {program});
+#endif
 }
 
 //! Process the optimization output
@@ -154,7 +165,11 @@ void SolutionManager::runParserProcess()
     pProcess->setProgram(program);
     pProcess->setWorkingDirectory(mOutputPath);
     // Export modeshapes and DOFs
+#ifdef Q_OS_WINDOWS
     pProcess->start();
+#elif defined(Q_OS_LINUX)
+    pProcess->start("wine", {program});
+#endif
     while (pProcess->waitForFinished()) { }
     pProcess->close();
     delete pProcess;
@@ -181,6 +196,9 @@ void SolutionManager::writeOptimizationInput(QString const& pathFile, int numDam
 void SolutionManager::runVisualizer()
 {
     QString program = mOutputPath + skNameVisualizer;
+#ifdef Q_OS_WINDOWS
     QProcess::startDetached(program, {}, mOutputPath);
+#elif defined(Q_OS_LINUX)
+    QProcess::startDetached("wine", {program}, mOutputPath);
+#endif
 }
-

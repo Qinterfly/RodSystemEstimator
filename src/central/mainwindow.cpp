@@ -56,7 +56,7 @@ static QString skDirectoryData             = "data/";
 static QString skDirectoryInput            = "Input/";
 static QString skDirectoryOutput           = "Output/";
 const static QString skFileNameCables      = "Провода.txt";
-const static QString skFileNameConvergence = "Optimal.txt";
+const static QString skFileNameConvergence = "optimal.txt";
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
