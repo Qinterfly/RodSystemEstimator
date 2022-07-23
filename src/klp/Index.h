@@ -32,7 +32,7 @@ struct IndexData
 struct Index
 {
     //! Base constructor
-    Index() { data.resize(RecordType::SIZE); }
+    Index() { data.resize(RecordType::MAX_RECORD); }
     //! Data
     std::vector<IndexData> data;
     //! Shift of the main record

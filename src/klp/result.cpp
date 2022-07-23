@@ -42,21 +42,30 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float no
     return FloatFrameObject(pData, normFactor, indexData.partSize, indexData.step);
 }
 
+//! Specify state data for each direction
+void Result::setStateFrameData(StateFrame& state, RecordType type, qint64 iFrame, qint64 iStartData,
+                               std::vector<float> const& normFactors) const
+{
+    qint64 iInsert;
+    for (int k = 0; k != kNumDirections; ++k)
+    {
+        iInsert = iStartData + k;
+        state.displacements[k] = getFrameObject(iFrame, type, normFactors[0],     iInsert);
+        state.rotations[k]     = getFrameObject(iFrame, type, normFactors[1], 3 + iInsert);
+        state.forces[k]        = getFrameObject(iFrame, type, normFactors[2], 6 + iInsert);
+        state.moments[k]       = getFrameObject(iFrame, type, normFactors[3], 9 + iInsert);
+    }
+}
+
 //! Retrieve the collection of the frame objects
 FrameCollection Result::getFrameCollection(qint64 iFrame) const
 {
     FrameCollection collection;
     // Retrieve nondimensional coeffcients
-    float normFactorDisplacement  = 1.0f;
-    float normFactorForce         = 1.0f;
-    float normFactorMoment        = 1.0f;
+    std::vector<float> factors(NondimensionalType::MAX_NONDIM, 1.0f);
     FloatFrameObject coefficients = getFrameObject(iFrame, RecordType::ND);
     if (!coefficients.isEmpty())
-    {
-        normFactorDisplacement = *coefficients[NondimensionalType::Displacement];
-        normFactorForce        = *coefficients[NondimensionalType::Force];
-        normFactorMoment       = *coefficients[NondimensionalType::Moment];
-    }
+        std::copy(coefficients.begin(), coefficients.end(), factors.begin());
     // Number of rods
     collection.numRods = numRods(iFrame);
     // Parameter
@@ -68,38 +77,28 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
     collection.coordinates[0] = getFrameObject(iFrame, RecordType::X1);
     collection.coordinates[1] = getFrameObject(iFrame, RecordType::X2);
     collection.coordinates[2] = getFrameObject(iFrame, RecordType::X3);
-    // Frame state
-    StateFrame& state = collection.state;
-    for (int k = 0; k != kNumDirections; ++k)
-    {
-        state.displacements[k] = getFrameObject(iFrame, RecordType::U, normFactorDisplacement, k);
-        state.rotations[k]     = getFrameObject(iFrame, RecordType::U, 1.0f, 3 + k);
-        state.forces[k]        = getFrameObject(iFrame, RecordType::U, normFactorForce, 6 + k);
-        state.moments[k]       = getFrameObject(iFrame, RecordType::U, normFactorMoment, 9 + k);
-    }
-    // Frequencies
-    collection.frequencies = getFrameObject(iFrame, RecordType::MF);
+    // Frame state and its projection
+    std::vector<float> stateFactors = {factors[NondimensionalType::Displacement], 1.0f, factors[NondimensionalType::Force], factors[NondimensionalType::Moment]};
+    setStateFrameData(collection.state, RecordType::U, iFrame, 0, stateFactors);
+    setStateFrameData(collection.projectedState, RecordType::Ul, iFrame, 0, stateFactors);
+    // Derivatives of frame state
+    setStateFrameData(collection.firstDerivativeState, RecordType::Ut, iFrame, 0, {factors[NondimensionalType::Speed], 1.0f, 1.0f, 1.0f});
+    setStateFrameData(collection.secondDerivativeState, RecordType::Utt, iFrame, 0, {factors[NondimensionalType::Acceleration], 1.0f, 1.0f, 1.0f});
     // Modal frame state
+    std::vector<float> modalFactors(4, 1.0f);
     int lenMode = mIndex[iFrame].data[RecordType::MV].partSize;
     int numFrequencies = collection.frequencies.size();
     auto& modalStates = collection.modalStates;
     modalStates.resize(numFrequencies);
-    for (int i = 0; i != numFrequencies; ++i)
-    {
-        StateFrame& currentState = modalStates[i];
-        int v = i * lenMode;
-        for (int k = 0; k != kNumDirections; ++k)
-        {
-            currentState.displacements[k] = getFrameObject(iFrame, RecordType::MV, 1.0f, v + k);
-            currentState.rotations[k]     = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 3 + k);
-            currentState.forces[k]        = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 6 + k);
-            currentState.moments[k]       = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 9 + k);
-        }
-    }
+    for (int iMode = 0; iMode != numFrequencies; ++iMode)
+        setStateFrameData(modalStates[iMode], RecordType::MV, iFrame, iMode * lenMode, modalFactors);
+    // Frequencies
+    collection.frequencies = getFrameObject(iFrame, RecordType::MF);
     // Energy
-    collection.energy.kinetic   = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 0);
-    collection.energy.potential = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 1);
-    collection.energy.full      = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 2);
+    float energyFactor = factors[NondimensionalType::Displacement];
+    collection.energy.kinetic   = getFrameObject(iFrame, RecordType::EN, energyFactor, 0);
+    collection.energy.potential = getFrameObject(iFrame, RecordType::EN, energyFactor, 1);
+    collection.energy.full      = getFrameObject(iFrame, RecordType::EN, energyFactor, 2);
     return collection;
 }
 
@@ -195,7 +194,7 @@ void Result::buildIndex()
             }
             // Assign the record
             iRecord = kk - 1;
-            if (iType > 1 && iType < RecordType::SIZE)
+            if (iType > 1 && iType < RecordType::MAX_RECORD)
             {
                 qint64 size = *pLengthEntry;
                 qint64 step = 1;

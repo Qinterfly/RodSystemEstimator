@@ -38,22 +38,28 @@ struct StateFrame
 //! Set of all quantities belonged to a frame
 struct FrameCollection
 {
-    // Number of rods
+    //! Number of rods
     int numRods;
-    // Parameter
+    //! Parameter
     FloatFrameObject parameter;
-    // Natural length
+    //! Natural length
     FloatFrameObject naturalLength;
     FloatFrameObject accumulatedNaturalLength;
-    // Coordinates
+    //! Coordinates
     FloatFrameObject coordinates[kNumDirections];
-    // Kinematic and dynamic quantities
+    //! Regular state
     StateFrame state;
-    // Frequencies
-    FloatFrameObject frequencies;
-    // Modal kinematic and dynamic quantities
+    //! Projected regular state
+    StateFrame projectedState;
+    //! First-order derivate of the state with respect to time
+    StateFrame firstDerivativeState;
+    //! Second-order derivate of the state with respect to time
+    StateFrame secondDerivativeState;
+    //! Set of modal states
     std::vector<StateFrame> modalStates;
-    // Energy
+    //! Frequencies
+    FloatFrameObject frequencies;
+    //! Energy
     EnergyFrame energy;
 };
 

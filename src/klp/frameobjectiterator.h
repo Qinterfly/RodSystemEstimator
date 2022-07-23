@@ -27,13 +27,13 @@ public:
 
 public:
     FrameObjectIterator(pointer pData, T normFactor, qint64 step);
-    ~FrameObjectIterator() {};
     // Access
-    value_type operator*() const { return *mpData * mNormFactor; }
+    value_type operator*() { return *mpData * mNormFactor; }
     // Operators
     self_type& operator++() { mpData += mStep; return *this; }
     self_type operator++(int) { self_type temp = *this; ++(*this); return temp; }
     self_type operator+(const difference_type& movement) { auto pOldData = mpData; mpData += movement * mStep; self_type temp = *this; mpData = pOldData; return temp; }
+    difference_type operator-(const FrameObjectIterator& another) const { return mpData - another.mpData; }
     // Comparison
     friend bool operator== (self_type const& first, self_type const& second) { return first.mpData == second.mpData; };
     friend bool operator!= (self_type const& first, self_type const& second) { return !(first == second); };

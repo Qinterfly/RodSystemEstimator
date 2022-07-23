@@ -28,6 +28,7 @@ public:
 private:
     bool read(QString const& pathFile);
     void buildIndex();
+    void setStateFrameData(StateFrame& state, RecordType type, qint64 iFrame, qint64 iStartData, std::vector<float> const& normFactors) const;
 
 private:
     //! Content of the file

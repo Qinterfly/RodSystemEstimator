@@ -47,7 +47,7 @@ enum RecordType
     FM2   = 33, // ?
     EM    = 34, // Effective masses
     EN    = 35, // Energy
-    SIZE        // Maximal size
+    MAX_RECORD  // Maximal size
 };
 
 //! Types of nondimensional coefficients
@@ -60,7 +60,8 @@ enum NondimensionalType
     DistributedForce  = 7,
     DistributedMoment = 8,
     Speed             = 9,
-    Acceleration      = 10
+    Acceleration      = 10,
+    MAX_NONDIM
 };
 
 }
