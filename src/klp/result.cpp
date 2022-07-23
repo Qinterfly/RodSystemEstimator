@@ -11,18 +11,9 @@
 using namespace KLP;
 
 Result::Result(QString const& pathFile)
+    : mkPathFile(pathFile)
 {
-    if (read(pathFile))
-        buildIndex();
-}
-
-//! Get the number of rods associated with the requested frame
-int Result::numRods(qint64 iFrame) const
-{
-    if (iFrame < 0 || iFrame >= mNumRecords - 1)
-        return -1;
-    IndexData indexData = mIndex[iFrame].data[RecordType::R];
-    return indexData.size / mNumBytesRod;
+    update();
 }
 
 //! Get the object associated with the requested frame
@@ -84,14 +75,18 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
     // Derivatives of frame state
     setStateFrameData(collection.firstDerivativeState, RecordType::Ut, iFrame, 0, {factors[NondimensionalType::Speed], 1.0f, 1.0f, 1.0f});
     setStateFrameData(collection.secondDerivativeState, RecordType::Utt, iFrame, 0, {factors[NondimensionalType::Acceleration], 1.0f, 1.0f, 1.0f});
+    // State error
+    std::vector<float> unityFactors(4, 1.0f);
+    setStateFrameData(collection.errorState, RecordType::ERR, iFrame, 0, unityFactors);
+    // Strain
+    collection.strain = getFrameObject(iFrame, RecordType::EPS);
     // Modal frame state
-    std::vector<float> modalFactors(4, 1.0f);
     int lenMode = mIndex[iFrame].data[RecordType::MV].partSize;
     int numFrequencies = collection.frequencies.size();
     auto& modalStates = collection.modalStates;
     modalStates.resize(numFrequencies);
     for (int iMode = 0; iMode != numFrequencies; ++iMode)
-        setStateFrameData(modalStates[iMode], RecordType::MV, iFrame, iMode * lenMode, modalFactors);
+        setStateFrameData(modalStates[iMode], RecordType::MV, iFrame, iMode * lenMode, unityFactors);
     // Frequencies
     collection.frequencies = getFrameObject(iFrame, RecordType::MF);
     // Energy
@@ -103,9 +98,9 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
 }
 
 //! Read all the content of the file
-bool Result::read(QString const& pathFile)
+bool Result::read()
 {
-    QFile file(pathFile);
+    QFile file(mkPathFile);
     if (!file.open(QIODeviceBase::ReadOnly))
         return false;
     QDataStream stream(&file);
@@ -244,4 +239,27 @@ void Result::buildIndex()
         pValue = (float*)&pBuffer[mIndex[i].recordShift + mIndex[i].relativeDataShift + kShiftTime];
         mTime[i] = *pValue;
     }
+}
+
+//! Retrieve the updated content from the file
+void Result::update()
+{
+    if (read())
+    {
+        buildIndex();
+    }
+    else
+    {
+        mContent.clear();
+        mIndex.clear();
+    }
+}
+
+//! Get the number of rods associated with the requested frame
+int Result::numRods(qint64 iFrame) const
+{
+    if (iFrame < 0 || iFrame >= mNumRecords - 1)
+        return -1;
+    IndexData indexData = mIndex[iFrame].data[RecordType::R];
+    return indexData.size / mNumBytesRod;
 }

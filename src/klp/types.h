@@ -24,9 +24,9 @@ enum RecordType
     U     = 9,  // State vector: [U1, U2, U3, w1, w2, w3, Q1, Q2, Q3, M1, M2, M3]
     Ut    = 10, // First-order derivative of the state vector with respect to time
     Utt   = 11, // Second-order derivative of the state vector with respect to time
-    Eps   = 12, // Strain
+    EPS   = 12, // Tensile-compressive strain
     Ul    = 13, // Projected state vector: [U1L, U2L, U3L, w1, w2, w3, Q1L, Q2L, Q3L, M1L, M2L, M3L]
-    Beta  = 15, // Rotation matrix
+    BETA  = 15, // Rotation matrix
     Qm    = 16, // Loads
     qm    = 17, // Distributed loads
     AE    = 18, // Aerodynamic
@@ -47,7 +47,7 @@ enum RecordType
     FM2   = 33, // ?
     EM    = 34, // Effective masses
     EN    = 35, // Energy
-    MAX_RECORD  // Maximal size
+    MAX_RECORD
 };
 
 //! Types of nondimensional coefficients

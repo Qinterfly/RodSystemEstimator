@@ -55,6 +55,10 @@ struct FrameCollection
     StateFrame firstDerivativeState;
     //! Second-order derivate of the state with respect to time
     StateFrame secondDerivativeState;
+    //! State error
+    StateFrame errorState;
+    //! Strain
+    FloatFrameObject strain;
     //! Set of modal states
     std::vector<StateFrame> modalStates;
     //! Frequencies
