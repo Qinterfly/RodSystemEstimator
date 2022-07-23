@@ -39,7 +39,7 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float no
     // Construct the resulting object
     unsigned char* pBuffer = (unsigned char*) mContent.data();
     float* pData = (float*)&pBuffer[indexData.position + shift];
-    return FloatFrameObject(pData, normFactor, indexData.size, indexData.step);
+    return FloatFrameObject(pData, normFactor, indexData.partSize, indexData.step);
 }
 
 //! Retrieve the collection of the frame objects
@@ -68,14 +68,38 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
     collection.coordinates[0] = getFrameObject(iFrame, RecordType::X1);
     collection.coordinates[1] = getFrameObject(iFrame, RecordType::X2);
     collection.coordinates[2] = getFrameObject(iFrame, RecordType::X3);
-    // State vector
-    for (int i = 0; i != kNumDirections; ++i)
+    // Frame state
+    StateFrame& state = collection.state;
+    for (int k = 0; k != kNumDirections; ++k)
     {
-        collection.displacements[i] = getFrameObject(iFrame, RecordType::U, normFactorDisplacement, i);
-        collection.rotations[i]     = getFrameObject(iFrame, RecordType::U, 1.0f, 3 + i);
-        collection.forces[i]        = getFrameObject(iFrame, RecordType::U, normFactorForce, 6 + i);
-        collection.moments[i]       = getFrameObject(iFrame, RecordType::U, normFactorMoment, 9 + i);
+        state.displacements[k] = getFrameObject(iFrame, RecordType::U, normFactorDisplacement, k);
+        state.rotations[k]     = getFrameObject(iFrame, RecordType::U, 1.0f, 3 + k);
+        state.forces[k]        = getFrameObject(iFrame, RecordType::U, normFactorForce, 6 + k);
+        state.moments[k]       = getFrameObject(iFrame, RecordType::U, normFactorMoment, 9 + k);
     }
+    // Frequencies
+    collection.frequencies = getFrameObject(iFrame, RecordType::MF);
+    // Modal frame state
+    int lenMode = mIndex[iFrame].data[RecordType::MV].partSize;
+    int numFrequencies = collection.frequencies.size();
+    auto& modalStates = collection.modalStates;
+    modalStates.resize(numFrequencies);
+    for (int i = 0; i != numFrequencies; ++i)
+    {
+        StateFrame& currentState = modalStates[i];
+        int v = i * lenMode;
+        for (int k = 0; k != kNumDirections; ++k)
+        {
+            currentState.displacements[k] = getFrameObject(iFrame, RecordType::MV, 1.0f, v + k);
+            currentState.rotations[k]     = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 3 + k);
+            currentState.forces[k]        = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 6 + k);
+            currentState.moments[k]       = getFrameObject(iFrame, RecordType::MV, 1.0f, v + 9 + k);
+        }
+    }
+    // Energy
+    collection.energy.kinetic   = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 0);
+    collection.energy.potential = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 1);
+    collection.energy.full      = getFrameObject(iFrame, RecordType::EN, normFactorDisplacement, 2);
     return collection;
 }
 
@@ -181,22 +205,39 @@ void Result::buildIndex()
                 case Ut:
                 case Utt:
                 case Ul:
+                case MV:
                     step = 12;
                     break;
                 case RMASS:
                     size /= 12;
                     step = 4;
                     break;
+                case MF:
+                    step = 9;
+                    break;
+                case EN:
+                    step = 3;
+                    break;
                 default:
                     break;
                 }
-                mIndex[iRecord].data[iType] = {iStartData, size, step};
+                qint64 partSize = iStartData > 0 ? size / step : 0;
+                mIndex[iRecord].data[iType] = {iStartData, size, step, partSize};
             }
         }
         iStartEntry = jEndEntry + 1;
     }
 
-    // Retrieve values of time steps
+    // Truncate partial sizes for eigenvectors
+    for (int i = 0; i != mNumRecords; ++i)
+    {
+        bool isFrequencies = mIndex[i].data[RecordType::MF].position != 0;
+        bool isModeshapes  = mIndex[i].data[RecordType::MV].position != 0;
+        if (isFrequencies && isModeshapes)
+            mIndex[i].data[RecordType::MV].partSize /= mIndex[i].data[RecordType::MF].partSize;
+    }
+
+    // Retrieve time steps
     mTime.resize(numTime);
     float* pValue;
     for (unsigned long i = 0; i != numTime; ++i)

@@ -24,6 +24,8 @@ struct IndexData
     qint64 size = 0;
     //! Step for iterating inside a record
     qint64 step = 1;
+    //! Partial length of a quantity inside a record
+    qint64 partSize = 0;
 };
 
 //! Structure to navigate through records
