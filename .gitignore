@@ -9,5 +9,4 @@ tests/data
 info
 *.pro.*
 *.so*
-*.tr*
 TODO.txt
