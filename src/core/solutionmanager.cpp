@@ -77,7 +77,7 @@ void SolutionManager::solveRodSystem(Project& project, SolutionOptions const& op
 #ifdef Q_OS_WINDOWS
     mpRodSystemSolver->start();
 #elif defined(Q_OS_LINUX)
-    mpRodSystemSolver->start("wine", {QString("start /d %1 %2").arg(mRootPath, skNameRodSystemSolver)});
+    mpRodSystemSolver->startDetached("wine", {program}, mRootPath);
 #endif
 }
 
@@ -115,9 +115,14 @@ void SolutionManager::solveOptimization(Project& project, SolutionOptions const&
     // Configure the optimization process
     QString program = mOutputPath + skNameOptimizationSolver;
     mpOptimizationSolver = new QProcess();
-    mpOptimizationSolver->setProgram(program);
     mpOptimizationSolver->setProcessChannelMode(QProcess::MergedChannels);
     mpOptimizationSolver->setWorkingDirectory(mOutputPath);
+#ifdef Q_OS_WINDOWS
+    mpOptimizationSolver->setProgram(program);
+#elif defined(Q_OS_LINUX)
+    mpOptimizationSolver->setProgram("wine");
+    mpOptimizationSolver->setArguments({program});
+#endif
     // Set signals & slots
     connect(mpOptimizationSolver, &QProcess::readyRead, this, &SolutionManager::processOptimizationStream);
     // Prepare the input data for optimization
@@ -125,11 +130,7 @@ void SolutionManager::solveOptimization(Project& project, SolutionOptions const&
     writeOptimizationInput(mOutputPath + skFileNameOptimizationInput, numDampers, options);
     runParserProcess();
     // Run the optimizer
-#ifdef Q_OS_WINDOWS
     mpOptimizationSolver->start();
-#elif defined(Q_OS_LINUX)
-    mpOptimizationSolver->start("wine", {program});
-#endif
 }
 
 //! Process the optimization output
@@ -162,14 +163,15 @@ void SolutionManager::runParserProcess()
     // Configure the process
     QString program = mOutputPath + skNameExporter;
     QProcess* pProcess = new QProcess();
-    pProcess->setProgram(program);
     pProcess->setWorkingDirectory(mOutputPath);
-    // Export modeshapes and DOFs
 #ifdef Q_OS_WINDOWS
-    pProcess->start();
+    pProcess->setProgram(program);
 #elif defined(Q_OS_LINUX)
-    pProcess->start("wine", {program});
+    pProcess->setProgram("wine");
+    pProcess->setArguments({program});
 #endif
+    // Export modeshapes and DOFs
+    pProcess->start();
     while (pProcess->waitForFinished()) { }
     pProcess->close();
     delete pProcess;

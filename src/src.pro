@@ -29,7 +29,7 @@ RESOURCES += \
 # Project info
 PROJECT_AUTHOR = "Qinterfly"
 PROJECT_NAME = "RodSystemEstimator"
-PROJECT_VERSION = "0.0.8"
+PROJECT_VERSION = "0.0.9"
 PROJECT_DIST = $${PROJECT_NAME} (v$${PROJECT_VERSION})
 
 DEFINES += \
