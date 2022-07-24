@@ -47,7 +47,7 @@ double x2(double u, double u0, double uL)
     return (cosh(u) - cosh(u0)) / (sinh(uL) - sinh(u0));
 }
 
-double Q1(double u, double u0, double uL)
+double Q1(double u0, double uL)
 {
     return 1.0 / (sinh(uL) - sinh(u0));
 }
@@ -76,7 +76,7 @@ double LL(double L, double u0, double uL, RodSystemParameters const* pParameters
 
 double projForce(double u0, double uL, double L, RodSystemParameters const* pParameters)
 {
-    return Q1(u0, u0, uL) * pParameters->massPerLength * LL(L, u0, uL, pParameters) * kGravitationalAcceleration;
+    return Q1(u0, uL) * pParameters->massPerLength * LL(L, u0, uL, pParameters) * kGravitationalAcceleration;
 }
 
 //! System of equations
