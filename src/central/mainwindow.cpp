@@ -235,10 +235,10 @@ CDockWidget* MainWindow::createRodSystemWidget()
     QAction* pAction;
     pToolBar->setStyleSheet("background: #ececec");
     pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
-    pAction = pToolBar->addAction(QIcon(":/icons/plus.svg"), tr("Вставить (Insert, A)"),
+    pAction = pToolBar->addAction(QIcon(":/icons/table-row-add.svg"), tr("Вставить (Insert, A)"),
                                   mpRodSystemTableModel, &Models::RodSystemTableModel::insertAfterSelected);
     pAction->setShortcuts({Qt::Key_Insert, Qt::Key_A});
-    pAction = pToolBar->addAction(QIcon(":/icons/minus.svg"), tr("Удалить (Delete, D)"),
+    pAction = pToolBar->addAction(QIcon(":/icons/table-row-delete.svg"), tr("Удалить (Delete, D)"),
                                   mpRodSystemTableModel, &Models::RodSystemTableModel::removeSelected);
     pAction->setShortcuts({Qt::Key_Delete, Qt::Key_D});
     pToolBar->setMaximumHeight(kToolBarIconSize);

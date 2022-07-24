@@ -17,9 +17,8 @@
 		<file>go-up-symbolic.symbolic.png</file>
 		<file>go-down-symbolic.symbolic.png</file>
 		<file>down-arrow.png</file>
-		<file>minus.svg</file>
-		<file>plus.svg</file>
-		<file>code.svg</file>
+		<file>table-row-add.svg</file>
+		<file>table-row-delete.svg</file>
 		<file>idea.svg</file>
 		<file>debug-start.svg</file>
 		<file>debug-stop.svg</file>
