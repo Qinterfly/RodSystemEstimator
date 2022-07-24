@@ -127,14 +127,14 @@ void Result::buildIndex()
     qint64 jEndEntry = 0;
     short* pStartEntry;
     short* pRecordType;
-    unsigned long* pLengthEntry;
+    unsigned int* pLengthEntry;
     unsigned short* pHl;
     unsigned long numTime = 0, numTimeOld = 0;
     while (iStartEntry < numBuffer)
     {
         ++mNumRecords;
         pStartEntry = (short*)&pBuffer[iStartEntry];
-        pLengthEntry = (unsigned long*)&pBuffer[iStartEntry + 2];
+        pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
         pHl = (unsigned short*)&pBuffer[iStartEntry + 8];
         jEndEntry = iStartEntry + kShiftNumRecords + (*pHl) + abs(*pStartEntry) * (qint64) * pLengthEntry;
         if (jEndEntry >= numBuffer)
@@ -170,7 +170,7 @@ void Result::buildIndex()
     for (qint64 k = 0; k != mNumRecords; ++k)
     {
         pStartEntry = (short*)&pBuffer[iStartEntry];
-        pLengthEntry = (unsigned long*)&pBuffer[iStartEntry + 2];
+        pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
         pHl = (unsigned short*)&pBuffer[iStartEntry + 8];
         iStartData = iStartEntry + kShiftNumRecords + *pHl;
         jEndEntry = iStartData + abs(*pStartEntry) * (qint64) * pLengthEntry;
