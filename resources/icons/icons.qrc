@@ -24,6 +24,11 @@
 		<file>debug-stop.svg</file>
 		<file>window-new.svg</file>
 		<file>line-chart.svg</file>
+		<file>import.svg</file>
 		<file>refresh.svg</file>
+		<file>delete.svg</file>
+		<file>rename.svg</file>
+		<file>list-add.svg</file>
+		<file>list-remove.svg</file>
     </qresource>
 </RCC>

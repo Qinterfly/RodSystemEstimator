@@ -128,18 +128,18 @@ void Result::buildIndex()
     short* pStartEntry;
     short* pRecordType;
     unsigned int* pLengthEntry;
-    unsigned short* pHl;
+    unsigned short* pHeaderLine;
     unsigned long numTime = 0, numTimeOld = 0;
     while (iStartEntry < numBuffer)
     {
         ++mNumRecords;
         pStartEntry = (short*)&pBuffer[iStartEntry];
         pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
-        pHl = (unsigned short*)&pBuffer[iStartEntry + 8];
-        jEndEntry = iStartEntry + kShiftNumRecords + (*pHl) + abs(*pStartEntry) * (qint64) * pLengthEntry;
+        pHeaderLine = (unsigned short*)&pBuffer[iStartEntry + 8];
+        jEndEntry = iStartEntry + kShiftNumRecords + *pHeaderLine + abs(*pStartEntry) * (qint64) * pLengthEntry;
         if (jEndEntry >= numBuffer)
             break;
-        if (*pHl >= 2)
+        if (*pHeaderLine >= 2)
         {
             pRecordType = (short*)&pBuffer[iStartEntry + kShiftNumRecords];
             // Number of finished records
@@ -171,10 +171,10 @@ void Result::buildIndex()
     {
         pStartEntry = (short*)&pBuffer[iStartEntry];
         pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
-        pHl = (unsigned short*)&pBuffer[iStartEntry + 8];
-        iStartData = iStartEntry + kShiftNumRecords + *pHl;
+        pHeaderLine = (unsigned short*)&pBuffer[iStartEntry + 8];
+        iStartData = iStartEntry + kShiftNumRecords + *pHeaderLine;
         jEndEntry = iStartData + abs(*pStartEntry) * (qint64) * pLengthEntry;
-        if (*pHl >= 2)
+        if (*pHeaderLine >= 2)
         {
             pRecordType = (short*)&pBuffer[iStartEntry + kShiftNumRecords];
             iType = *pRecordType;
@@ -182,7 +182,7 @@ void Result::buildIndex()
             if (iType == 1)
             {
                 mIndex[kk].recordShift = iStartEntry;
-                mIndex[kk].relativeDataShift = (unsigned char)(kShiftNumRecords + *pHl);
+                mIndex[kk].relativeDataShift = (unsigned char)(kShiftNumRecords + *pHeaderLine);
                 if (*pLengthEntry > 4)
                     mNumBytesRod = 4;
                 ++kk;
