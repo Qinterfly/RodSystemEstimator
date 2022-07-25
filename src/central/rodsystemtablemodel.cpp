@@ -12,8 +12,8 @@
 using namespace RSE::Models;
 using namespace RSE::Core;
 
-RodSystemTableModel::RodSystemTableModel(QObject* parent)
-    : QStandardItemModel(parent)
+RodSystemTableModel::RodSystemTableModel(QObject* pParent)
+    : QStandardItemModel(pParent)
 {
     setHorizontalHeaderLabels({tr("Длина пролета, м"), tr("Длина провода, м"), tr("Масса провода, кг")});
     connect(this, &QStandardItemModel::itemChanged, this, &RodSystemTableModel::setChangedData);

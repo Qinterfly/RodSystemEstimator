@@ -46,7 +46,7 @@ void TestViewers::testConvergenceViewer()
 {
     QString pathFile = mkOutputPath + tr("optimal.txt");
     mpConvergenceViewer = new ConvergenceViewer(pathFile);
-    RSE::Utilities::App::centerWidget(mpConvergenceViewer);
+    RSE::Utilities::App::moveToCenter(mpConvergenceViewer);
     mpConvergenceViewer->plot();
 }
 
@@ -54,7 +54,7 @@ void TestViewers::testConvergenceViewer()
 void TestViewers::testKLPGraphViewer()
 {
     mpKLPGraphViewer = new KLPGraphViewer(mkTestDataPath, *mpSettings);
-    RSE::Utilities::App::centerWidget(mpKLPGraphViewer);
+    RSE::Utilities::App::moveToCenter(mpKLPGraphViewer);
     mpKLPGraphViewer->show();
 }
 

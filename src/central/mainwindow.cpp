@@ -73,8 +73,12 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+    // GUI
+    delete mpDoubleSpinBoxItemDelegate;
+    delete mpRodSystemTableModel;
     delete mpUi;
     delete mpDockManager;
+    // Project
     delete mpProject;
     delete mpSolutionManager;
     delete mpSolutionOptions;
@@ -99,16 +103,10 @@ void MainWindow::createContent()
     // Create the default project and solution options
     createDefaultProject();
     createDefaultSolutionOptions();
-    // Configure the central layout
-    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-    QVBoxLayout* pLayout = new QVBoxLayout(mpUi->centralWidget);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    pLayout->setSpacing(1);
-    mpUi->centralWidget->setLayout(pLayout);
     // Intialize the manager to control floating widgets
-    mpDockManager = new CDockManager();
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    mpDockManager = new CDockManager(this);
     mpDockManager->setStyleSheet("");
-    pLayout->addWidget(mpDockManager);
     ads::CDockWidget* pDockWidget = nullptr;
     CDockAreaWidget* pArea = nullptr;
     // Widget to specify the solution process
@@ -218,8 +216,9 @@ CDockWidget* MainWindow::createRodSystemWidget()
     QTableView* pTable = new QTableView();
     mpRodSystemTableModel = new Models::RodSystemTableModel(pTable);
     mpRodSystemTableModel->setRodSystem(&mpProject->rodSystem());
+    mpDoubleSpinBoxItemDelegate = new Models::DoubleSpinBoxItemDelegate();
     pTable->setModel(mpRodSystemTableModel);
-    pTable->setItemDelegate(new Models::DoubleSpinBoxItemDelegate());
+    pTable->setItemDelegate(mpDoubleSpinBoxItemDelegate);
     pTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     pTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     // Name of cable

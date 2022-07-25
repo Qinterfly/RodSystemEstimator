@@ -23,6 +23,7 @@ static const QString skFileNameRods    = "RODS.prn";
 static const QString skFileNameProgram = "PROG.prn";
 static const int     skFieldWidth      = 30;
 
+void clearDataObjects(DataObjects& dataObjects);
 QStringList readAllLines(QString const& path, QString const& fileName);
 void replaceStringEntry(QString& string, int numSkipEntries, QString subString);
 void writeAllLines(QStringList const& lines, QString const& path, QString const& fileName);
@@ -31,6 +32,12 @@ Project::Project(QString const& name, DataBaseCables dataBaseCables, Damper damp
     : mName(name), mDamper(damper), mRodSystem(rodSystem), mSupport(support), mDataBaseCables(dataBaseCables)
 {
 
+}
+
+Project::~Project()
+{
+    clearDataObjects(mScalarDataObjects);
+    clearDataObjects(mVectorDataObjects);
 }
 
 //! Read template data
@@ -326,4 +333,12 @@ void writeAllLines(QStringList const& lines, QString const& path, QString const&
     for (auto const& line : lines)
         stream << line << Qt::endl;
     file.close();
+}
+
+//! Helper function to clear a container consisted of pointers to data objects
+void clearDataObjects(DataObjects& dataObjects)
+{
+    for (auto iter = dataObjects.begin(); iter != dataObjects.end(); ++iter)
+        delete *iter;
+    dataObjects.clear();
 }

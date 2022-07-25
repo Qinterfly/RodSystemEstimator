@@ -20,7 +20,7 @@ namespace App
 {
 
 void setStyle();
-void centerWidget(QWidget* pWidget);
+void moveToCenter(QWidget* pChildWidget, QWidget* pParentWidget = nullptr);
 
 }
 

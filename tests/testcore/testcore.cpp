@@ -39,7 +39,7 @@ inline bool fuzzyCompare(double p1, double p2, double eps)
 //! Initialize objects
 void TestCore::initTestCase()
 {
-    mpDataBaseCables = new DataBaseCables(mkRootPath, tr("Провода.txt"));
+    mpDataBaseCables = new DataBaseCables(mkDataPath, tr("Провода.txt"));
     mpDamper = new Damper(62, 124, 0.5, 0.4);
     mpRodSystem = new RodSystem({24, 24, 24, 24}, mpDataBaseCables->getItem("АС 120/19"), 3000);
 }

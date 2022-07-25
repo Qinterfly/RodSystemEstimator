@@ -27,7 +27,7 @@ class RodSystemTableModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    RodSystemTableModel(QObject* parent = nullptr);
+    RodSystemTableModel(QObject* pParent = nullptr);
     ~RodSystemTableModel() = default;
     void setRodSystem(Core::RodSystem* pRodSystem);
     void updateContent();

@@ -24,11 +24,14 @@ void App::setStyle()
     qApp->setStyleSheet(File::loadFileContent(":/styles/modern.qss"));
 }
 
-//! Align the center of the widget with the center of the screen
-void App::centerWidget(QWidget* pWidget)
+//! Align the child widget to the center of the parent widget or, if not specified, to the screen center
+void App::moveToCenter(QWidget* pChildWidget, QWidget* pParentWidget)
 {
-    QSize screenSize = qApp->primaryScreen()->availableGeometry().size();
-    int shiftX = (screenSize.width() - pWidget->width()) / 2;
-    int shiftY = (screenSize.height() - pWidget->height()) / 2;
-    pWidget->move(shiftX, shiftY);
+    QRect leadingGeometry;
+    if (pParentWidget)
+        leadingGeometry = pParentWidget->geometry();
+    else
+        leadingGeometry = qApp->primaryScreen()->availableGeometry();
+    QPoint newPosition = pChildWidget->pos() + leadingGeometry.center() - pChildWidget->geometry().center();
+    pChildWidget->move(newPosition);
 }

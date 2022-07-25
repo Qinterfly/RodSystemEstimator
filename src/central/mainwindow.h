@@ -48,6 +48,7 @@ class SolutionOptions;
 namespace Models
 {
 class RodSystemTableModel;
+class DoubleSpinBoxItemDelegate;
 }
 
 namespace App
@@ -123,6 +124,7 @@ private:
     Ui::MainWindow* mpUi;
     ads::CDockManager* mpDockManager;
     Models::RodSystemTableModel* mpRodSystemTableModel;
+    Models::DoubleSpinBoxItemDelegate* mpDoubleSpinBoxItemDelegate;
     // Parameters of a damper
     QDoubleSpinBox* mpMassCable;
     QDoubleSpinBox* mpMassLoadedCable;

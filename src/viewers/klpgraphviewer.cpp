@@ -10,7 +10,9 @@
 #include "DockWidget.h"
 #include "DockAreaWidget.h"
 #include "ads_globals.h"
+
 #include "central/uiconstants.h"
+#include "apputilities.h"
 #include "klpgraphviewer.h"
 
 using namespace RSE::Viewers;
@@ -36,8 +38,9 @@ void KLPGraphViewer::initialize()
 {
     setWindowTitle(tr("Просмотр результатов KLP"));
     setGeometry(0, 0, 1024, 768);
-    mpDockManager = new CDockManager();
+    mpDockManager = new CDockManager(this);
     mpDockManager->setStyleSheet("");
+    RSE::Utilities::App::moveToCenter(this, parentWidget());
 }
 
 //! Construct graphical interface

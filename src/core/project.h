@@ -34,6 +34,7 @@ class Project
 {
 public:
     Project(QString const& name, DataBaseCables dataBaseCables, Damper damper, RodSystem rodSystem, Support support);
+    ~Project();
     QString const& name() const { return mName; }
     void setName(QString const& name) { mName = name; }
     Damper& damper() { return mDamper; }
