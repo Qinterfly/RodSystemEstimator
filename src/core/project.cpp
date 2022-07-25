@@ -10,7 +10,7 @@
 #include "project.h"
 #include "scalardataobject.h"
 #include "vectordataobject.h"
-#include "utilities.h"
+#include "fileutilities.h"
 #include "solutionoptions.h"
 
 using namespace RSE::Core;

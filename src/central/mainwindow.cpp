@@ -35,6 +35,7 @@
 #include "core/solutionmanager.h"
 #include "core/io.h"
 #include "viewers/convergenceviewer.h"
+#include "viewers/klpgraphviewer.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -73,6 +74,7 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow()
 {
     delete mpUi;
+    delete mpDockManager;
     delete mpProject;
     delete mpSolutionManager;
     delete mpSolutionOptions;
@@ -308,6 +310,7 @@ CDockWidget* MainWindow::createCalculationWidget()
     pToolBar->addAction(QIcon(":/icons/window-new.svg"), tr("Запустить визуализацию"),
                         mpSolutionManager, &SolutionManager::runVisualizer);
     pToolBar->addAction(QIcon(":/icons/line-chart.svg"), tr("Просмотр сходимости"), this, &MainWindow::showConvergence);
+    pToolBar->addAction(QIcon(":/icons/view.svg"), tr("Просмотр результатов"), this, &MainWindow::showResults);
     // Number of computational modes
     mpNumCalcModes = createIntegerField(0);
     pGridLayout->addWidget(new QLabel(tr("Число тонов колебаний для расчета: ")), 0, 0);
@@ -669,6 +672,13 @@ void MainWindow::showConvergence()
     mpDockManager->addDockWidgetFloating(pConvergenceWidget);
 }
 
+//! Represent the results obtained via KLPALGSYS
+void MainWindow::showResults()
+{
+    KLPGraphViewer* pWidget = new Viewers::KLPGraphViewer(mpIO->lastPath(), *mpSettings, this);
+    pWidget->show();
+}
+
 //! Show the information about the program
 void MainWindow::aboutProgram()
 {
@@ -679,5 +689,5 @@ void MainWindow::aboutProgram()
                                  "Дмитрий Красноруцкий (KLPALGSYS, KLPExport),\n"
                                  "Павел Лакиза (RodSystemEstimator, OptimalDamping)."
                              );
-    QMessageBox::about(this, tr("О программе %1 v%2").arg(APP_NAME, APP_VERSION), aboutMsg);
+    QMessageBox::about(this, tr("О программе %1 (v%2)").arg(APP_NAME, APP_VERSION), aboutMsg);
 }

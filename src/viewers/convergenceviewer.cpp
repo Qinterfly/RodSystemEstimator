@@ -25,6 +25,8 @@ ConvergenceViewer::~ConvergenceViewer()
 //! Initialize the widget
 void ConvergenceViewer::initialize()
 {
+    // Geometry
+    setGeometry(0, 0, 600, 600);
     // Configure QCustomPlot
     mpFigure = new QCustomPlot();
     mpFigure->setAntialiasedElement(QCP::AntialiasedElement::aeAll, true);

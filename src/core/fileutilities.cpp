@@ -2,7 +2,7 @@
  * \file
  * \author Pavel Lakiza
  * \date July 2022
- * \brief Definition of utilites
+ * \brief Definition of utilites targeted to working with files
  */
 
 #include <QDebug>
@@ -10,8 +10,7 @@
 #include <QFile>
 #include <QDir>
 #include <QPair>
-
-#include "utilities.h"
+#include "fileutilities.h"
 
 using namespace RSE::Core;
 using namespace RSE::Utilities;
@@ -39,7 +38,7 @@ QPair<AbstractDataObject::ObjectType, QSharedPointer<QFile>> File::getDataObject
     QSharedPointer<QFile> pFile(new QFile(filePath));
     if (!pFile->open(QIODeviceBase::ReadOnly))
     {
-        qWarning() << QString("Не удалось считать объект с данными из файла: %1").arg(filePath);
+        qWarning() << QString("Could not read a data object from the file %1").arg(filePath);
         return {type, nullptr};;
     }
     return {type, pFile};
@@ -52,7 +51,7 @@ QString File::loadFileContent(QString const& path)
     QString content;
     if (!fileStyleSheet.exists())
     {
-        qDebug() << QString("Файл, расположенный в %1, не найден").arg(path) << Qt::endl;
+        qDebug() << QString("The file located at %1 was not found").arg(path) << Qt::endl;
     }
     else
     {

@@ -30,5 +30,6 @@
 		<file>rename.svg</file>
 		<file>list-add.svg</file>
 		<file>list-remove.svg</file>
+		<file>view.svg</file>
     </qresource>
 </RCC>

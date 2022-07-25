@@ -7,9 +7,8 @@
 
 #include <QFile>
 #include <QApplication>
-#include <QFontDatabase>
-#include "mainwindow.h"
-#include "utilities.h"
+#include "central/mainwindow.h"
+#include "viewers/apputilities.h"
 
 //! Startup point
 int main(int argc, char* argv[])
@@ -18,11 +17,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName(APP_NAME);
     QCoreApplication::setApplicationVersion(APP_VERSION);
     QApplication app(argc, argv);
-    QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
-    uint fontSize = 10;
-    qApp->setFont(QFont("Source Sans Pro", fontSize));
-    qApp->setStyle("Fusion");
-    qApp->setStyleSheet(RSE::Utilities::File::loadFileContent(":/styles/modern.qss"));
+    RSE::Utilities::App::setStyle();
     RSE::App::MainWindow window;
     window.show();
     return app.exec();

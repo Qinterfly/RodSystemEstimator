@@ -3,6 +3,7 @@ INCLUDEPATH += $${PWD}
 
 HEADERS += \
     $$PWD/databasecables.h \
+    $$PWD/fileutilities.h \
     $$PWD/io.h \
     $$PWD/solutionmanager.h \
     $$PWD/solutionoptions.h \
@@ -11,7 +12,6 @@ HEADERS += \
     $$PWD/damper.h \
     $$PWD/project.h \
     $$PWD/rodsystem.h \
-    $$PWD/utilities.h \
     $$PWD/array.h \
     $$PWD/abstractdataobject.h \
     $$PWD/scalardataobject.h \
@@ -20,6 +20,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/databasecables.cpp \
+    $$PWD/fileutilities.cpp \
     $$PWD/io.cpp \
     $$PWD/solutionmanager.cpp \
     $$PWD/solutionoptions.cpp \
@@ -27,7 +28,6 @@ SOURCES += \
     $$PWD/damper.cpp \
     $$PWD/project.cpp \
     $$PWD/rodsystem.cpp \
-    $$PWD/utilities.cpp \
     $$PWD/array.cpp \
     $$PWD/abstractdataobject.cpp \
     $$PWD/scalardataobject.cpp \

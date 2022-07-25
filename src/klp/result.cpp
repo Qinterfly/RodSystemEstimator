@@ -200,6 +200,7 @@ void Result::buildIndex()
                 case Utt:
                 case Ul:
                 case MV:
+                case ERR:
                     step = 12;
                     break;
                 case RMASS:
@@ -229,6 +230,16 @@ void Result::buildIndex()
         bool isModeshapes  = mIndex[i].data[RecordType::MV].position != 0;
         if (isFrequencies && isModeshapes)
             mIndex[i].data[RecordType::MV].partSize /= mIndex[i].data[RecordType::MF].partSize;
+    }
+
+    // If the current frame does not contain data, redirect it to the previous one
+    for (int i = 1; i != mNumRecords; ++i)
+    {
+        for (int j = 0; j != RecordType::MAX_RECORD; ++j)
+        {
+            if (mIndex[i].data[j].position == 0)
+                mIndex[i] = mIndex[i - 1];
+        }
     }
 
     // Retrieve time steps

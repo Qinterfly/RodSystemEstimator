@@ -16,27 +16,38 @@ class TestKLP : public QObject
 
 private slots:
     void readModal();
+    void readDynamic();
     void cleanupTestCase();
 
 private:
     QString const mkRootPath = "../../../../";
     QString const mkDataPath = mkRootPath + "tests/data/";
     Result* mpModalResult = nullptr;
+    Result* mpDynamicResult = nullptr;
 };
 
 //! Read the output file which consists of modal data
 void TestKLP::readModal()
 {
     mpModalResult = new Result(mkDataPath + "modal.klp");
-    qint64 iFrame = 0;
-    auto collection = mpModalResult->getFrameCollection(iFrame);
+    auto collection = mpModalResult->getFrameCollection(0);
     QCOMPARE(collection.naturalLength.size(), 2388);
+    QCOMPARE(collection.numRods, 28);
+}
+
+//! Read the output file which consists of dynamic data
+void TestKLP::readDynamic()
+{
+    mpDynamicResult = new Result(mkDataPath + "dynamic.klp");
+    auto collection = mpModalResult->getFrameCollection(1);
+    QCOMPARE(collection.numRods, 28);
 }
 
 //! Destroy all the data used
 void TestKLP::cleanupTestCase()
 {
     delete mpModalResult;
+    delete mpDynamicResult;
 }
 
 QTEST_APPLESS_MAIN(TestKLP)

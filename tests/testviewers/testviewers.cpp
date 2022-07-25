@@ -6,11 +6,10 @@
  */
 
 #include <QtTest>
-#include <QCoreApplication>
 #include <QtWidgets>
-#include <QScreen>
-#include "core/utilities.h"
+#include "viewers/apputilities.h"
 #include "viewers/convergenceviewer.h"
+#include "viewers/klpgraphviewer.h"
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;
@@ -22,30 +21,24 @@ class TestViewers : public QObject
 private slots:
     void initTestCase();
     void testConvergenceViewer();
+    void testKLPGraphViewer();
     void cleanupTestCase();
 
 private:
     QString const mkRootPath = "../../../../";
     QString const mkDataPath = mkRootPath + "data/";
     QString const mkOutputPath = mkDataPath + "Output/";
-    QRect mGeometryWidget;
+    QString const mkTestDataPath = mkRootPath + "tests/data/";
+    QSettings* mpSettings;
     ConvergenceViewer* mpConvergenceViewer;
+    KLPGraphViewer* mpKLPGraphViewer;
 };
 
 //! Initialize viewers
 void TestViewers::initTestCase()
 {
-    qApp->setStyle("Fusion");
-    qApp->setStyleSheet(RSE::Utilities::File::loadFileContent(":/styles/modern.qss"));
-    QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
-    uint fontSize = 10;
-    qApp->setFont(QFont("Source Sans Pro", fontSize));
-    // Position of widgets
-    QSize widgetSize = {600, 600};
-    QSize screenSize = qApp->primaryScreen()->availableGeometry().size();
-    mGeometryWidget.setLeft((screenSize.width() - widgetSize.width()) / 2);
-    mGeometryWidget.setTop((screenSize.height() - widgetSize.height()) / 2);
-    mGeometryWidget.setSize(widgetSize);
+    mpSettings = new QSettings("Settings.ini", QSettings::IniFormat);
+    RSE::Utilities::App::setStyle();
 }
 
 //! Represent convergence of viscosities
@@ -53,15 +46,25 @@ void TestViewers::testConvergenceViewer()
 {
     QString pathFile = mkOutputPath + tr("optimal.txt");
     mpConvergenceViewer = new ConvergenceViewer(pathFile);
+    RSE::Utilities::App::centerWidget(mpConvergenceViewer);
     mpConvergenceViewer->plot();
-    mpConvergenceViewer->setGeometry(mGeometryWidget);
+}
+
+//! Represent content of the KLP file
+void TestViewers::testKLPGraphViewer()
+{
+    mpKLPGraphViewer = new KLPGraphViewer(mkTestDataPath, *mpSettings);
+    RSE::Utilities::App::centerWidget(mpKLPGraphViewer);
+    mpKLPGraphViewer->show();
 }
 
 //! Destroy all the viewers used
 void TestViewers::cleanupTestCase()
 {
-    delete mpConvergenceViewer;
     qApp->exec();
+    delete mpConvergenceViewer;
+    delete mpKLPGraphViewer;
+    delete mpSettings;
 }
 
 QTEST_MAIN(TestViewers)

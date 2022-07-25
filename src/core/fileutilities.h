@@ -2,11 +2,11 @@
  * \file
  * \author Pavel Lakiza
  * \date July 2022
- * \brief Declaration of utilities
+ * \brief Declaration of utilities targeted to working with files
  */
 
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef FILEUTILITIES_H
+#define FILEUTILITIES_H
 
 #include <QSharedPointer>
 #include "abstractdataobject.h"
@@ -32,4 +32,4 @@ QString loadFileContent(QString const& path);
 
 }
 
-#endif // UTILITIES_H
+#endif // FILEUTILITIES_H

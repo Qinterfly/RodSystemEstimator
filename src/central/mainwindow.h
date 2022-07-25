@@ -101,6 +101,7 @@ private slots:
     void runOptimizationSolution();
     void appendOutputData(QByteArray);
     void showConvergence();
+    void showResults();
     // Creating a project
     void createProject();
     // Saving a project
