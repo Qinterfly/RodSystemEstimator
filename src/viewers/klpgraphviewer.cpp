@@ -17,13 +17,16 @@
 #include "klp/result.h"
 #include "apputilities.h"
 #include "klpgraphviewer.h"
+#include "klpresultlistmodel.h"
 
-using namespace RSE::Viewers;
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::CDockAreaWidget;
+using namespace RSE::Viewers;
+using namespace RSE::Models;
 
 static const QString skGroupName = "KLPGraphViewer";
+static const QString skResultFileExtension = ".klp";
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QDialog(pParent), mLastPath(lastPath), mSettings(settings)
@@ -44,6 +47,8 @@ void KLPGraphViewer::initialize()
     setWindowTitle(tr("Просмотр результатов KLP"));
     setGeometry(0, 0, 1024, 768);
     CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    CDockManager::setConfigFlag(CDockManager::DockAreaHideDisabledButtons, true);
+    CDockManager::setConfigFlag(CDockManager::EqualSplitOnInsertion, true);
     mpDockManager = new CDockManager(this);
     mpDockManager->setStyleSheet("");
     RSE::Utilities::App::moveToCenter(this, parentWidget());
@@ -69,25 +74,35 @@ void KLPGraphViewer::createContent()
 //! Create a widget to open and deal with KLP results
 CDockWidget* KLPGraphViewer::createResultWidget()
 {
-    const QSize kToolBarIconSize = {18, 18};
+    const QSize kToolBarIconSize = {22, 22};
     CDockWidget* pDockWidget = new CDockWidget(tr("Расчетные проекты"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    // List of results
+    mpListResults = new QListView();
+    mpResultListModel = new KLPResultListModel(mResults, mpListResults);
+    mpListResults->setModel(mpResultListModel);
+    mpListResults->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    connect(mpListResults->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedResults);
+    // Info
+    mpTextInfo = new QTextEdit();
+    mpTextInfo->setReadOnly(true);
     // Toolbar
     QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
+    QAction* pAction;
     pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     pDockWidget->setToolBarIconSize(kToolBarIconSize, CDockWidget::StateDocked);
-    pToolBar->addAction(QIcon(":/icons/document-open.svg"), tr("Открыть"), this, &KLPGraphViewer::openResultsDialog);
-    pToolBar->addAction(QIcon(":/icons/delete.svg"), tr("Удалить"));
-    pToolBar->addAction(QIcon(":/icons/rename.svg"), tr("Переименовать"));
-    // List of results
-    QListView* pListResults = new QListView();
-    // Info
-    QTextEdit* pTextInfo = new QTextEdit();
-    pTextInfo->setReadOnly(true);
+    pAction = pToolBar->addAction(QIcon(":/icons/document-open.svg"), tr("Открыть (Ctrl+O)"),
+                                  this, &KLPGraphViewer::openResultsDialog);
+    pAction->setShortcut(Qt::CTRL | Qt::Key_O);
+    pAction = pToolBar->addAction(QIcon(":/icons/delete.svg"), tr("Удалить (Delete)"),
+                                  mpResultListModel, &KLPResultListModel::removeSelected);
+    pAction->setShortcut(Qt::Key_Delete);
     // Arrangement
     QSplitter* pSplitter = new QSplitter();
-    pSplitter->addWidget(pListResults);
-    pSplitter->addWidget(pTextInfo);
+    pSplitter->addWidget(mpListResults);
+    pSplitter->addWidget(mpTextInfo);
+    pSplitter->setStretchFactor(0, 1);
+    pSplitter->setStretchFactor(1, 2);
     pDockWidget->setWidget(pSplitter);
     return pDockWidget;
 }
@@ -153,7 +168,7 @@ void KLPGraphViewer::closeEvent(QCloseEvent* pEvent)
 void KLPGraphViewer::openResultsDialog()
 {
     QStringList locationFiles = QFileDialog::getOpenFileNames(this, tr("Открыть проект"), mLastPath,
-                                                              tr("Формат проекта (*.klp)"));
+                                                              tr("Формат проекта (*%1)").arg(skResultFileExtension));
     if (!locationFiles.isEmpty())
         openResults(locationFiles);
 }
@@ -163,8 +178,37 @@ void KLPGraphViewer::openResults(QStringList const& locationFiles)
 {
     for (QString const& pathFile : locationFiles)
     {
-        KLP::Result result(pathFile);
-        if (!result.isEmpty())
-            mResults.push_back(std::move(result));
+        std::shared_ptr<KLP::Result> pResult = std::make_shared<KLP::Result>(pathFile);
+        if (!pResult->isEmpty())
+        {
+            mResults.push_back(pResult);
+            mLastPath = pResult->pathFile();
+        }
+    }
+    mpResultListModel->updateContent();
+}
+
+//! Process selected results
+void KLPGraphViewer::processSelectedResults()
+{
+    // Show information about the selected result
+    mpTextInfo->clear();
+    QModelIndexList indices = mpListResults->selectionModel()->selectedIndexes();
+    if (indices.size() == 1)
+    {
+        int iSelected = indices[0].row();
+        showResultInfo(mResults[iSelected]->info());
     }
 }
+
+//! Show information about the selected result
+void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
+{
+    mpTextInfo->append(tr("Дата создания проекта: %1").arg(info.creationDateTime.date().toString()));
+    mpTextInfo->append(tr("Время создания проекта: %1").arg(info.creationDateTime.time().toString()));
+    mpTextInfo->append(tr("Размер файла: %1 Кб").arg(info.fileSize));
+    mpTextInfo->append(tr("Общее число записей: %1").arg(info.numTotalRecords));
+    mpTextInfo->append(tr("Число записей по времени: %1").arg(info.numTimeRecords));
+    mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.identifier));
+}
+

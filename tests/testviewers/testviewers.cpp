@@ -55,6 +55,7 @@ void TestViewers::testKLPGraphViewer()
 {
     mpKLPGraphViewer = new KLPGraphViewer(mkTestDataPath, *mpSettings);
     RSE::Utilities::App::moveToCenter(mpKLPGraphViewer);
+    mpKLPGraphViewer->openResults({mkTestDataPath + "modal.klp", mkTestDataPath + "dynamic.klp"});
     mpKLPGraphViewer->show();
 }
 

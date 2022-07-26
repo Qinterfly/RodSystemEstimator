@@ -270,19 +270,25 @@ void Result::update()
 //! Retrieve general information about a result file
 ResultInfo Result::info() const
 {
+    QString const kDateFormat = "ddd MMM d hh:mm:ss yyyy";
+    // Slice the buffer
     ResultInfo infoData;
     unsigned char* pBuffer = (unsigned char*) mContent.data();
     // Creation date
     double* pValue = (double*)&pBuffer[0];
     time_t rawTime = (time_t) * pValue;
     tm* timeInfo = localtime (&rawTime);
-    infoData.creationDate = asctime(timeInfo);
-    // Identifier
-    uint* pWord = (uint*)&pBuffer[8];
-    infoData.identifier = *pWord;
+    QString date = asctime(timeInfo);
+    date = date.simplified();
+    infoData.creationDateTime = QDateTime::fromString(date, kDateFormat);
     // Number of records
     infoData.numTotalRecords = mNumRecords;
     infoData.numTimeRecords  = mTime.size();
+    // File size, Kb
+    infoData.fileSize = QFile(mkPathFile).size() / 1024;
+    // Identifier
+    uint* pWord = (uint*)&pBuffer[8];
+    infoData.identifier = *pWord;
     return infoData;
 }
 

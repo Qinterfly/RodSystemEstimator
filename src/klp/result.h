@@ -9,6 +9,7 @@
 #define RESULT_H
 
 #include <QString>
+#include <QDateTime>
 #include "index.h"
 #include "framecollection.h"
 
@@ -17,14 +18,16 @@ namespace KLP
 
 struct ResultInfo
 {
-    //! Unique identifier
-    uint identifier;
-    //! Creation date
-    QString creationDate;
+    //! Creation date and time
+    QDateTime creationDateTime;
     //! Total number of records
     qint64 numTotalRecords;
     //! Number of time records
     qint64 numTimeRecords;
+    //! File size, Kb
+    uint fileSize;
+    //! Unique identifier
+    uint identifier;
 };
 
 //! Class to aggregate all the records

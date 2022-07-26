@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include "qcustomplot.h"
+#include "appaliases.h"
 
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -24,10 +25,16 @@ class CDockWidget;
 namespace KLP
 {
 class Result;
+class ResultInfo;
 }
 
 namespace RSE
 {
+
+namespace Models
+{
+class KLPResultListModel;
+}
 
 namespace Viewers
 {
@@ -52,19 +59,26 @@ private:
     ads::CDockWidget* createFigureWidget();
     ads::CDockWidget* createConstructorWidget();
     ads::CDockWidget* createPropertyWidget();
+    // Results
+    void processSelectedResults();
+    void showResultInfo(KLP::ResultInfo const& info);
     // Settings
     void saveSettings();
     void restoreSettings();
     void closeEvent(QCloseEvent* pEvent) override;
 
 private:
-    // GUI
     QString mLastPath;
     QSettings& mSettings;
+    // GUI
     ads::CDockManager* mpDockManager = nullptr;
     QCustomPlot* mpFigure;
+    QListView* mpListResults;
+    QTextEdit* mpTextInfo;
+    // Models
+    RSE::Models::KLPResultListModel* mpResultListModel;
     // Data
-    std::vector<KLP::Result> mResults;
+    Results mResults;
 };
 
 }
