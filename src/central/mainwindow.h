@@ -65,7 +65,7 @@ public:
 
 private:
     // Content
-    void initializeWindow();
+    void initialize();
     void createContent();
     void createDefaultProject();
     void createDefaultSolutionOptions();

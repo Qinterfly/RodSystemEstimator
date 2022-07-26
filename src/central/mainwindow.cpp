@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget* parent)
     , mpUi(new Ui::MainWindow)
 {
     if (!skIsDistribute) skDirectoryData = "../../../" + skDirectoryData;
-    initializeWindow();
+    initialize();
     createContent();
     specifyMenuConnections();
     restoreSettings();
@@ -86,10 +86,13 @@ MainWindow::~MainWindow()
 }
 
 //! Set the state and geometry of the central window
-void MainWindow::initializeWindow()
+void MainWindow::initialize()
 {
     mpUi->setupUi(this);
     setWindowModified(false);
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    mpDockManager = new CDockManager(this);
+    mpDockManager->setStyleSheet("");
 }
 
 //! Create all the widgets and links between them
@@ -103,27 +106,17 @@ void MainWindow::createContent()
     // Create the default project and solution options
     createDefaultProject();
     createDefaultSolutionOptions();
-    // Intialize the manager to control floating widgets
-    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-    mpDockManager = new CDockManager(this);
-    mpDockManager->setStyleSheet("");
-    ads::CDockWidget* pDockWidget = nullptr;
+    // Solution process
+    mpDockManager->addDockWidget(ads::RightDockWidgetArea, createCalculationWidget());
+    // Computational workflow
+    mpDockManager->addDockWidget(ads::BottomDockWidgetArea, createConsole());
+    // Damper
     CDockAreaWidget* pArea = nullptr;
-    // Widget to specify the solution process
-    pDockWidget = createCalculationWidget();
-    mpDockManager->addDockWidget(ads::RightDockWidgetArea, pDockWidget);
-    // Widget to control the computational workflow
-    pDockWidget = createConsole();
-    mpDockManager->addDockWidget(ads::BottomDockWidgetArea, pDockWidget);
-    // Widget to set and represent data of a damper
-    pDockWidget = createDamperWidget();
-    pArea = mpDockManager->addDockWidget(ads::LeftDockWidgetArea, pDockWidget);
-    // Widget to set mechanical properties and geometry of a rod system
-    pDockWidget = createRodSystemWidget();
-    pArea = mpDockManager->addDockWidget(ads::BottomDockWidgetArea, pDockWidget, pArea);
-    // Widget to specify parameters of supports
-    pDockWidget = createSupportWidget();
-    mpDockManager->addDockWidget(ads::BottomDockWidgetArea, pDockWidget, pArea);
+    pArea = mpDockManager->addDockWidget(ads::LeftDockWidgetArea, createDamperWidget());
+    // Mechanical properties and geometry of a rod system
+    pArea = mpDockManager->addDockWidget(ads::BottomDockWidgetArea, createRodSystemWidget(), pArea);
+    // Parameters of supports
+    mpDockManager->addDockWidget(ads::BottomDockWidgetArea, createSupportWidget(), pArea);
     // Represent the project and solution options through the graphical interface
     setProjectData();
     setSolutionOptions();
