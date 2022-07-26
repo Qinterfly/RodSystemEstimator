@@ -516,7 +516,7 @@ void MainWindow::runOptimizationSolution()
 }
 
 //! Process the message from the solution process
-void MainWindow::appendOutputData(QByteArray data)
+void MainWindow::appendOutputData(QByteArray const& data)
 {
     mpConsole->append(data);
 }

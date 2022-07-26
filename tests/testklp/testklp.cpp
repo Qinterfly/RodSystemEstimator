@@ -31,6 +31,7 @@ void TestKLP::readModal()
 {
     mpModalResult = new Result(mkDataPath + "modal.klp");
     auto collection = mpModalResult->getFrameCollection(0);
+    QCOMPARE(mpModalResult->info().numTimeRecords, 1);
     QCOMPARE(collection.naturalLength.size(), 2388);
     QCOMPARE(collection.numRods, 28);
 }
@@ -40,6 +41,7 @@ void TestKLP::readDynamic()
 {
     mpDynamicResult = new Result(mkDataPath + "dynamic.klp");
     auto collection = mpModalResult->getFrameCollection(1);
+    QCOMPARE(mpDynamicResult->info().numTimeRecords, 660);
     QCOMPARE(collection.numRods, 28);
 }
 

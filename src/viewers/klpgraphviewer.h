@@ -21,6 +21,11 @@ class CDockManager;
 class CDockWidget;
 }
 
+namespace KLP
+{
+class Result;
+}
+
 namespace RSE
 {
 
@@ -35,12 +40,15 @@ class KLPGraphViewer : public QDialog
 public:
     KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent = nullptr);
     ~KLPGraphViewer();
+    // Deal with results
+    void openResultsDialog();
+    void openResults(QStringList const& locationFiles);
 
 private:
     // Content
     void initialize();
     void createContent();
-    ads::CDockWidget* createProjectWidget();
+    ads::CDockWidget* createResultWidget();
     ads::CDockWidget* createFigureWidget();
     ads::CDockWidget* createConstructorWidget();
     ads::CDockWidget* createPropertyWidget();
@@ -50,10 +58,13 @@ private:
     void closeEvent(QCloseEvent* pEvent) override;
 
 private:
+    // GUI
     QString mLastPath;
     QSettings& mSettings;
     ads::CDockManager* mpDockManager = nullptr;
     QCustomPlot* mpFigure;
+    // Data
+    std::vector<KLP::Result> mResults;
 };
 
 }

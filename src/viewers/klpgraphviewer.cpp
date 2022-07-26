@@ -6,6 +6,7 @@
  */
 
 #include <QSettings>
+#include <QTextEdit>
 #include "qcustomplot.h"
 #include "DockManager.h"
 #include "DockWidget.h"
@@ -13,6 +14,7 @@
 #include "ads_globals.h"
 
 #include "central/uiconstants.h"
+#include "klp/result.h"
 #include "apputilities.h"
 #include "klpgraphviewer.h"
 
@@ -54,8 +56,8 @@ void KLPGraphViewer::createContent()
     QVBoxLayout* pMainLayout = new QVBoxLayout(this);
     pMainLayout->setContentsMargins(0, 0, 0, 0);
     pMainLayout->addWidget(mpDockManager);
-    // Open and modify KLP projects
-    mpDockManager->addDockWidget(ads::LeftDockWidgetArea, createProjectWidget());
+    // View KLP results
+    mpDockManager->addDockWidget(ads::LeftDockWidgetArea, createResultWidget());
     // Construct graphs
     mpDockManager->addDockWidget(ads::BottomDockWidgetArea, createConstructorWidget());
     // Edit properties of graphs
@@ -64,13 +66,29 @@ void KLPGraphViewer::createContent()
     mpDockManager->addDockWidget(ads::RightDockWidgetArea, createFigureWidget());
 }
 
-//! Create a widget to open and deal with KLP projects
-CDockWidget* KLPGraphViewer::createProjectWidget()
+//! Create a widget to open and deal with KLP results
+CDockWidget* KLPGraphViewer::createResultWidget()
 {
+    const QSize kToolBarIconSize = {18, 18};
     CDockWidget* pDockWidget = new CDockWidget(tr("Расчетные проекты"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    QListWidget* pWidget = new QListWidget();
-    pDockWidget->setWidget(pWidget);
+    // Toolbar
+    QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
+    pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+    pDockWidget->setToolBarIconSize(kToolBarIconSize, CDockWidget::StateDocked);
+    pToolBar->addAction(QIcon(":/icons/document-open.svg"), tr("Открыть"), this, &KLPGraphViewer::openResultsDialog);
+    pToolBar->addAction(QIcon(":/icons/delete.svg"), tr("Удалить"));
+    pToolBar->addAction(QIcon(":/icons/rename.svg"), tr("Переименовать"));
+    // List of results
+    QListView* pListResults = new QListView();
+    // Info
+    QTextEdit* pTextInfo = new QTextEdit();
+    pTextInfo->setReadOnly(true);
+    // Arrangement
+    QSplitter* pSplitter = new QSplitter();
+    pSplitter->addWidget(pListResults);
+    pSplitter->addWidget(pTextInfo);
+    pDockWidget->setWidget(pSplitter);
     return pDockWidget;
 }
 
@@ -91,7 +109,7 @@ CDockWidget* KLPGraphViewer::createConstructorWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Конструктор графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    QListWidget* pWidget = new QListWidget();
+    QListView* pWidget = new QListView();
     pDockWidget->setWidget(pWidget);
     return pDockWidget;
 }
@@ -129,4 +147,24 @@ void KLPGraphViewer::closeEvent(QCloseEvent* pEvent)
 {
     saveSettings();
     pEvent->accept();
+}
+
+//! Open results using a file system dialog
+void KLPGraphViewer::openResultsDialog()
+{
+    QStringList locationFiles = QFileDialog::getOpenFileNames(this, tr("Открыть проект"), mLastPath,
+                                                              tr("Формат проекта (*.klp)"));
+    if (!locationFiles.isEmpty())
+        openResults(locationFiles);
+}
+
+//! Open a set of results using their locations
+void KLPGraphViewer::openResults(QStringList const& locationFiles)
+{
+    for (QString const& pathFile : locationFiles)
+    {
+        KLP::Result result(pathFile);
+        if (!result.isEmpty())
+            mResults.push_back(std::move(result));
+    }
 }

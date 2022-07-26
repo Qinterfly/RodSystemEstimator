@@ -6,6 +6,7 @@
  */
 
 #include <QFile>
+#include <QDateTime>
 #include "result.h"
 
 using namespace KLP;
@@ -127,15 +128,15 @@ void Result::buildIndex()
     qint64 jEndEntry = 0;
     short* pStartEntry;
     short* pRecordType;
-    unsigned int* pLengthEntry;
-    unsigned short* pHeaderLine;
-    unsigned long numTime = 0, numTimeOld = 0;
+    uint* pLengthEntry;
+    ushort* pHeaderLine;
+    ulong numTime = 0, numTimeOld = 0;
     while (iStartEntry < numBuffer)
     {
         ++mNumRecords;
         pStartEntry = (short*)&pBuffer[iStartEntry];
-        pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
-        pHeaderLine = (unsigned short*)&pBuffer[iStartEntry + 8];
+        pLengthEntry = (uint*)&pBuffer[iStartEntry + 2];
+        pHeaderLine = (ushort*)&pBuffer[iStartEntry + 8];
         jEndEntry = iStartEntry + kShiftNumRecords + *pHeaderLine + abs(*pStartEntry) * (qint64) * pLengthEntry;
         if (jEndEntry >= numBuffer)
             break;
@@ -170,8 +171,8 @@ void Result::buildIndex()
     for (qint64 k = 0; k != mNumRecords; ++k)
     {
         pStartEntry = (short*)&pBuffer[iStartEntry];
-        pLengthEntry = (unsigned int*)&pBuffer[iStartEntry + 2];
-        pHeaderLine = (unsigned short*)&pBuffer[iStartEntry + 8];
+        pLengthEntry = (uint*)&pBuffer[iStartEntry + 2];
+        pHeaderLine = (ushort*)&pBuffer[iStartEntry + 8];
         iStartData = iStartEntry + kShiftNumRecords + *pHeaderLine;
         jEndEntry = iStartData + abs(*pStartEntry) * (qint64) * pLengthEntry;
         if (*pHeaderLine >= 2)
@@ -245,7 +246,7 @@ void Result::buildIndex()
     // Retrieve time steps
     mTime.resize(numTime);
     float* pValue;
-    for (unsigned long i = 0; i != numTime; ++i)
+    for (ulong i = 0; i != numTime; ++i)
     {
         pValue = (float*)&pBuffer[mIndex[i].recordShift + mIndex[i].relativeDataShift + kShiftTime];
         mTime[i] = *pValue;
@@ -264,6 +265,25 @@ void Result::update()
         mContent.clear();
         mIndex.clear();
     }
+}
+
+//! Retrieve general information about a result file
+ResultInfo Result::info() const
+{
+    ResultInfo infoData;
+    unsigned char* pBuffer = (unsigned char*) mContent.data();
+    // Creation date
+    double* pValue = (double*)&pBuffer[0];
+    time_t rawTime = (time_t) * pValue;
+    tm* timeInfo = localtime (&rawTime);
+    infoData.creationDate = asctime(timeInfo);
+    // Identifier
+    uint* pWord = (uint*)&pBuffer[8];
+    infoData.identifier = *pWord;
+    // Number of records
+    infoData.numTotalRecords = mNumRecords;
+    infoData.numTimeRecords  = mTime.size();
+    return infoData;
 }
 
 //! Get the number of rods associated with the requested frame

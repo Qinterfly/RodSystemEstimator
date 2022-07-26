@@ -10,6 +10,7 @@ SOURCES +=  \
     testviewers.cpp
 
 include(../../src/core/core.pri)
+include(../../src/klp/klp.pri)
 include(../../src/viewers/viewers.pri)
 
 INCLUDEPATH += ../../src

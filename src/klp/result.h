@@ -15,14 +15,29 @@
 namespace KLP
 {
 
+struct ResultInfo
+{
+    //! Unique identifier
+    uint identifier;
+    //! Creation date
+    QString creationDate;
+    //! Total number of records
+    qint64 numTotalRecords;
+    //! Number of time records
+    qint64 numTimeRecords;
+};
+
 //! Class to aggregate all the records
 class Result
 {
 public:
-    Result(QString const& pathFile);
+    explicit Result(QString const& pathFile);
     ~Result() = default;
     bool isEmpty() const { return mContent.isEmpty(); }
+    std::vector<float> const& time() const { return mTime; }
+    QString const& pathFile() const { return mkPathFile; }
     int numRods(qint64 iFrame) const;
+    ResultInfo info() const;
     FloatFrameObject getFrameObject(qint64 iFrame, RecordType type, float normFactor = 1.0f, qint64 shift = 0) const;
     FrameCollection getFrameCollection(qint64 iFrame) const;
     void update();

@@ -62,6 +62,25 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+    // Set parameters of a damper
+    void setMassCable(double value);
+    void setMassLoadedCable(double value);
+    void setWorkingLength(double value);
+    void setBouncerLength(double value);
+    void setSpringLength(double value);
+    void setSpringStiffness(double value);
+    // Set parameters of a rod system
+    void setCable(QString const& name);
+    void setForce(double value);
+    // Set parameters of supports
+    void setLongitudinalStiffness(double value);
+    void setVerticalStiffness(double value);
+    // Deal with projects
+    void createProject();
+    void openProjectDialog();
+    void openProject(QString const& pathFile);
+    void saveAsProject();
+    void saveProject();
 
 private:
     // Content
@@ -82,37 +101,17 @@ private slots:
     // Settings
     void saveSettings();
     void restoreSettings();
-    // Parameters of a damper
-    void setMassCable(double);
-    void setMassLoadedCable(double);
-    void setWorkingLength(double);
-    void setBouncerLength(double);
-    void setSpringLength(double);
-    void setSpringStiffness(double);
+    // Recompute
     void computeSpring();
-    // Parameters of a rod system
-    void setCable(QString const& name);
-    void setForce(double);
     void computeSpans();
-    // Parameters of supports
-    void setLongitudinalStiffness(double);
-    void setVerticalStiffness(double);
     // Controlling the solution process
     void runRodSystemSolution();
     void runOptimizationSolution();
-    void appendOutputData(QByteArray);
+    void appendOutputData(QByteArray const& data);
     void showConvergence();
     void showResults();
-    // Creating a project
-    void createProject();
-    // Saving a project
-    void saveAsProject();
-    void saveProject();
-    // Open a project
-    void openProjectDialog();
-    void openProject(QString const&);
-    void setProjectTitle();
     // Set project data
+    void setProjectTitle();
     void setProjectData();
     void setSolutionOptions();
     void setCurrentCable();
