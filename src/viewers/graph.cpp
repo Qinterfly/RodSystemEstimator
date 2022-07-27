@@ -19,7 +19,7 @@ Graph::Graph(QString const& name)
 
 Graph::~Graph()
 {
-    for (int i = 0; i != kNumGraphData; ++i)
+    for (int i = 0; i != KLP::kNumDirections; ++i)
     {
         if (mpData[i])
             delete mpData[i];

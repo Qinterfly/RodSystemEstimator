@@ -17,8 +17,6 @@
 namespace RSE::Viewers
 {
 
-const int kNumGraphData = 3;
-
 class Graph
 {
 public:
@@ -40,7 +38,7 @@ private:
     QString mName;
     GraphIDType mID;
     // Data
-    AbstractGraphData* mpData[kNumGraphData] = {nullptr, nullptr, nullptr};
+    AbstractGraphData* mpData[KLP::kNumDirections] = {nullptr, nullptr, nullptr};
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
     QColor mColor = Qt::blue;
