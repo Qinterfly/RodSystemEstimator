@@ -10,6 +10,9 @@
 #include "viewers/apputilities.h"
 #include "viewers/convergenceviewer.h"
 #include "viewers/klpgraphviewer.h"
+#include "viewers/graph.h"
+#include "viewers/spacetimegraphdata.h"
+#include "viewers/kinematicsgraphdata.h"
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;
@@ -21,6 +24,7 @@ class TestViewers : public QObject
 private slots:
     void initTestCase();
     void testConvergenceViewer();
+    void testGraphs();
     void testKLPGraphViewer();
     void cleanupTestCase();
 
@@ -32,6 +36,7 @@ private:
     QSettings* mpSettings;
     ConvergenceViewer* mpConvergenceViewer;
     KLPGraphViewer* mpKLPGraphViewer;
+    MapGraphs mGraphs;
 };
 
 //! Initialize viewers
@@ -50,12 +55,34 @@ void TestViewers::testConvergenceViewer()
     mpConvergenceViewer->plot();
 }
 
+//! Create graphs of different types
+void TestViewers::testGraphs()
+{
+    const int kNumGraphs = 5;
+    // Create multiple graphs
+    for (int i = 0; i != kNumGraphs; ++i)
+    {
+        auto pGraph = std::make_shared<Graph>(tr("Тест %1").arg(i));
+        mGraphs.insert({i, pGraph});
+    }
+    // Create graph data of several types
+    AbstractGraphData* pCoordinate = new SpaceTimeGraphData(SpaceTimeGraphData::stCoordiante);
+    AbstractGraphData* pParameter = new SpaceTimeGraphData(SpaceTimeGraphData::stParameter);
+    AbstractGraphData* pLength = new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength);
+    AbstractGraphData* pTime = new SpaceTimeGraphData(SpaceTimeGraphData::stTime);
+    AbstractGraphData* pDisplacement = new KinematicsGraphData(KinematicsGraphData::kDisplacement);
+    // Assign graph data
+    mGraphs[0]->setData(pCoordinate, pParameter);
+    mGraphs[1]->setData(pLength, pTime, pDisplacement);
+}
+
 //! Represent content of the KLP file
 void TestViewers::testKLPGraphViewer()
 {
     mpKLPGraphViewer = new KLPGraphViewer(mkTestDataPath, *mpSettings);
     RSE::Utilities::App::moveToCenter(mpKLPGraphViewer);
     mpKLPGraphViewer->openResults({mkTestDataPath + "modal.klp", mkTestDataPath + "dynamic.klp"});
+    mpKLPGraphViewer->setGraphs(mGraphs);
     mpKLPGraphViewer->show();
 }
 

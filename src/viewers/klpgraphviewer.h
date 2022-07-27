@@ -52,7 +52,7 @@ public:
     void openResultsDialog();
     void openResults(QStringList const& locationFiles);
     // Graphs
-    void setGraphs(MapGraphs const& graphs) { mGraphs = graphs; }
+    void setGraphs(MapGraphs const& graphs);
 
 private:
     // Content

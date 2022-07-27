@@ -17,6 +17,8 @@
 namespace RSE::Viewers
 {
 
+const int kNumGraphData = 3;
+
 class Graph
 {
 public:
@@ -26,17 +28,19 @@ public:
     GraphIDType id() const { return mID; }
     QString const& name() const { return mName; }
     void setName(QString const& name) { mName = name; }
-    void setXData(AbstractGraphData* pXData) { mpXData = pXData; }
-    void setYData(AbstractGraphData* pYData) { mpYData = pYData; }
-    void setZData(AbstractGraphData* pZData) { mpZData = pZData; }
+    void setXData(AbstractGraphData* pData) { setDirectionalData(pData, 0); }
+    void setYData(AbstractGraphData* pData) { setDirectionalData(pData, 1); }
+    void setZData(AbstractGraphData* pData) { setDirectionalData(pData, 2); }
+    void setData(AbstractGraphData* pXData = nullptr, AbstractGraphData* pYData = nullptr, AbstractGraphData* pZData = nullptr);
+
+private:
+    void setDirectionalData(AbstractGraphData* pData, int direction);
 
 private:
     QString mName;
     GraphIDType mID;
     // Data
-    AbstractGraphData* mpXData = nullptr;
-    AbstractGraphData* mpYData = nullptr;
-    AbstractGraphData* mpZData = nullptr;
+    AbstractGraphData* mpData[kNumGraphData] = {nullptr, nullptr, nullptr};
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
     QColor mColor = Qt::blue;

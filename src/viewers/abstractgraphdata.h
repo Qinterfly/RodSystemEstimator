@@ -9,11 +9,7 @@
 #define ABSTRACTGRAPHDATA_H
 
 #include "aliasviewers.h"
-
-namespace KLP
-{
-class FrameCollection;
-}
+#include "framecollection.h"
 
 namespace RSE::Viewers
 {
@@ -40,7 +36,11 @@ public:
     };
     AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
-    virtual GraphData data(KLP::FrameCollection const& collection) = 0;
+    virtual GraphDataset data(KLP::FrameCollection const& collection) = 0;
+
+protected:
+    GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[]);
+    GraphDataset sliceDataByDirection(KLP::FloatFrameObject const components[], Direction direction);
 
 protected:
     Category mCategory;

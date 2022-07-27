@@ -222,6 +222,13 @@ void KLPGraphViewer::processSelectedResults()
     }
 }
 
+//! Replace the current set of graphs with the new one
+void KLPGraphViewer::setGraphs(MapGraphs const& graphs)
+{
+    mGraphs = graphs;
+    mpGraphListModel->updateContent();
+}
+
 //! Process selected graphs
 void KLPGraphViewer::processSelectedGraphs()
 {

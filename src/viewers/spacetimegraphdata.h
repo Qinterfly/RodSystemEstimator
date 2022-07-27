@@ -17,7 +17,7 @@ namespace RSE::Viewers
 class SpaceTimeGraphData : public AbstractGraphData
 {
 public:
-    enum Type
+    enum SpaceTimeType
     {
         stTime,
         stParameter,
@@ -26,12 +26,12 @@ public:
         stCoordiante,
         MAX_SPACE_TIME
     };
-    SpaceTimeGraphData(Direction direction, Type type);
+    SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);
     ~SpaceTimeGraphData();
-    GraphData data(KLP::FrameCollection const& collection) override;
+    GraphDataset data(KLP::FrameCollection const& collection) override;
 
 private:
-    Type mType;
+    SpaceTimeType mType;
 };
 
 }

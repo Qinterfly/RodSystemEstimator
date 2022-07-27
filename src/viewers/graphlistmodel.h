@@ -24,10 +24,10 @@ class GraphListModel : public QStandardItemModel
 public:
     GraphListModel(Viewers::MapGraphs& graphs, QObject* pParent = nullptr);
     void create();
+    void updateContent();
     void removeSelected();
 
 private:
-    void updateContent();
     void clearContent();
     void renameItem(QStandardItem* pItem);
 

@@ -39,6 +39,7 @@ public:
     qint64 numTimeRecords() const { return mTime.size(); }
     ResultInfo info() const;
     FrameCollection getFrameCollection(qint64 iFrame) const;
+    QVector<float> getAbsoluteData(FloatFrameObject components[kNumDirections]);
     void update();
 
 private:

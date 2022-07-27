@@ -10,7 +10,8 @@ HEADERS += \
     $$PWD/resultlistmodel.h \
     $$PWD/abstractgraphdata.h \
     $$PWD/graph.h \
-    $$PWD/spacetimegraphdata.h
+    $$PWD/spacetimegraphdata.h \
+    $$PWD/kinematicsgraphdata.h
 
 SOURCES += \
     $$PWD/apputilities.cpp \
@@ -20,7 +21,8 @@ SOURCES += \
     $$PWD/resultlistmodel.cpp \
     $$PWD/abstractgraphdata.cpp \
     $$PWD/graph.cpp \
-    $$PWD/spacetimegraphdata.cpp
+    $$PWD/spacetimegraphdata.cpp \
+    $$PWD/kinematicsgraphdata.cpp
 
 # Library QCustomPlot
 ROOT_PATH = $${PWD}/../../

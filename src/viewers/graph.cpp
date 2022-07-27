@@ -19,7 +19,25 @@ Graph::Graph(QString const& name)
 
 Graph::~Graph()
 {
-    delete mpXData;
-    delete mpYData;
-    delete mpZData;
+    for (int i = 0; i != kNumGraphData; ++i)
+    {
+        if (mpData[i])
+            delete mpData[i];
+    }
+}
+
+//! Specify data for all axes
+void Graph::setData(AbstractGraphData* pXData, AbstractGraphData* pYData, AbstractGraphData* pZData)
+{
+    setXData(pXData);
+    setYData(pYData);
+    setZData(pZData);
+}
+
+//! Set a new directional data and free the previous one
+void Graph::setDirectionalData(AbstractGraphData* pData, int direction)
+{
+    if (mpData[direction])
+        delete mpData[direction];
+    mpData[direction] = pData;
 }
