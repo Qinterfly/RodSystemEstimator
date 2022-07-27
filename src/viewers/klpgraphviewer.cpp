@@ -17,7 +17,7 @@
 #include "klp/result.h"
 #include "apputilities.h"
 #include "klpgraphviewer.h"
-#include "klpresultlistmodel.h"
+#include "resultlistmodel.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -27,6 +27,7 @@ using namespace RSE::Models;
 
 static const QString skGroupName = "KLPGraphViewer";
 static const QString skResultFileExtension = ".klp";
+static const QSize skToolBarIconSize = {22, 22};
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QDialog(pParent), mLastPath(lastPath), mSettings(settings)
@@ -74,12 +75,11 @@ void KLPGraphViewer::createContent()
 //! Create a widget to open and deal with KLP results
 CDockWidget* KLPGraphViewer::createResultWidget()
 {
-    const QSize kToolBarIconSize = {22, 22};
     CDockWidget* pDockWidget = new CDockWidget(tr("Расчетные проекты"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     // List of results
     mpListResults = new QListView();
-    mpResultListModel = new KLPResultListModel(mResults, mpListResults);
+    mpResultListModel = new ResultListModel(mResults, mpListResults);
     mpListResults->setModel(mpResultListModel);
     mpListResults->setSelectionMode(QAbstractItemView::ExtendedSelection);
     connect(mpListResults->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedResults);
@@ -90,13 +90,16 @@ CDockWidget* KLPGraphViewer::createResultWidget()
     QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
     QAction* pAction;
     pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
-    pDockWidget->setToolBarIconSize(kToolBarIconSize, CDockWidget::StateDocked);
+    pDockWidget->setToolBarIconSize(skToolBarIconSize, CDockWidget::StateDocked);
     pAction = pToolBar->addAction(QIcon(":/icons/document-open.svg"), tr("Открыть (Ctrl+O)"),
                                   this, &KLPGraphViewer::openResultsDialog);
     pAction->setShortcut(Qt::CTRL | Qt::Key_O);
     pAction = pToolBar->addAction(QIcon(":/icons/delete.svg"), tr("Удалить (Delete)"),
-                                  mpResultListModel, &KLPResultListModel::removeSelected);
+                                  mpResultListModel, &ResultListModel::removeSelected);
     pAction->setShortcut(Qt::Key_Delete);
+    pAction = pToolBar->addAction(QIcon(":/icons/refresh.svg"), tr("Обновить (F5)"),
+                                  mpResultListModel, &ResultListModel::updateData);
+    pAction->setShortcut(Qt::Key_F5);
     // Arrangement
     QSplitter* pSplitter = new QSplitter();
     pSplitter->addWidget(mpListResults);
@@ -124,8 +127,19 @@ CDockWidget* KLPGraphViewer::createConstructorWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Конструктор графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    QListView* pWidget = new QListView();
-    pDockWidget->setWidget(pWidget);
+    // Toolbar
+    QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
+    QAction* pAction;
+    pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+    pDockWidget->setToolBarIconSize(skToolBarIconSize, CDockWidget::StateDocked);
+    pAction = pToolBar->addAction(QIcon(":/icons/list-add.svg"), tr("Добавить (A)"));
+    pAction->setShortcut(Qt::Key_A);
+    pAction = pToolBar->addAction(QIcon(":/icons/list-remove.svg"), tr("Удалить (D)"));
+    pAction->setShortcut(Qt::Key_D);
+    // List of graphs
+    QListView* pListGraphs = new QListView();
+    pListGraphs->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    pDockWidget->setWidget(pListGraphs);
     return pDockWidget;
 }
 
@@ -209,6 +223,6 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
     mpTextInfo->append(tr("Размер файла: %1 Кб").arg(info.fileSize));
     mpTextInfo->append(tr("Общее число записей: %1").arg(info.numTotalRecords));
     mpTextInfo->append(tr("Число записей по времени: %1").arg(info.numTimeRecords));
-    mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.identifier));
+    mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.ID));
 }
 

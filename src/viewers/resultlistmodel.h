@@ -5,16 +5,11 @@
  * \brief Declaration of the KLPResultListModel class
  */
 
-#ifndef KLPRESULTLISTMODEL_H
-#define KLPRESULTLISTMODEL_H
+#ifndef RESULTLISTMODEL_H
+#define RESULTLISTMODEL_H
 
 #include <QStandardItemModel>
-#include "appaliases.h"
-
-namespace KLP
-{
-class Result;
-}
+#include "klp/aliasklp.h"
 
 namespace RSE
 {
@@ -22,12 +17,13 @@ namespace RSE
 namespace Models
 {
 
-class KLPResultListModel : public QStandardItemModel
+class ResultListModel : public QStandardItemModel
 {
     Q_OBJECT
 
 public:
-    KLPResultListModel(Results& results, QObject* pParent = nullptr);
+    ResultListModel(KLP::Results& results, QObject* pParent = nullptr);
+    void updateData();
     void updateContent();
     void removeSelected();
 
@@ -35,11 +31,11 @@ private:
     void clearContent();
 
 private:
-    Results& mResults;
+    KLP::Results& mResults;
 };
 
 }
 
 }
 
-#endif // KLPRESULTLISTMODEL_H
+#endif // RESULTLISTMODEL_H

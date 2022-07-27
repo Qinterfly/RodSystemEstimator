@@ -2,17 +2,21 @@
 INCLUDEPATH += $${PWD}
 
 HEADERS += \
-    $$PWD/appaliases.h \
+    $$PWD/aliasviewers.h \
     $$PWD/apputilities.h \
     $$PWD/convergenceviewer.h \
     $$PWD/klpgraphviewer.h \
-    $$PWD/klpresultlistmodel.h
+    $$PWD/resultlistmodel.h \
+    $$PWD/abstractgraphdata.h \
+    $$PWD/graph.h
 
 SOURCES += \
     $$PWD/apputilities.cpp \
     $$PWD/convergenceviewer.cpp \
     $$PWD/klpgraphviewer.cpp \
-    $$PWD/klpresultlistmodel.cpp
+    $$PWD/resultlistmodel.cpp \
+    $$PWD/abstractgraphdata.cpp \
+    $$PWD/graph.cpp
 
 # Library QCustomPlot
 ROOT_PATH = $${PWD}/../../

@@ -10,7 +10,7 @@
 
 #include <QDialog>
 #include "qcustomplot.h"
-#include "appaliases.h"
+#include "klp/aliasklp.h"
 
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -24,7 +24,6 @@ class CDockWidget;
 
 namespace KLP
 {
-class Result;
 class ResultInfo;
 }
 
@@ -33,7 +32,7 @@ namespace RSE
 
 namespace Models
 {
-class KLPResultListModel;
+class ResultListModel;
 }
 
 namespace Viewers
@@ -76,9 +75,9 @@ private:
     QListView* mpListResults;
     QTextEdit* mpTextInfo;
     // Models
-    RSE::Models::KLPResultListModel* mpResultListModel;
+    RSE::Models::ResultListModel* mpResultListModel;
     // Data
-    Results mResults;
+    KLP::Results mResults;
 };
 
 }

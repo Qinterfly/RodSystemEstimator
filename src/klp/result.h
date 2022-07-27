@@ -18,16 +18,11 @@ namespace KLP
 
 struct ResultInfo
 {
-    //! Creation date and time
     QDateTime creationDateTime;
-    //! Total number of records
-    qint64 numTotalRecords;
-    //! Number of time records
-    qint64 numTimeRecords;
-    //! File size, Kb
-    uint fileSize;
-    //! Unique identifier
-    uint identifier;
+    qint64 numTotalRecords = 0;
+    qint64 numTimeRecords = 0;
+    uint fileSize = 0;
+    uint ID = -1;
 };
 
 //! Class to aggregate all the records
@@ -41,7 +36,6 @@ public:
     QString const& pathFile() const { return mkPathFile; }
     int numRods(qint64 iFrame) const;
     ResultInfo info() const;
-    FloatFrameObject getFrameObject(qint64 iFrame, RecordType type, float normFactor = 1.0f, qint64 shift = 0) const;
     FrameCollection getFrameCollection(qint64 iFrame) const;
     void update();
 
@@ -49,6 +43,7 @@ private:
     bool read();
     void buildIndex();
     void setStateFrameData(StateFrame& state, RecordType type, qint64 iFrame, qint64 iStartData, std::vector<float> const& normFactors) const;
+    FloatFrameObject getFrameObject(qint64 iFrame, RecordType type, float normFactor = 1.0f, qint64 shift = 0) const;
 
 private:
     //! Path to the KLP file

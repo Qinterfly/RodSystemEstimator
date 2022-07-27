@@ -7,19 +7,26 @@
 
 #include <QFileInfo>
 #include <QListView>
-#include "klpresultlistmodel.h"
+#include "resultlistmodel.h"
 #include "klp/result.h"
 
 using namespace RSE::Models;
 
-KLPResultListModel::KLPResultListModel(Results& results, QObject* pParent)
+ResultListModel::ResultListModel(KLP::Results& results, QObject* pParent)
     : QStandardItemModel(pParent), mResults(results)
 {
 
 }
 
+//! Update results from files
+void ResultListModel::updateData()
+{
+    for (auto& result : mResults)
+        result->update();
+}
+
 //! Create items linked to results
-void KLPResultListModel::updateContent()
+void ResultListModel::updateContent()
 {
     clearContent();
     for (auto const& result : mResults)
@@ -32,13 +39,13 @@ void KLPResultListModel::updateContent()
 }
 
 //! Remove all the items created
-void KLPResultListModel::clearContent()
+void ResultListModel::clearContent()
 {
     removeRows(0, rowCount());
 }
 
 //! Remove selected results
-void KLPResultListModel::removeSelected()
+void ResultListModel::removeSelected()
 {
     QListView* pParent = (QListView*)parent();
     QModelIndexList selectedIndices = pParent->selectionModel()->selectedIndexes();
@@ -48,7 +55,7 @@ void KLPResultListModel::removeSelected()
     std::vector<bool> mask(numResults, true);
     for (auto const& index : selectedIndices)
         mask[index.row()] = false;
-    Results newResults;
+    KLP::Results newResults;
     for (int i = 0; i != numResults; ++i)
     {
         if (mask[i])

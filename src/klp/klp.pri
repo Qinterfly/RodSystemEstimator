@@ -2,6 +2,7 @@
 INCLUDEPATH += $${PWD}
 
 HEADERS += \
+    $$PWD/aliasklp.h \
     $$PWD/framecollection.h \
     $$PWD/frameobject.h \
     $$PWD/frameobjectiterator.h \

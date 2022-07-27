@@ -5,7 +5,6 @@
  * \brief Collection of the data associated with the specified frame
  */
 
-
 #ifndef FRAMECOLLECTION_H
 #define FRAMECOLLECTION_H
 
@@ -40,6 +39,8 @@ struct FrameCollection
 {
     //! Number of rods
     int numRods;
+    //! Time
+    float time;
     //! Parameter
     FloatFrameObject parameter;
     //! Natural length

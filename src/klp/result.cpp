@@ -60,6 +60,8 @@ FrameCollection Result::getFrameCollection(qint64 iFrame) const
         std::copy(coefficients.begin(), coefficients.end(), factors.begin());
     // Number of rods
     collection.numRods = numRods(iFrame);
+    // Time
+    collection.time = mTime[iFrame];
     // Parameter
     collection.parameter = getFrameObject(iFrame, RecordType::Xi);
     // Natural length
@@ -271,8 +273,10 @@ void Result::update()
 ResultInfo Result::info() const
 {
     QString const kDateFormat = "ddd MMM d hh:mm:ss yyyy";
-    // Slice the buffer
     ResultInfo infoData;
+    if (mContent.isEmpty())
+        return infoData;
+    // Retrieve the buffer
     unsigned char* pBuffer = (unsigned char*) mContent.data();
     // Creation date
     double* pValue = (double*)&pBuffer[0];
@@ -288,7 +292,7 @@ ResultInfo Result::info() const
     infoData.fileSize = QFile(mkPathFile).size() / 1024;
     // Identifier
     uint* pWord = (uint*)&pBuffer[8];
-    infoData.identifier = *pWord;
+    infoData.ID = *pWord;
     return infoData;
 }
 
