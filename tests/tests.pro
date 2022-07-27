@@ -2,5 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     testcore \
-    testviewers \
-    testklp
+    testklp \
+    testviewers

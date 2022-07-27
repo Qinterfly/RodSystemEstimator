@@ -16,3 +16,10 @@ Graph::Graph(QString const& name)
 {
     mID = ++smMaxGraphID;
 }
+
+Graph::~Graph()
+{
+    delete mpXData;
+    delete mpYData;
+    delete mpZData;
+}

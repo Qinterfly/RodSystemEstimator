@@ -35,6 +35,8 @@ public:
     std::vector<float> const& time() const { return mTime; }
     QString const& pathFile() const { return mkPathFile; }
     int numRods(qint64 iFrame) const;
+    qint64 numTotalRecords() const { return mNumTotalRecords; }
+    qint64 numTimeRecords() const { return mTime.size(); }
     ResultInfo info() const;
     FrameCollection getFrameCollection(qint64 iFrame) const;
     void update();
@@ -53,7 +55,7 @@ private:
     //! Index of the data buffer
     std::vector<Index> mIndex;
     //! Number of records
-    qint64 mNumRecords;
+    qint64 mNumTotalRecords;
     //! Time array
     std::vector<float> mTime;
     //! Number of bytes per rod

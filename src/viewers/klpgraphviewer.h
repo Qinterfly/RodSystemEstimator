@@ -11,6 +11,7 @@
 #include <QDialog>
 #include "qcustomplot.h"
 #include "klp/aliasklp.h"
+#include "aliasviewers.h"
 
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -33,6 +34,7 @@ namespace RSE
 namespace Models
 {
 class ResultListModel;
+class GraphListModel;
 }
 
 namespace Viewers
@@ -46,9 +48,11 @@ class KLPGraphViewer : public QDialog
 public:
     KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent = nullptr);
     ~KLPGraphViewer();
-    // Deal with results
+    // Results
     void openResultsDialog();
     void openResults(QStringList const& locationFiles);
+    // Graphs
+    void setGraphs(MapGraphs const& graphs) { mGraphs = graphs; }
 
 private:
     // Content
@@ -61,6 +65,8 @@ private:
     // Results
     void processSelectedResults();
     void showResultInfo(KLP::ResultInfo const& info);
+    // Graphs
+    void processSelectedGraphs();
     // Settings
     void saveSettings();
     void restoreSettings();
@@ -76,8 +82,10 @@ private:
     QTextEdit* mpTextInfo;
     // Models
     RSE::Models::ResultListModel* mpResultListModel;
+    RSE::Models::GraphListModel* mpGraphListModel;
     // Data
     KLP::Results mResults;
+    MapGraphs mGraphs;
 };
 
 }

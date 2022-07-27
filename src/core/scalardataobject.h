@@ -22,7 +22,8 @@ public:
     AbstractDataObject* clone() const override;
     DataItemType& addItem(DataValueType key) override;
     static quint32 numberInstances() { return smNumInstances; }
-    virtual void import(QTextStream& stream) override;
+    void import(QTextStream& stream) override;
+
 private:
     static quint32 smNumInstances;
 };

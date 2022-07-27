@@ -8,7 +8,7 @@
 #ifndef ABSTRACTGRAPHDATA_H
 #define ABSTRACTGRAPHDATA_H
 
-#include <QVector>
+#include "aliasviewers.h"
 
 namespace KLP
 {
@@ -23,8 +23,7 @@ class AbstractGraphData
 public:
     enum Category
     {
-        cNone,
-        cSpacetime,
+        cSpaceTime,
         cKinematics,
         cForce,
         cEnergy,
@@ -34,17 +33,16 @@ public:
     };
     enum Direction
     {
-        dNone,
         dFirst,
         dSecond,
         dThird,
         dFull
     };
-    AbstractGraphData(Category category = cNone, Direction direction = dNone);
+    AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
-    virtual QVector<float> data(KLP::FrameCollection const& collection) = 0;
+    virtual GraphData data(KLP::FrameCollection const& collection) = 0;
 
-private:
+protected:
     Category mCategory;
     Direction mDirection;
 };

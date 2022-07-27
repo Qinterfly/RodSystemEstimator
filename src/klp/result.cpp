@@ -22,7 +22,7 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float no
 {
     FloatFrameObject nullFrameObject;
     // Check if an index of frame is valid
-    if (iFrame < 0 || iFrame >= mNumRecords - 1)
+    if (iFrame < 0 || iFrame >= mNumTotalRecords - 1)
         return nullFrameObject;
     IndexData indexData = mIndex[iFrame].data[type];
     // Check if the requested data exists
@@ -125,7 +125,7 @@ void Result::buildIndex()
     qint64 numBuffer = mContent.size();
 
     // Count the number of records
-    mNumRecords = 0;
+    mNumTotalRecords = 0;
     qint64 iStartEntry = kStartIndex;
     qint64 jEndEntry = 0;
     short* pStartEntry;
@@ -135,7 +135,7 @@ void Result::buildIndex()
     ulong numTime = 0, numTimeOld = 0;
     while (iStartEntry < numBuffer)
     {
-        ++mNumRecords;
+        ++mNumTotalRecords;
         pStartEntry = (short*)&pBuffer[iStartEntry];
         pLengthEntry = (uint*)&pBuffer[iStartEntry + 2];
         pHeaderLine = (ushort*)&pBuffer[iStartEntry + 8];
@@ -162,7 +162,7 @@ void Result::buildIndex()
 
     // Alocate the mapping structure
     mNumBytesRod = 3;
-    mIndex.resize(mNumRecords);
+    mIndex.resize(mNumTotalRecords);
 
     // Fill in the mapping structure
     qint64 kk = 0;
@@ -170,7 +170,7 @@ void Result::buildIndex()
     qint64 iStartData;
     int iType;
     iStartEntry = kStartIndex;
-    for (qint64 k = 0; k != mNumRecords; ++k)
+    for (qint64 k = 0; k != mNumTotalRecords; ++k)
     {
         pStartEntry = (short*)&pBuffer[iStartEntry];
         pLengthEntry = (uint*)&pBuffer[iStartEntry + 2];
@@ -227,7 +227,7 @@ void Result::buildIndex()
     }
 
     // Truncate partial sizes for eigenvectors
-    for (int i = 0; i != mNumRecords; ++i)
+    for (int i = 0; i != mNumTotalRecords; ++i)
     {
         bool isFrequencies = mIndex[i].data[RecordType::MF].position != 0;
         bool isModeshapes  = mIndex[i].data[RecordType::MV].position != 0;
@@ -236,12 +236,12 @@ void Result::buildIndex()
     }
 
     // If the current frame does not contain data, redirect it to the previous one
-    for (int i = 1; i != mNumRecords; ++i)
+    for (int iRecord = 1; iRecord != mNumTotalRecords; ++iRecord)
     {
-        for (int j = 0; j != RecordType::MAX_RECORD; ++j)
+        for (int jType = 0; jType != RecordType::MAX_RECORD; ++jType)
         {
-            if (mIndex[i].data[j].position == 0)
-                mIndex[i] = mIndex[i - 1];
+            if (mIndex[iRecord].data[jType].position == 0)
+                mIndex[iRecord].data[jType] = mIndex[iRecord - 1].data[jType];
         }
     }
 
@@ -286,8 +286,8 @@ ResultInfo Result::info() const
     date = date.simplified();
     infoData.creationDateTime = QDateTime::fromString(date, kDateFormat);
     // Number of records
-    infoData.numTotalRecords = mNumRecords;
-    infoData.numTimeRecords  = mTime.size();
+    infoData.numTotalRecords = mNumTotalRecords;
+    infoData.numTimeRecords  = numTimeRecords();
     // File size, Kb
     infoData.fileSize = QFile(mkPathFile).size() / 1024;
     // Identifier
@@ -299,7 +299,7 @@ ResultInfo Result::info() const
 //! Get the number of rods associated with the requested frame
 int Result::numRods(qint64 iFrame) const
 {
-    if (iFrame < 0 || iFrame >= mNumRecords - 1)
+    if (iFrame < 0 || iFrame >= mNumTotalRecords - 1)
         return -1;
     IndexData indexData = mIndex[iFrame].data[RecordType::R];
     return indexData.size / mNumBytesRod;

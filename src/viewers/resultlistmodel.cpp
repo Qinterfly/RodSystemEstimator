@@ -15,7 +15,7 @@ using namespace RSE::Models;
 ResultListModel::ResultListModel(KLP::Results& results, QObject* pParent)
     : QStandardItemModel(pParent), mResults(results)
 {
-
+    updateContent();
 }
 
 //! Update results from files

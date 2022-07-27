@@ -21,14 +21,22 @@ class Graph
 {
 public:
     Graph(QString const& name);
+    ~Graph();
+    static GraphIDType maxGraphID() { return smMaxGraphID; }
+    GraphIDType id() const { return mID; }
+    QString const& name() const { return mName; }
+    void setName(QString const& name) { mName = name; }
+    void setXData(AbstractGraphData* pXData) { mpXData = pXData; }
+    void setYData(AbstractGraphData* pYData) { mpYData = pYData; }
+    void setZData(AbstractGraphData* pZData) { mpZData = pZData; }
 
 private:
     QString mName;
     GraphIDType mID;
     // Data
-    AbstractGraphData* pXData = nullptr;
-    AbstractGraphData* pYData = nullptr;
-    AbstractGraphData* pZData = nullptr;
+    AbstractGraphData* mpXData = nullptr;
+    AbstractGraphData* mpYData = nullptr;
+    AbstractGraphData* mpZData = nullptr;
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
     QColor mColor = Qt::blue;

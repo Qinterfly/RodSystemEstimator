@@ -18,6 +18,7 @@
 #include "apputilities.h"
 #include "klpgraphviewer.h"
 #include "resultlistmodel.h"
+#include "graphlistmodel.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -127,18 +128,24 @@ CDockWidget* KLPGraphViewer::createConstructorWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Конструктор графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    // List of graphs
+    QListView* pListGraphs = new QListView();
+    mpGraphListModel = new GraphListModel(mGraphs, pListGraphs);
+    pListGraphs->setModel(mpGraphListModel);
+    pListGraphs->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    connect(pListGraphs->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedGraphs);
     // Toolbar
     QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
     QAction* pAction;
     pToolBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     pDockWidget->setToolBarIconSize(skToolBarIconSize, CDockWidget::StateDocked);
-    pAction = pToolBar->addAction(QIcon(":/icons/list-add.svg"), tr("Добавить (A)"));
+    pAction = pToolBar->addAction(QIcon(":/icons/list-add.svg"), tr("Добавить (A)"),
+                                  mpGraphListModel, &GraphListModel::create);
     pAction->setShortcut(Qt::Key_A);
-    pAction = pToolBar->addAction(QIcon(":/icons/list-remove.svg"), tr("Удалить (D)"));
+    pAction = pToolBar->addAction(QIcon(":/icons/list-remove.svg"), tr("Удалить (D)"),
+                                  mpGraphListModel, &GraphListModel::removeSelected);
     pAction->setShortcut(Qt::Key_D);
-    // List of graphs
-    QListView* pListGraphs = new QListView();
-    pListGraphs->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    // Arrangement
     pDockWidget->setWidget(pListGraphs);
     return pDockWidget;
 }
@@ -213,6 +220,12 @@ void KLPGraphViewer::processSelectedResults()
         int iSelected = indices[0].row();
         showResultInfo(mResults[iSelected]->info());
     }
+}
+
+//! Process selected graphs
+void KLPGraphViewer::processSelectedGraphs()
+{
+
 }
 
 //! Show information about the selected result

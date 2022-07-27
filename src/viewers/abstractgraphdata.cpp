@@ -14,3 +14,8 @@ AbstractGraphData::AbstractGraphData(Category category, Direction direction)
 {
 
 }
+
+AbstractGraphData::~AbstractGraphData()
+{
+
+}
