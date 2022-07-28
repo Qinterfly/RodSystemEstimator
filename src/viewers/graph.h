@@ -41,8 +41,8 @@ private:
     AbstractGraphData* mpData[KLP::kNumDirections] = {nullptr, nullptr, nullptr};
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
-    QColor mColor = Qt::blue;
     uint mLineWidth = 1;
+    QColor mColor = Qt::blue;
     // Scatter options
     QCPScatterStyle mScatterStyle = QCPScatterStyle::ssNone;
     double mScatterSize = 5;

@@ -35,6 +35,7 @@ namespace Models
 {
 class ResultListModel;
 class GraphListModel;
+class PropertyTreeModel;
 }
 
 namespace Viewers
@@ -80,9 +81,11 @@ private:
     QCustomPlot* mpFigure;
     QListView* mpListResults;
     QTextEdit* mpTextInfo;
+    QListView* mpListGraphs;
     // Models
     RSE::Models::ResultListModel* mpResultListModel;
     RSE::Models::GraphListModel* mpGraphListModel;
+    RSE::Models::PropertyTreeModel* mpPropertyTreeModel;
     // Data
     KLP::Results mResults;
     MapGraphs mGraphs;

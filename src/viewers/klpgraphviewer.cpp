@@ -19,6 +19,7 @@
 #include "klpgraphviewer.h"
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
+#include "propertytreemodel.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -129,11 +130,11 @@ CDockWidget* KLPGraphViewer::createConstructorWidget()
     CDockWidget* pDockWidget = new CDockWidget(tr("Конструктор графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     // List of graphs
-    QListView* pListGraphs = new QListView();
-    mpGraphListModel = new GraphListModel(mGraphs, pListGraphs);
-    pListGraphs->setModel(mpGraphListModel);
-    pListGraphs->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    connect(pListGraphs->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedGraphs);
+    mpListGraphs = new QListView();
+    mpGraphListModel = new GraphListModel(mGraphs, mpListGraphs);
+    mpListGraphs->setModel(mpGraphListModel);
+    mpListGraphs->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    connect(mpListGraphs->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedGraphs);
     // Toolbar
     QToolBar* pToolBar = pDockWidget->createDefaultToolBar();
     QAction* pAction;
@@ -146,7 +147,7 @@ CDockWidget* KLPGraphViewer::createConstructorWidget()
                                   mpGraphListModel, &GraphListModel::removeSelected);
     pAction->setShortcut(Qt::Key_D);
     // Arrangement
-    pDockWidget->setWidget(pListGraphs);
+    pDockWidget->setWidget(mpListGraphs);
     return pDockWidget;
 }
 
@@ -155,8 +156,15 @@ CDockWidget* KLPGraphViewer::createPropertyWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Редактор свойств графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    QTreeView* pWidget = new QTreeView();
-    pDockWidget->setWidget(pWidget);
+    QTreeView* pTreeProperties = new QTreeView();
+    mpPropertyTreeModel = new PropertyTreeModel(pTreeProperties);
+    pTreeProperties->setModel(mpPropertyTreeModel);
+    pTreeProperties->setSelectionMode(QAbstractItemView::SingleSelection);
+    pTreeProperties->header()->setSectionResizeMode(QHeaderView::Stretch);
+    pTreeProperties->header()->setDefaultAlignment(Qt::AlignHCenter);
+    pTreeProperties->expandAll();
+    // Arrangement
+    pDockWidget->setWidget(pTreeProperties);
     return pDockWidget;
 }
 
@@ -232,7 +240,11 @@ void KLPGraphViewer::setGraphs(MapGraphs const& graphs)
 //! Process selected graphs
 void KLPGraphViewer::processSelectedGraphs()
 {
-
+    QModelIndexList indices = mpListGraphs->selectionModel()->selectedIndexes();
+    PointerGraph pGraph = nullptr;
+    if (indices.size() == 1)
+        pGraph = mGraphs[indices[0].row()];
+    mpPropertyTreeModel->setSelectedGraph(pGraph);
 }
 
 //! Show information about the selected result
