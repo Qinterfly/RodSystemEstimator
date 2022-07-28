@@ -19,7 +19,7 @@
 #include "klpgraphviewer.h"
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
-#include "propertytreemodel.h"
+#include "propertytreewidget.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -156,15 +156,9 @@ CDockWidget* KLPGraphViewer::createPropertyWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Редактор свойств графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    QTreeView* pTreeProperties = new QTreeView();
-    mpPropertyTreeModel = new PropertyTreeModel(pTreeProperties);
-    pTreeProperties->setModel(mpPropertyTreeModel);
-    pTreeProperties->setSelectionMode(QAbstractItemView::SingleSelection);
-    pTreeProperties->header()->setSectionResizeMode(QHeaderView::Stretch);
-    pTreeProperties->header()->setDefaultAlignment(Qt::AlignHCenter);
-    pTreeProperties->expandAll();
+    mpPropertyTreeWidget = new PropertyTreeWidget();
     // Arrangement
-    pDockWidget->setWidget(pTreeProperties);
+    pDockWidget->setWidget(mpPropertyTreeWidget);
     return pDockWidget;
 }
 
@@ -231,7 +225,7 @@ void KLPGraphViewer::processSelectedResults()
 }
 
 //! Replace the current set of graphs with the new one
-void KLPGraphViewer::setGraphs(MapGraphs const& graphs)
+void KLPGraphViewer::setGraphs(MapGraphs&& graphs)
 {
     mGraphs = graphs;
     mpGraphListModel->updateContent();
@@ -243,8 +237,12 @@ void KLPGraphViewer::processSelectedGraphs()
     QModelIndexList indices = mpListGraphs->selectionModel()->selectedIndexes();
     PointerGraph pGraph = nullptr;
     if (indices.size() == 1)
-        pGraph = mGraphs[indices[0].row()];
-    mpPropertyTreeModel->setSelectedGraph(pGraph);
+    {
+        int idGraph = indices[0].data(Qt::UserRole).toInt();
+        if (mGraphs.contains(idGraph))
+            pGraph = mGraphs[idGraph];
+    }
+    mpPropertyTreeWidget->setSelectedGraph(pGraph);
 }
 
 //! Show information about the selected result

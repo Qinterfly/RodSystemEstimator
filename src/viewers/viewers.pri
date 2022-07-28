@@ -7,7 +7,7 @@ HEADERS += \
     $$PWD/convergenceviewer.h \
     $$PWD/graphlistmodel.h \
     $$PWD/klpgraphviewer.h \
-    $$PWD/propertytreemodel.h \
+    $$PWD/propertytreewidget.h \
     $$PWD/resultlistmodel.h \
     $$PWD/abstractgraphdata.h \
     $$PWD/graph.h \
@@ -19,7 +19,7 @@ SOURCES += \
     $$PWD/convergenceviewer.cpp \
     $$PWD/graphlistmodel.cpp \
     $$PWD/klpgraphviewer.cpp \
-    $$PWD/propertytreemodel.cpp \
+    $$PWD/propertytreewidget.cpp \
     $$PWD/resultlistmodel.cpp \
     $$PWD/abstractgraphdata.cpp \
     $$PWD/graph.cpp \

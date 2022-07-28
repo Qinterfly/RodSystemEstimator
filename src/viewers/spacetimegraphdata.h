@@ -16,6 +16,8 @@ namespace RSE::Viewers
 //! Class to deal with spacetime KLP-data
 class SpaceTimeGraphData : public AbstractGraphData
 {
+    Q_OBJECT
+
 public:
     enum SpaceTimeType
     {
@@ -23,9 +25,9 @@ public:
         stParameter,
         stNaturalLength,
         stAccumulatedNaturalLength,
-        stCoordiante,
-        MAX_SPACE_TIME
+        stCoordiante
     };
+    Q_ENUM(SpaceTimeType)
     SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);
     ~SpaceTimeGraphData();
     GraphDataset data(KLP::FrameCollection const& collection) override;

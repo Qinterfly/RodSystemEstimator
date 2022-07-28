@@ -8,14 +8,17 @@
 #ifndef ABSTRACTGRAPHDATA_H
 #define ABSTRACTGRAPHDATA_H
 
+#include <QObject>
 #include "aliasviewers.h"
 #include "framecollection.h"
 
 namespace RSE::Viewers
 {
 
-class AbstractGraphData
+class AbstractGraphData : public QObject
 {
+    Q_OBJECT
+
 public:
     enum Category
     {
@@ -24,8 +27,7 @@ public:
         cForce,
         cEnergy,
         cModal,
-        cEstimation,
-        MAX_CATEGORY
+        cEstimation
     };
     enum Direction
     {
@@ -34,6 +36,8 @@ public:
         dThird,
         dFull
     };
+    Q_ENUM(Category)
+    Q_ENUM(Direction)
     AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
     virtual GraphDataset data(KLP::FrameCollection const& collection) = 0;

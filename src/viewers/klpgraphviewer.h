@@ -35,11 +35,12 @@ namespace Models
 {
 class ResultListModel;
 class GraphListModel;
-class PropertyTreeModel;
 }
 
 namespace Viewers
 {
+
+class PropertyTreeWidget;
 
 //! Class to graphically represent content of KLP output files
 class KLPGraphViewer : public QDialog
@@ -53,7 +54,7 @@ public:
     void openResultsDialog();
     void openResults(QStringList const& locationFiles);
     // Graphs
-    void setGraphs(MapGraphs const& graphs);
+    void setGraphs(MapGraphs&& graphs);
 
 private:
     // Content
@@ -82,10 +83,10 @@ private:
     QListView* mpListResults;
     QTextEdit* mpTextInfo;
     QListView* mpListGraphs;
+    RSE::Viewers::PropertyTreeWidget* mpPropertyTreeWidget;
     // Models
     RSE::Models::ResultListModel* mpResultListModel;
     RSE::Models::GraphListModel* mpGraphListModel;
-    RSE::Models::PropertyTreeModel* mpPropertyTreeModel;
     // Data
     KLP::Results mResults;
     MapGraphs mGraphs;

@@ -16,6 +16,8 @@ namespace RSE::Viewers
 //! Class to deal with kinematics of KLP-data
 class KinematicsGraphData : public AbstractGraphData
 {
+    Q_OBJECT
+
 public:
     enum KinematicsType
     {
@@ -25,9 +27,9 @@ public:
         kSpeed,
         kAngularSpeed,
         kAcceleration,
-        kAngularAcceleration,
-        MAX_KINEMATICS
+        kAngularAcceleration
     };
+    Q_ENUM(KinematicsType)
     KinematicsGraphData(KinematicsType type, Direction direction = Direction::dFull);
     ~KinematicsGraphData();
     GraphDataset data(KLP::FrameCollection const& collection) override;

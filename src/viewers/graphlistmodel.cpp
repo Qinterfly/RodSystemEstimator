@@ -68,3 +68,4 @@ void GraphListModel::renameItem(QStandardItem* pItem)
     QString newName = pItem->data(Qt::DisplayRole).toString();
     mGraphs[id]->setName(newName);
 }
+
