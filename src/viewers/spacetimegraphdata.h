@@ -31,6 +31,7 @@ public:
     SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);
     ~SpaceTimeGraphData();
     GraphDataset data(KLP::FrameCollection const& collection) override;
+    SpaceTimeType type() const { return mType; }
 
 private:
     SpaceTimeType mType;

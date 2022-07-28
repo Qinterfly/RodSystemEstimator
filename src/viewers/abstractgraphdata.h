@@ -41,6 +41,8 @@ public:
     AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
     virtual GraphDataset data(KLP::FrameCollection const& collection) = 0;
+    Category category() const { return mCategory; }
+    Direction direction() const { return mDirection; }
 
 protected:
     GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[]);

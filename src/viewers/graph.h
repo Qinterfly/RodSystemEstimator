@@ -22,14 +22,24 @@ class Graph
 public:
     Graph(QString const& name);
     ~Graph();
+    // Get methods
     static GraphIDType maxGraphID() { return smMaxGraphID; }
-    GraphIDType id() const { return mID; }
     QString const& name() const { return mName; }
+    GraphIDType id() const { return mID; }
+    AbstractGraphData** data() { return mpData; }
+    QCPGraph::LineStyle lineStyle() const { return mLineStyle; }
+    uint lineWidth() const { return mLineWidth; }
+    QColor color() const { return mColor; }
+    QCPScatterStyle scatterStyle() const { return mScatterStyle; }
+    double scatterSize() const { return mScatterSize; }
+    // Set methods
     void setName(QString const& name) { mName = name; }
-    void setXData(AbstractGraphData* pData) { setDirectionalData(pData, 0); }
-    void setYData(AbstractGraphData* pData) { setDirectionalData(pData, 1); }
-    void setZData(AbstractGraphData* pData) { setDirectionalData(pData, 2); }
     void setData(AbstractGraphData* pXData = nullptr, AbstractGraphData* pYData = nullptr, AbstractGraphData* pZData = nullptr);
+    void setLineStyle(QCPGraph::LineStyle const& lineStyle) { mLineStyle = lineStyle; }
+    void setLineWidth(uint lineWidth) { mLineWidth = lineWidth; }
+    void setColor(QColor const& color) { mColor = color; }
+    void setScatterStyle(QCPScatterStyle const& scatterStyle) { mScatterStyle = scatterStyle; }
+    void setScatterSize(double scatterSize) { mScatterSize = scatterSize; }
 
 private:
     void setDirectionalData(AbstractGraphData* pData, int direction);

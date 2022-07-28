@@ -29,9 +29,9 @@ Graph::~Graph()
 //! Specify data for all axes
 void Graph::setData(AbstractGraphData* pXData, AbstractGraphData* pYData, AbstractGraphData* pZData)
 {
-    setXData(pXData);
-    setYData(pYData);
-    setZData(pZData);
+    setDirectionalData(pXData, 0);
+    setDirectionalData(pYData, 1);
+    setDirectionalData(pZData, 2);
 }
 
 //! Set a new directional data and free the previous one
