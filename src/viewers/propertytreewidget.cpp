@@ -51,34 +51,33 @@ void PropertyTreeWidget::createHierarchy()
     double const kMaxScatterSize = 20;
     QTreeWidgetItem* pRoot = invisibleRootItem();
     // Properties of data
-    pRoot->addChild(createDirectionalDataItem(tr("Данные по X")));
-    pRoot->addChild(createDirectionalDataItem(tr("Данные по Y")));
-    pRoot->addChild(createDirectionalDataItem(tr("Данные по Z")));
+    mDataItems.push_back(createDirectionalDataItem(tr("Данные по X")));
+    mDataItems.push_back(createDirectionalDataItem(tr("Данные по Y")));
+    mDataItems.push_back(createDirectionalDataItem(tr("Данные по Z")));
+    pRoot->addChildren(mDataItems);
     // Properties for slicing data: XSData, YSData, ZSData
-    pRoot->addChild(createSliceDataItem(tr("Срез данных по X")));
-    pRoot->addChild(createSliceDataItem(tr("Срез данных по Y")));
-    pRoot->addChild(createSliceDataItem(tr("Срез данных по Z")));
+    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по X")));
+    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по Y")));
+    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по Z")));
+    pRoot->addChildren(mSliceDataItems);
     // Line properties
-    QTreeWidgetItem* pLineStyleItem = new QTreeWidgetItem({tr("Тип линии")});
-    QTreeWidgetItem* pLineWidthItem = new QTreeWidgetItem({tr("Толщина линии")});
-    QTreeWidgetItem* pColorItem     = new QTreeWidgetItem({tr("Цвет линии")});
-    pRoot->addChild(pLineStyleItem);
-    pRoot->addChild(pLineWidthItem);
-    pRoot->addChild(pColorItem);
+    mpLineStyleItem = new QTreeWidgetItem({tr("Тип линии")});
+    mpLineWidthItem = new QTreeWidgetItem({tr("Толщина линии")});
+    mpColorItem     = new QTreeWidgetItem({tr("Цвет линии")});
+    pRoot->addChildren({mpLineStyleItem, mpLineWidthItem, mpColorItem});
     QSpinBox* pLineWidthSpinBox = new QSpinBox();
     pLineWidthSpinBox->setRange(0, kMaxLineWidth);
-    setItemWidget(pLineStyleItem, 1, new QComboBox());
-    setItemWidget(pLineWidthItem, 1, pLineWidthSpinBox);
-    setItemWidget(pColorItem, 1, new QComboBox());
+    setItemWidget(mpLineStyleItem, 1, new QComboBox());
+    setItemWidget(mpLineWidthItem, 1, pLineWidthSpinBox);
+    setItemWidget(mpColorItem, 1, new QComboBox());
     // Scatter properties
-    QTreeWidgetItem* pScatterStyle = new QTreeWidgetItem({tr("Тип маркера")});
-    QTreeWidgetItem* pScatterSize = new QTreeWidgetItem({tr("Размер маркера")});
-    pRoot->addChild(pScatterStyle);
-    pRoot->addChild(pScatterSize);
+    mpScatterStyleItem = new QTreeWidgetItem({tr("Тип маркера")});
+    mpScatterSizeItem = new QTreeWidgetItem({tr("Размер маркера")});
+    pRoot->addChildren({mpScatterStyleItem, mpScatterSizeItem});
     QDoubleSpinBox* pScatterSizeSpinBox = new QDoubleSpinBox();
     pScatterSizeSpinBox->setRange(0, kMaxScatterSize);
-    setItemWidget(pScatterStyle, 1, new QComboBox());
-    setItemWidget(pScatterSize, 1, pScatterSizeSpinBox);
+    setItemWidget(mpScatterStyleItem, 1, new QComboBox());
+    setItemWidget(mpScatterSizeItem, 1, pScatterSizeSpinBox);
 }
 
 //! Represent values of properties

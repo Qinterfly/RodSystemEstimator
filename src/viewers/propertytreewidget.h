@@ -37,6 +37,13 @@ private:
 private:
     PointerGraph mpGraph = nullptr;
     QMap<QString, QString> mEnumTranslator;
+    QList<QTreeWidgetItem*> mDataItems;
+    QList<QTreeWidgetItem*> mSliceDataItems;
+    QTreeWidgetItem* mpLineStyleItem;
+    QTreeWidgetItem* mpLineWidthItem;
+    QTreeWidgetItem* mpColorItem;
+    QTreeWidgetItem* mpScatterStyleItem;
+    QTreeWidgetItem* mpScatterSizeItem;
 };
 
 }

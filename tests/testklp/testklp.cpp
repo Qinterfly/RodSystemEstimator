@@ -40,9 +40,9 @@ void TestKLP::readModal()
 void TestKLP::readDynamic()
 {
     mpDynamicResult = new Result(mkDataPath + "dynamic.klp");
-    auto collection = mpModalResult->getFrameCollection(1);
+    auto collection = mpDynamicResult->getFrameCollection(1);
     QCOMPARE(mpDynamicResult->info().numTimeRecords, 660);
-    QCOMPARE(collection.numRods, 28);
+    QCOMPARE(collection.numRods, 6);
 }
 
 //! Destroy all the data used

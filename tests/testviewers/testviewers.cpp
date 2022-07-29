@@ -81,7 +81,10 @@ void TestViewers::testKLPGraphViewer()
 {
     mpKLPGraphViewer = new KLPGraphViewer(mkTestDataPath, *mpSettings);
     RSE::Utilities::App::moveToCenter(mpKLPGraphViewer);
-    mpKLPGraphViewer->openResults({mkTestDataPath + "modal.klp", mkTestDataPath + "dynamic.klp"});
+    QStringList pathFiles = {"modal.klp", "dynamic.klp", "dynamic-impulse-1.klp", "dynamic-impulse-2.klp"};
+    for (QString& path : pathFiles)
+        path = mkTestDataPath + path;
+    mpKLPGraphViewer->openResults(pathFiles);
     mpKLPGraphViewer->setGraphs(std::move(mGraphs));
     mpKLPGraphViewer->show();
 }
