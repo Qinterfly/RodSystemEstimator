@@ -30,5 +30,20 @@
 		<file>list-add.svg</file>
 		<file>list-remove.svg</file>
 		<file>view.svg</file>
+		<file>ssDot.png</file>
+		<file>ssCross.png</file>
+		<file>ssPlus.png</file>
+		<file>ssCircle.png</file>
+		<file>ssDisc.png</file>
+		<file>ssSquare.png</file>
+		<file>ssDiamond.png</file>
+		<file>ssStar.png</file>
+		<file>ssTriangle.png</file>
+		<file>ssTriangleInverted.png</file>
+		<file>ssCrossSquare.png</file>
+		<file>ssPlusSquare.png</file>
+		<file>ssCrossCircle.png</file>
+		<file>ssPlusCircle.png</file>
+		<file>ssPeace.png</file>
     </qresource>
 </RCC>

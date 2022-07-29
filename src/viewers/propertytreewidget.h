@@ -18,6 +18,7 @@ namespace Viewers
 
 class Graph;
 using PointerGraph = std::shared_ptr<Graph>;
+using EnumData = QPair<QStringList, QList<QIcon>>;
 
 class PropertyTreeWidget : public QTreeWidget
 {
@@ -27,12 +28,13 @@ public:
 
 private:
     void initialize();
+    void setEnumTranslations();
     void createHierarchy();
     void updateValues();
     void resetValues();
     QTreeWidgetItem* createDirectionalDataItem(QString const& name);
     QTreeWidgetItem* createSliceDataItem(QString const& name);
-    QStringList getEnumKeys(QMetaObject const& metaObject, std::string const& nameEnumerator);
+    EnumData getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator);
 
 private:
     PointerGraph mpGraph = nullptr;
