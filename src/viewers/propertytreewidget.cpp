@@ -13,6 +13,8 @@
 #include "propertytreewidget.h"
 #include "abstractgraphdata.h"
 #include "graph.h"
+#include "spacetimegraphdata.h"
+#include "kinematicsgraphdata.h"
 
 using namespace RSE::Viewers;
 
@@ -71,6 +73,9 @@ void PropertyTreeWidget::createHierarchy()
     pScatterSizeSpinBox->setValue(5);
     setItemWidget(mpScatterStyleItem, 1, new QComboBox());
     setItemWidget(mpScatterSizeItem, 1, pScatterSizeSpinBox);
+    // Axes
+    createAxesLabelsItem();
+    pRoot->addChild(mpAxesLabelsItem);
     // Specify default properties
     resetValues();
 }
@@ -79,10 +84,49 @@ void PropertyTreeWidget::createHierarchy()
 void PropertyTreeWidget::updateValues()
 {
     resetValues();
-    // TODO
+    // Data properties
+    int numDirections = mDataItems.size();
+    AbstractGraphData** data = mpGraph->data();
+    QComboBox* pComboBox;
+    for (int i = 0; i != numDirections; ++i)
+    {
+        if (data[i] != nullptr)
+        {
+            // Category
+            pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
+            pComboBox->setCurrentIndex(data[i]->category());
+            // Type
+            setTypeValue(data[i], mDataItems[i]->child(1));
+            // Direction
+            pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
+            pComboBox->setCurrentIndex(data[i]->direction());
+            // Slice
+            if (data[i]->isSliced())
+                mSliceDataItems[i]->setCheckState(0, Qt::Checked);
+        }
+    }
+    // Line properties
+    pComboBox = (QComboBox*)itemWidget(mpLineStyleItem, 1);
+    pComboBox->setCurrentIndex(mpGraph->lineStyle());
+    QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mpLineWidthItem, 1);
+    pSpinBox->setValue(mpGraph->lineWidth());
+    setColorItem(mpGraph->color());
+    // Scatter properties
+    pComboBox = (QComboBox*)itemWidget(mpScatterStyleItem, 1);
+    pComboBox->setCurrentIndex(mpGraph->scatterStyle().shape());
+    QDoubleSpinBox* pDoubleSpinBox = (QDoubleSpinBox*)itemWidget(mpScatterSizeItem, 1);
+    pDoubleSpinBox->setValue(mpGraph->scatterSize());
+    // Axes
+    QLineEdit* pEdit;
+    QStringList const& axesLabels = mpGraph->axesLabels();
+    for (int i = 0; i != numDirections; ++i)
+    {
+        pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        pEdit->setText(axesLabels[i]);
+    }
 }
 
-//! Clear values of properties
+//! Clear values of properties, even if none of graphs is selected
 void PropertyTreeWidget::resetValues()
 {
     QColor const kDefaultColor = Qt::blue;
@@ -104,14 +148,15 @@ void PropertyTreeWidget::resetValues()
         pComboBox->clear();
         pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
         pComboBox->setCurrentIndex(-1);
+        // Slice
+        mSliceDataItems[i]->setCheckState(0, Qt::Unchecked);
     }
     // Line properties
     pComboBox = (QComboBox*)itemWidget(mpLineStyleItem, 1);
     pComboBox->clear();
     pComboBox->addItems(getEnumData(QCPGraph::staticMetaObject, "LineStyle").first);
     pComboBox->setCurrentIndex(-1);
-    mpColorItem->setData(1, Qt::DecorationRole, kDefaultColor);
-    mpColorItem->setData(1, Qt::DisplayRole, kDefaultColor.name());
+    setColorItem(kDefaultColor);
     // Scatter properties
     pComboBox = (QComboBox*)itemWidget(mpScatterStyleItem, 1);
     pComboBox->clear();
@@ -127,6 +172,12 @@ void PropertyTreeWidget::resetValues()
             pComboBox->addItem(name);
     }
     pComboBox->setCurrentIndex(-1);
+    // Axes
+    for (int i = 0; i != numDirections; ++i)
+    {
+        QLineEdit* pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        pEdit->clear();
+    }
 }
 
 //! Create a nested hierarchy of directional items
@@ -164,6 +215,18 @@ QTreeWidgetItem* PropertyTreeWidget::createSliceDataItem(QString const& name)
     return pRootItem;
 }
 
+//! Create an item to specify labels for axes
+void PropertyTreeWidget::createAxesLabelsItem()
+{
+    mpAxesLabelsItem = new QTreeWidgetItem({tr("Подписи осей")});
+    mpAxesLabelsItem->addChild(new QTreeWidgetItem({tr("X")}));
+    mpAxesLabelsItem->addChild(new QTreeWidgetItem({tr("Y")}));
+    mpAxesLabelsItem->addChild(new QTreeWidgetItem({tr("Z")}));
+    int numChildren = mpAxesLabelsItem->childCount();
+    for (int i = 0; i != numChildren; ++i)
+        setItemWidget(mpAxesLabelsItem->child(i), 1, new QLineEdit());
+}
+
 //! Specify the single graph which properties need to be edited
 void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
 {
@@ -175,6 +238,41 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
     }
     mpGraph = pGraph;
     updateValues();
+}
+
+//! Represent the type of the given graph data
+void PropertyTreeWidget::setTypeValue(AbstractGraphData* pBaseData, QTreeWidgetItem* pItem)
+{
+    QComboBox* pComboBox = (QComboBox*)itemWidget(pItem, 1);
+    switch (pBaseData->category())
+    {
+    case AbstractGraphData::cSpaceTime:
+        pComboBox->addItems(getEnumData(SpaceTimeGraphData::staticMetaObject, "SpaceTimeType").first);
+        break;
+    case AbstractGraphData::cKinematics:
+        pComboBox->addItems(getEnumData(KinematicsGraphData::staticMetaObject, "KinematicsType").first);
+        break;
+    case AbstractGraphData::cForce:
+        // TODO
+        break;
+    case AbstractGraphData::cEnergy:
+        // TODO
+        break;
+    case AbstractGraphData::cModal:
+        // TODO
+        break;
+    case AbstractGraphData::cEstimation:
+        // TODO
+        break;
+    }
+    pComboBox->setCurrentIndex(pBaseData->type());
+}
+
+//! Set the color of the graph
+void PropertyTreeWidget::setColorItem(QColor const& color)
+{
+    mpColorItem->setData(1, Qt::DecorationRole, color);
+    mpColorItem->setData(1, Qt::DisplayRole, color.name());
 }
 
 //! Retrieve translated keys and icons from a meta object
@@ -214,6 +312,20 @@ void PropertyTreeWidget::setEnumTranslations()
     mEnumTranslator["cEnergy"]     = tr("Энергетическая");
     mEnumTranslator["cModal"]      = tr("Модальная");
     mEnumTranslator["cEstimation"] = tr("Оценочная");
+    // Spacetime enum
+    mEnumTranslator["stTime"]                     = tr("Время");
+    mEnumTranslator["stParameter"]                = tr("Параметр");
+    mEnumTranslator["stNaturalLength"]            = tr("Естественная длина");
+    mEnumTranslator["stAccumulatedNaturalLength"] = tr("Суммарная естественная длина");
+    mEnumTranslator["stCoordiante"]               = tr("Координата");
+    // Kinematics enum
+    mEnumTranslator["kStrain"]              = tr("Продольная деформация");
+    mEnumTranslator["kDisplacement"]        = tr("Перемещение");
+    mEnumTranslator["kRotation"]            = tr("Проекция вектора поворота");
+    mEnumTranslator["kSpeed"]               = tr("Линейная скорость");
+    mEnumTranslator["kAngularSpeed"]        = tr("Угловая скорость");
+    mEnumTranslator["kAcceleration"]        = tr("Линейное ускорение");
+    mEnumTranslator["kAngularAcceleration"] = tr("Угловое ускорение");
     // Direction enum
     mEnumTranslator["dFirst"]  = tr("Первое");
     mEnumTranslator["dSecond"] = tr("Второе");

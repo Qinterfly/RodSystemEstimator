@@ -33,7 +33,7 @@ public:
     KinematicsGraphData(KinematicsType type, Direction direction = Direction::dFull);
     ~KinematicsGraphData();
     GraphDataset data(KLP::FrameCollection const& collection) override;
-    KinematicsType type() const { return mType; }
+    int type() const override { return mType; }
 
 private:
     KinematicsType mType;

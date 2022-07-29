@@ -26,6 +26,7 @@ public:
     void create();
     void updateContent();
     void removeSelected();
+    void selectItem(int iSelect = -1);
 
 private:
     void clearContent();

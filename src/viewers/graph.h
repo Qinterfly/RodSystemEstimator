@@ -22,7 +22,7 @@ class Graph
 public:
     Graph(QString const& name);
     ~Graph();
-    // Get methods
+    // Getters
     static GraphIDType maxGraphID() { return smMaxGraphID; }
     QString const& name() const { return mName; }
     GraphIDType id() const { return mID; }
@@ -32,17 +32,17 @@ public:
     QColor color() const { return mColor; }
     QCPScatterStyle scatterStyle() const { return mScatterStyle; }
     double scatterSize() const { return mScatterSize; }
-    // Set methods
+    QStringList const& axesLabels() const { return mAxesLabels; }
+    // Setters
     void setName(QString const& name) { mName = name; }
+    void setData(AbstractGraphData* pData, int direction);
     void setData(AbstractGraphData* pXData = nullptr, AbstractGraphData* pYData = nullptr, AbstractGraphData* pZData = nullptr);
     void setLineStyle(QCPGraph::LineStyle const& lineStyle) { mLineStyle = lineStyle; }
     void setLineWidth(uint lineWidth) { mLineWidth = lineWidth; }
     void setColor(QColor const& color) { mColor = color; }
     void setScatterStyle(QCPScatterStyle const& scatterStyle) { mScatterStyle = scatterStyle; }
     void setScatterSize(double scatterSize) { mScatterSize = scatterSize; }
-
-private:
-    void setDirectionalData(AbstractGraphData* pData, int direction);
+    void setAxesLabels(QStringList const& axesLabels) { mAxesLabels = axesLabels; }
 
 private:
     QString mName;
@@ -56,6 +56,8 @@ private:
     // Scatter options
     QCPScatterStyle mScatterStyle = QCPScatterStyle::ssNone;
     double mScatterSize = 5;
+    // Axes labels
+    QStringList mAxesLabels = QStringList({"Ось X", "Ось Y", "Ось Z"});
 
 private:
     static GraphIDType smMaxGraphID;

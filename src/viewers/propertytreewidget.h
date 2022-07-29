@@ -17,6 +17,7 @@ namespace Viewers
 {
 
 class Graph;
+class AbstractGraphData;
 using PointerGraph = std::shared_ptr<Graph>;
 using EnumData = QPair<QStringList, QList<QIcon>>;
 
@@ -28,13 +29,16 @@ public:
 
 private:
     void initialize();
-    void setEnumTranslations();
     void createHierarchy();
     void updateValues();
     void resetValues();
     QTreeWidgetItem* createDirectionalDataItem(QString const& name);
     QTreeWidgetItem* createSliceDataItem(QString const& name);
+    void createAxesLabelsItem();
+    void setTypeValue(AbstractGraphData* pBaseData, QTreeWidgetItem* pItem);
+    void setColorItem(QColor const& color);
     EnumData getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator);
+    void setEnumTranslations();
 
 private:
     PointerGraph mpGraph = nullptr;
@@ -46,6 +50,7 @@ private:
     QTreeWidgetItem* mpColorItem;
     QTreeWidgetItem* mpScatterStyleItem;
     QTreeWidgetItem* mpScatterSizeItem;
+    QTreeWidgetItem* mpAxesLabelsItem;
 };
 
 }

@@ -51,6 +51,11 @@ class RodSystemTableModel;
 class DoubleSpinBoxItemDelegate;
 }
 
+namespace Viewers
+{
+class KLPGraphViewer;
+}
+
 namespace App
 {
 
@@ -124,6 +129,7 @@ private:
     ads::CDockManager* mpDockManager;
     Models::RodSystemTableModel* mpRodSystemTableModel;
     Models::DoubleSpinBoxItemDelegate* mpDoubleSpinBoxItemDelegate;
+    std::shared_ptr<Viewers::KLPGraphViewer> mpGraphViewer;
     // Parameters of a damper
     QDoubleSpinBox* mpMassCable;
     QDoubleSpinBox* mpMassLoadedCable;

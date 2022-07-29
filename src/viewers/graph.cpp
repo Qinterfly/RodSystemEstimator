@@ -29,13 +29,13 @@ Graph::~Graph()
 //! Specify data for all axes
 void Graph::setData(AbstractGraphData* pXData, AbstractGraphData* pYData, AbstractGraphData* pZData)
 {
-    setDirectionalData(pXData, 0);
-    setDirectionalData(pYData, 1);
-    setDirectionalData(pZData, 2);
+    setData(pXData, 0);
+    setData(pYData, 1);
+    setData(pZData, 2);
 }
 
-//! Set a new directional data and free the previous one
-void Graph::setDirectionalData(AbstractGraphData* pData, int direction)
+//! Replace directional data with a new one
+void Graph::setData(AbstractGraphData* pData, int direction)
 {
     if (mpData[direction])
         delete mpData[direction];

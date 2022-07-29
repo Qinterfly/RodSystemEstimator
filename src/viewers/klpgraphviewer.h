@@ -8,7 +8,6 @@
 #ifndef KLPGRAPHVIEWER_H
 #define KLPGRAPHVIEWER_H
 
-#include <QDialog>
 #include "qcustomplot.h"
 #include "klp/aliasklp.h"
 #include "aliasviewers.h"
@@ -43,7 +42,7 @@ namespace Viewers
 class PropertyTreeWidget;
 
 //! Class to graphically represent content of KLP output files
-class KLPGraphViewer : public QDialog
+class KLPGraphViewer : public QWidget
 {
     Q_OBJECT
 

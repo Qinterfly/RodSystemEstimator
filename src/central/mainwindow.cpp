@@ -667,8 +667,10 @@ void MainWindow::showConvergence()
 //! Represent the results obtained via KLPALGSYS
 void MainWindow::showResults()
 {
-    KLPGraphViewer* pWidget = new Viewers::KLPGraphViewer(mpIO->lastPath(), *mpSettings, this);
-    pWidget->show();
+    if (mpGraphViewer)
+        mpGraphViewer.reset();
+    mpGraphViewer = std::make_shared<Viewers::KLPGraphViewer>(mpIO->lastPath(), *mpSettings);
+    mpGraphViewer->show();
 }
 
 //! Show the information about the program

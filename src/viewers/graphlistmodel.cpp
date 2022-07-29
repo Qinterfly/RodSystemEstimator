@@ -44,6 +44,7 @@ void GraphListModel::create()
     std::shared_ptr<Graph> pGraph = std::make_shared<Graph>(name);
     mGraphs.insert({pGraph->id(), pGraph});
     updateContent();
+    selectItem();
 }
 
 //! Remove selected graphs
@@ -59,6 +60,7 @@ void GraphListModel::removeSelected()
         mGraphs.erase(id);
     }
     updateContent();
+    selectItem();
 }
 
 //! Rename a graph after editing
@@ -69,3 +71,14 @@ void GraphListModel::renameItem(QStandardItem* pItem)
     mGraphs[id]->setName(newName);
 }
 
+//! Select an item by index
+void GraphListModel::selectItem(int iSelect)
+{
+    int numRows = rowCount();
+    if (iSelect < 0)
+        iSelect = numRows - 1;
+    if (iSelect >= numRows)
+        return;
+    QListView* pParent = (QListView*)parent();
+    pParent->setCurrentIndex(index(iSelect, 0));
+}

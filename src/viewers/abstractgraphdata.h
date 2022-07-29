@@ -41,8 +41,11 @@ public:
     AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
     virtual GraphDataset data(KLP::FrameCollection const& collection) = 0;
+    virtual int type() const = 0;
     Category category() const { return mCategory; }
     Direction direction() const { return mDirection; }
+    bool isSliced() const { return mSliceIndex > 0; }
+    qint64 sliceIndex() const { return mSliceIndex; }
 
 protected:
     GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[]);
@@ -51,6 +54,7 @@ protected:
 protected:
     Category mCategory;
     Direction mDirection;
+    qint64 mSliceIndex = -1;
 };
 
 }

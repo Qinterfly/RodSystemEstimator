@@ -32,7 +32,7 @@ static const QString skResultFileExtension = ".klp";
 static const QSize skToolBarIconSize = {22, 22};
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
-    : QDialog(pParent), mLastPath(lastPath), mSettings(settings)
+    : QWidget(pParent), mLastPath(lastPath), mSettings(settings)
 {
     initialize();
     createContent();
@@ -209,6 +209,7 @@ void KLPGraphViewer::openResults(QStringList const& locationFiles)
         }
     }
     mpResultListModel->updateContent();
+    mpResultListModel->selectItem();
 }
 
 //! Process selected results
@@ -229,6 +230,7 @@ void KLPGraphViewer::setGraphs(MapGraphs&& graphs)
 {
     mGraphs = graphs;
     mpGraphListModel->updateContent();
+    mpGraphListModel->selectItem();
 }
 
 //! Process selected graphs
@@ -255,4 +257,3 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
     mpTextInfo->append(tr("Число записей по времени: %1").arg(info.numTimeRecords));
     mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.ID));
 }
-

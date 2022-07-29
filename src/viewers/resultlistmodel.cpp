@@ -63,4 +63,17 @@ void ResultListModel::removeSelected()
     }
     mResults = newResults;
     updateContent();
+    selectItem();
+}
+
+//! Select an item by index
+void ResultListModel::selectItem(int iSelect)
+{
+    int numRows = rowCount();
+    if (iSelect < 0)
+        iSelect = numRows - 1;
+    if (iSelect >= numRows)
+        return;
+    QListView* pParent = (QListView*)parent();
+    pParent->setCurrentIndex(index(iSelect, 0));
 }
