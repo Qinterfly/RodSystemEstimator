@@ -35,8 +35,9 @@ public:
     QStringList const& axesLabels() const { return mAxesLabels; }
     // Setters
     void setName(QString const& name) { mName = name; }
-    void setData(AbstractGraphData* pData, int direction);
+    void setData(AbstractGraphData* pData, int iData);
     void setData(AbstractGraphData* pXData = nullptr, AbstractGraphData* pYData = nullptr, AbstractGraphData* pZData = nullptr);
+    void eraseData(int iData) { setData(nullptr, iData); }
     void setLineStyle(QCPGraph::LineStyle const& lineStyle) { mLineStyle = lineStyle; }
     void setLineWidth(uint lineWidth) { mLineWidth = lineWidth; }
     void setColor(QColor const& color) { mColor = color; }

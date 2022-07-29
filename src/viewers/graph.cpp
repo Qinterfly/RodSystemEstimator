@@ -35,9 +35,9 @@ void Graph::setData(AbstractGraphData* pXData, AbstractGraphData* pYData, Abstra
 }
 
 //! Replace directional data with a new one
-void Graph::setData(AbstractGraphData* pData, int direction)
+void Graph::setData(AbstractGraphData* pData, int iData)
 {
-    if (mpData[direction])
-        delete mpData[direction];
-    mpData[direction] = pData;
+    if (mpData[iData])
+        delete mpData[iData];
+    mpData[iData] = pData;
 }

@@ -22,6 +22,7 @@ PropertyTreeWidget::PropertyTreeWidget(QWidget* pParent)
     : QTreeWidget(pParent)
 {
     initialize();
+    makeTranslationMap();
     createHierarchy();
 }
 
@@ -33,7 +34,86 @@ void PropertyTreeWidget::initialize()
     setSelectionMode(QAbstractItemView::SingleSelection);
     header()->setSectionResizeMode(QHeaderView::Stretch);
     header()->setDefaultAlignment(Qt::AlignHCenter);
-    setEnumTranslations();
+}
+
+//! Represent values of properties
+void PropertyTreeWidget::updateValues()
+{
+    setBlockedSignals(true);
+    bool isGraph = mpGraph != nullptr;
+    // Data properties
+    int numData = mDataItems.size();
+    AbstractGraphData** data = isGraph ? mpGraph->data() : nullptr;
+    QComboBox* pComboBox;
+    bool isDirectionalData;
+    int index;
+    for (int i = 0; i != numData; ++i)
+    {
+        isDirectionalData = isGraph && data[i] != nullptr;
+        // Category
+        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
+        pComboBox->clear();
+        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Category").first);
+        index = isDirectionalData ? data[i]->category() : -1;
+        pComboBox->setCurrentIndex(index);
+        // Type
+        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(1), 1);
+        pComboBox->clear();
+        if (isDirectionalData)
+        {
+            setTypeValue(i);
+            pComboBox->setCurrentIndex(data[i]->type());
+        }
+        // Direction
+        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
+        pComboBox->clear();
+        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
+        index = isDirectionalData ? data[i]->direction() : -1;
+        pComboBox->setCurrentIndex(index);
+        // Slice
+        Qt::CheckState sliceState = isDirectionalData && data[i]->isSliced() ? Qt::Checked : Qt::Unchecked;
+        mSliceDataItems[i]->setCheckState(0, sliceState);
+    }
+    // Line style
+    mpLineStyleWidget->clear();
+    mpLineStyleWidget->addItems(getEnumData(QCPGraph::staticMetaObject, "LineStyle").first);
+    index = isGraph ? mpGraph->lineStyle() : -1;
+    mpLineStyleWidget->setCurrentIndex(index);
+    // Line width & color
+    if (isGraph)
+    {
+        mpLineWidthWidget->setValue(mpGraph->lineWidth());
+        setColorItem(mpGraph->color());
+    }
+    // Scatter shape
+    mpScatterStyleWidget->clear();
+    EnumData scatterData = getEnumData(QCPScatterStyle::staticMetaObject, "ScatterShape");
+    int numScatterData = scatterData.first.size();
+    for (int i = 0; i != numScatterData; ++i)
+    {
+        QString const& name = scatterData.first[i];
+        QIcon const& icon = scatterData.second[i];
+        if (!icon.isNull())
+            mpScatterStyleWidget->addItem(icon, name);
+        else
+            mpScatterStyleWidget->addItem(name);
+    }
+    index = isGraph ? mpGraph->scatterStyle().shape() : -1;
+    mpScatterStyleWidget->setCurrentIndex(index);
+    // Scatter size
+    if (isGraph)
+        mpScatterSizeWidget->setValue(mpGraph->scatterSize());
+    // Axes labels
+    QLineEdit* pEdit;
+    QStringList const& axesLabels = mpGraph->axesLabels();
+    for (int i = 0; i != numData; ++i)
+    {
+        pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        pEdit->clear();
+        if (isGraph)
+            pEdit->setText(axesLabels[i]);
+    }
+    setBlockedSignals(false);
 }
 
 //! Create a hierachy of properties: keys and empty values
@@ -55,110 +135,33 @@ void PropertyTreeWidget::createHierarchy()
     mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по Z")));
     pRoot->addChildren(mSliceDataItems);
     // Line properties
-    mpLineStyleItem = new QTreeWidgetItem({tr("Тип линии")});
-    mpLineWidthItem = new QTreeWidgetItem({tr("Толщина линии")});
-    mpColorItem     = new QTreeWidgetItem({tr("Цвет линии"), tr("")});
-    pRoot->addChildren({mpLineStyleItem, mpLineWidthItem, mpColorItem});
-    QSpinBox* pLineWidthSpinBox = new QSpinBox();
-    pLineWidthSpinBox->setRange(0, kMaxLineWidth);
-    pLineWidthSpinBox->setValue(1);
-    setItemWidget(mpLineStyleItem, 1, new QComboBox());
-    setItemWidget(mpLineWidthItem, 1, pLineWidthSpinBox);
+    QTreeWidgetItem* pLineStyleItem = new QTreeWidgetItem({tr("Тип линии")});
+    QTreeWidgetItem* pLineWidthItem = new QTreeWidgetItem({tr("Толщина линии")});
+    mpColorItem                     = new QTreeWidgetItem({tr("Цвет линии"), tr("")});
+    pRoot->addChildren({pLineStyleItem, pLineWidthItem, mpColorItem});
+    mpLineStyleWidget = new QComboBox();
+    mpLineWidthWidget = new QSpinBox();
+    mpLineWidthWidget->setRange(0, kMaxLineWidth);
+    mpLineWidthWidget->setValue(1);
+    setItemWidget(pLineStyleItem, 1, mpLineStyleWidget);
+    setItemWidget(pLineWidthItem, 1, mpLineWidthWidget);
     // Scatter properties
-    mpScatterStyleItem = new QTreeWidgetItem({tr("Тип маркера")});
-    mpScatterSizeItem = new QTreeWidgetItem({tr("Размер маркера")});
-    pRoot->addChildren({mpScatterStyleItem, mpScatterSizeItem});
-    QDoubleSpinBox* pScatterSizeSpinBox = new QDoubleSpinBox();
-    pScatterSizeSpinBox->setRange(0, kMaxScatterSize);
-    pScatterSizeSpinBox->setValue(5);
-    setItemWidget(mpScatterStyleItem, 1, new QComboBox());
-    setItemWidget(mpScatterSizeItem, 1, pScatterSizeSpinBox);
+    QTreeWidgetItem* pScatterStyleItem = new QTreeWidgetItem({tr("Тип маркера")});
+    QTreeWidgetItem* pScatterSizeItem = new QTreeWidgetItem({tr("Размер маркера")});
+    pRoot->addChildren({pScatterStyleItem, pScatterSizeItem});
+    mpScatterStyleWidget = new QComboBox();
+    mpScatterSizeWidget = new QDoubleSpinBox();
+    mpScatterSizeWidget->setRange(0, kMaxScatterSize);
+    mpScatterSizeWidget->setValue(5);
+    setItemWidget(pScatterStyleItem, 1, mpScatterStyleWidget);
+    setItemWidget(pScatterSizeItem, 1, mpScatterSizeWidget);
     // Axes
     createAxesLabelsItem();
     pRoot->addChild(mpAxesLabelsItem);
     // Specify default properties
     updateValues();
-}
-
-//! Represent values of properties
-void PropertyTreeWidget::updateValues()
-{
-    bool isGraph = mpGraph != nullptr;
-    // Data properties
-    int numDirections = mDataItems.size();
-    AbstractGraphData** data = isGraph ? mpGraph->data() : nullptr;
-    QComboBox* pComboBox;
-    bool isDirectionalData;
-    int index;
-    for (int i = 0; i != numDirections; ++i)
-    {
-        isDirectionalData = isGraph && data[i] != nullptr;
-        // Category
-        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
-        pComboBox->clear();
-        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Category").first);
-        index = isDirectionalData ? data[i]->category() : -1;
-        pComboBox->setCurrentIndex(index);
-        // Type
-        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(1), 1);
-        pComboBox->clear();
-        if (isDirectionalData)
-            setTypeValue(data[i], mDataItems[i]->child(1));
-        // Direction
-        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
-        pComboBox->clear();
-        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
-        index = isDirectionalData ? data[i]->direction() : -1;
-        pComboBox->setCurrentIndex(index);
-        // Slice
-        Qt::CheckState sliceState = isDirectionalData && data[i]->isSliced() ? Qt::Checked : Qt::Unchecked;
-        mSliceDataItems[i]->setCheckState(0, sliceState);
-    }
-    // Line style
-    pComboBox = (QComboBox*)itemWidget(mpLineStyleItem, 1);
-    pComboBox->clear();
-    pComboBox->addItems(getEnumData(QCPGraph::staticMetaObject, "LineStyle").first);
-    index = isGraph ? mpGraph->lineStyle() : -1;
-    pComboBox->setCurrentIndex(index);
-    // Line width & color
-    if (isGraph)
-    {
-        QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mpLineWidthItem, 1);
-        pSpinBox->setValue(mpGraph->lineWidth());
-        setColorItem(mpGraph->color());
-    }
-    // Scatter shape
-    pComboBox = (QComboBox*)itemWidget(mpScatterStyleItem, 1);
-    pComboBox->clear();
-    EnumData scatterData = getEnumData(QCPScatterStyle::staticMetaObject, "ScatterShape");
-    int numScatterData = scatterData.first.size();
-    for (int i = 0; i != numScatterData; ++i)
-    {
-        QString const& name = scatterData.first[i];
-        QIcon const& icon = scatterData.second[i];
-        if (!icon.isNull())
-            pComboBox->addItem(icon, name);
-        else
-            pComboBox->addItem(name);
-    }
-    index = isGraph ? mpGraph->scatterStyle().shape() : -1;
-    pComboBox->setCurrentIndex(index);
-    // Scatter size
-    if (isGraph)
-    {
-        QDoubleSpinBox* pDoubleSpinBox = (QDoubleSpinBox*)itemWidget(mpScatterSizeItem, 1);
-        pDoubleSpinBox->setValue(mpGraph->scatterSize());
-    }
-    // Axes labels
-    QLineEdit* pEdit;
-    QStringList const& axesLabels = mpGraph->axesLabels();
-    for (int i = 0; i != numDirections; ++i)
-    {
-        pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
-        pEdit->clear();
-        if (isGraph)
-            pEdit->setText(axesLabels[i]);
-    }
+    // Enable widgets to communicate
+    specifyConnections();
 }
 
 //! Create a nested hierarchy of directional items
@@ -208,6 +211,53 @@ void PropertyTreeWidget::createAxesLabelsItem()
         setItemWidget(mpAxesLabelsItem->child(i), 1, new QLineEdit());
 }
 
+//! Enable widgets to communicate
+void PropertyTreeWidget::specifyConnections()
+{
+    // Data properties
+    int numData = mDataItems.size();
+    QComboBox* pComboBox;
+    for (int i = 0; i != numData; ++i)
+    {
+        // Category
+        pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
+        connect(pComboBox, &QComboBox::currentIndexChanged, this, [ this, i ]()
+        {
+            if (mpGraph)
+                mpGraph->eraseData(i);
+            setTypeValue(i);
+        });
+        // Type & direction
+        auto funAssignData = [ this, i ]() { assignGraphData(i); };
+        for (int j = 1; j != numData; ++j)
+        {
+            pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(j), 1);
+            connect(pComboBox, &QComboBox::currentIndexChanged, this, funAssignData);
+        }
+    }
+    // Line properties
+    connect(mpLineStyleWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
+    connect(mpLineWidthWidget, &QSpinBox::valueChanged, this, &PropertyTreeWidget::assignVisualProperties);
+    connect(this, &PropertyTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem * pItem, int column)
+    {
+        if (pItem == mpColorItem && column == 1)
+        {
+            QColorDialog* pDialog = new QColorDialog(this);
+            connect(pDialog, &QColorDialog::colorSelected, this, &PropertyTreeWidget::setColorItem);
+            pDialog->show();
+        }
+    });
+    // Scatter properties
+    connect(mpScatterStyleWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
+    connect(mpScatterSizeWidget, &QDoubleSpinBox::valueChanged, this, &PropertyTreeWidget::assignVisualProperties);
+    // Axes labels
+    for (int i = 0; i != numData; ++i)
+    {
+        QLineEdit* pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        connect(pEdit, &QLineEdit::editingFinished, this, &PropertyTreeWidget::assignVisualProperties);
+    }
+}
+
 //! Specify the single graph which properties need to be edited
 void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
 {
@@ -221,11 +271,23 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
     updateValues();
 }
 
-//! Represent the type of the given graph data
-void PropertyTreeWidget::setTypeValue(AbstractGraphData* pBaseData, QTreeWidgetItem* pItem)
+//! Get current data index
+int PropertyTreeWidget::currentDataIndex(int iData, int iChild)
 {
-    QComboBox* pComboBox = (QComboBox*)itemWidget(pItem, 1);
-    switch (pBaseData->category())
+    QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(iChild), 1);
+    return pComboBox->currentIndex();
+}
+
+//! Represent the type of the given graph data
+void PropertyTreeWidget::setTypeValue(int iData)
+{
+    // Retrieve the current category
+    AbstractGraphData::Category category = (AbstractGraphData::Category)currentDataIndex(iData, 0);
+    // Get the widget to select types
+    QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(1), 1);
+    pComboBox->blockSignals(true);
+    pComboBox->clear();
+    switch (category)
     {
     case AbstractGraphData::cSpaceTime:
         pComboBox->addItems(getEnumData(SpaceTimeGraphData::staticMetaObject, "SpaceTimeType").first);
@@ -246,7 +308,8 @@ void PropertyTreeWidget::setTypeValue(AbstractGraphData* pBaseData, QTreeWidgetI
         // TODO
         break;
     }
-    pComboBox->setCurrentIndex(pBaseData->type());
+    pComboBox->setCurrentIndex(-1);
+    pComboBox->blockSignals(false);
 }
 
 //! Set the color of the graph
@@ -254,6 +317,80 @@ void PropertyTreeWidget::setColorItem(QColor const& color)
 {
     mpColorItem->setData(1, Qt::DecorationRole, color);
     mpColorItem->setData(1, Qt::DisplayRole, color.name());
+    assignVisualProperties();
+}
+
+//! Set the blocked state of all widgets
+void PropertyTreeWidget::setBlockedSignals(bool flag)
+{
+    QTreeWidgetItemIterator iter(this);
+    while (*iter)
+    {
+        QWidget* pWidget = itemWidget(*iter, 1);
+        if (pWidget)
+            pWidget->blockSignals(flag);
+        ++iter;
+    }
+}
+
+//! Assign new graph data
+void PropertyTreeWidget::assignGraphData(int iData)
+{
+    if (!mpGraph)
+        return;
+    int iCategory = currentDataIndex(iData, 0);
+    int iType = currentDataIndex(iData, 1);
+    int iDirection = currentDataIndex(iData, 2);
+    if (iCategory >= 0 && iType >= 0 && iDirection >= 0)
+    {
+        AbstractGraphData* pData = nullptr;
+        auto direction = (AbstractGraphData::Direction)iDirection;
+        switch (iCategory)
+        {
+        case AbstractGraphData::cSpaceTime:
+            pData = new SpaceTimeGraphData((SpaceTimeGraphData::SpaceTimeType)iType, direction);
+            break;
+        case AbstractGraphData::cKinematics:
+            pData = new KinematicsGraphData((KinematicsGraphData::KinematicsType)iType, direction);
+            break;
+        case AbstractGraphData::cForce:
+            // TODO
+            break;
+        case AbstractGraphData::cEnergy:
+            // TODO
+            break;
+        case AbstractGraphData::cModal:
+            // TODO
+            break;
+        case AbstractGraphData::cEstimation:
+            // TODO
+            break;
+        }
+        mpGraph->setData(pData, iData);
+    }
+}
+
+//! Assign visual properties of current graph
+void PropertyTreeWidget::assignVisualProperties()
+{
+    if (!mpGraph)
+        return;
+    // Line properties
+    mpGraph->setLineStyle((QCPGraph::LineStyle)mpLineStyleWidget->currentIndex());
+    mpGraph->setLineWidth(mpLineWidthWidget->value());
+    mpGraph->setColor(mpColorItem->data(1, Qt::DisplayRole).toString());
+    // Scatter properties
+    mpGraph->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)mpScatterStyleWidget->currentIndex()));
+    mpGraph->setScatterSize(mpScatterSizeWidget->value());
+    // Axes labels
+    int numData = mpAxesLabelsItem->childCount();
+    QStringList axesLabels(numData);
+    for (int i = 0; i != numData; ++i)
+    {
+        QLineEdit* pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        axesLabels[i] = pEdit->text();
+    }
+    mpGraph->setAxesLabels(axesLabels);
 }
 
 //! Retrieve translated keys and icons from a meta object
@@ -284,7 +421,7 @@ EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::str
 }
 
 //! Specify translations for enum options
-void PropertyTreeWidget::setEnumTranslations()
+void PropertyTreeWidget::makeTranslationMap()
 {
     // Category enum
     mEnumTranslator["cSpaceTime"]  = tr("Пространство-время");
