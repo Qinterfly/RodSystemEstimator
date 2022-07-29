@@ -77,87 +77,57 @@ void PropertyTreeWidget::createHierarchy()
     createAxesLabelsItem();
     pRoot->addChild(mpAxesLabelsItem);
     // Specify default properties
-    resetValues();
+    updateValues();
 }
 
 //! Represent values of properties
 void PropertyTreeWidget::updateValues()
 {
-    resetValues();
+    bool isGraph = mpGraph != nullptr;
     // Data properties
     int numDirections = mDataItems.size();
-    AbstractGraphData** data = mpGraph->data();
+    AbstractGraphData** data = isGraph ? mpGraph->data() : nullptr;
     QComboBox* pComboBox;
+    bool isDirectionalData;
+    int index;
     for (int i = 0; i != numDirections; ++i)
     {
-        if (data[i] != nullptr)
-        {
-            // Category
-            pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
-            pComboBox->setCurrentIndex(data[i]->category());
-            // Type
-            setTypeValue(data[i], mDataItems[i]->child(1));
-            // Direction
-            pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
-            pComboBox->setCurrentIndex(data[i]->direction());
-            // Slice
-            if (data[i]->isSliced())
-                mSliceDataItems[i]->setCheckState(0, Qt::Checked);
-        }
-    }
-    // Line properties
-    pComboBox = (QComboBox*)itemWidget(mpLineStyleItem, 1);
-    pComboBox->setCurrentIndex(mpGraph->lineStyle());
-    QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mpLineWidthItem, 1);
-    pSpinBox->setValue(mpGraph->lineWidth());
-    setColorItem(mpGraph->color());
-    // Scatter properties
-    pComboBox = (QComboBox*)itemWidget(mpScatterStyleItem, 1);
-    pComboBox->setCurrentIndex(mpGraph->scatterStyle().shape());
-    QDoubleSpinBox* pDoubleSpinBox = (QDoubleSpinBox*)itemWidget(mpScatterSizeItem, 1);
-    pDoubleSpinBox->setValue(mpGraph->scatterSize());
-    // Axes
-    QLineEdit* pEdit;
-    QStringList const& axesLabels = mpGraph->axesLabels();
-    for (int i = 0; i != numDirections; ++i)
-    {
-        pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
-        pEdit->setText(axesLabels[i]);
-    }
-}
-
-//! Clear values of properties, even if none of graphs is selected
-void PropertyTreeWidget::resetValues()
-{
-    QColor const kDefaultColor = Qt::blue;
-    // Data properties
-    int numDirections = mDataItems.size();
-    QComboBox* pComboBox;
-    for (int i = 0; i != numDirections; ++i)
-    {
+        isDirectionalData = isGraph && data[i] != nullptr;
         // Category
         pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
         pComboBox->clear();
         pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Category").first);
-        pComboBox->setCurrentIndex(-1);
+        index = isDirectionalData ? data[i]->category() : -1;
+        pComboBox->setCurrentIndex(index);
         // Type
         pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(1), 1);
         pComboBox->clear();
+        if (isDirectionalData)
+            setTypeValue(data[i], mDataItems[i]->child(1));
         // Direction
         pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
         pComboBox->clear();
         pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
-        pComboBox->setCurrentIndex(-1);
+        index = isDirectionalData ? data[i]->direction() : -1;
+        pComboBox->setCurrentIndex(index);
         // Slice
-        mSliceDataItems[i]->setCheckState(0, Qt::Unchecked);
+        Qt::CheckState sliceState = isDirectionalData && data[i]->isSliced() ? Qt::Checked : Qt::Unchecked;
+        mSliceDataItems[i]->setCheckState(0, sliceState);
     }
-    // Line properties
+    // Line style
     pComboBox = (QComboBox*)itemWidget(mpLineStyleItem, 1);
     pComboBox->clear();
     pComboBox->addItems(getEnumData(QCPGraph::staticMetaObject, "LineStyle").first);
-    pComboBox->setCurrentIndex(-1);
-    setColorItem(kDefaultColor);
-    // Scatter properties
+    index = isGraph ? mpGraph->lineStyle() : -1;
+    pComboBox->setCurrentIndex(index);
+    // Line width & color
+    if (isGraph)
+    {
+        QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mpLineWidthItem, 1);
+        pSpinBox->setValue(mpGraph->lineWidth());
+        setColorItem(mpGraph->color());
+    }
+    // Scatter shape
     pComboBox = (QComboBox*)itemWidget(mpScatterStyleItem, 1);
     pComboBox->clear();
     EnumData scatterData = getEnumData(QCPScatterStyle::staticMetaObject, "ScatterShape");
@@ -171,12 +141,23 @@ void PropertyTreeWidget::resetValues()
         else
             pComboBox->addItem(name);
     }
-    pComboBox->setCurrentIndex(-1);
-    // Axes
+    index = isGraph ? mpGraph->scatterStyle().shape() : -1;
+    pComboBox->setCurrentIndex(index);
+    // Scatter size
+    if (isGraph)
+    {
+        QDoubleSpinBox* pDoubleSpinBox = (QDoubleSpinBox*)itemWidget(mpScatterSizeItem, 1);
+        pDoubleSpinBox->setValue(mpGraph->scatterSize());
+    }
+    // Axes labels
+    QLineEdit* pEdit;
+    QStringList const& axesLabels = mpGraph->axesLabels();
     for (int i = 0; i != numDirections; ++i)
     {
-        QLineEdit* pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
+        pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
         pEdit->clear();
+        if (isGraph)
+            pEdit->setText(axesLabels[i]);
     }
 }
 
@@ -232,8 +213,8 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
 {
     if (!pGraph)
     {
-        resetValues();
         mpGraph.reset();
+        updateValues();
         return;
     }
     mpGraph = pGraph;

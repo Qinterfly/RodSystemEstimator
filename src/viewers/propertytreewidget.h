@@ -31,7 +31,6 @@ private:
     void initialize();
     void createHierarchy();
     void updateValues();
-    void resetValues();
     QTreeWidgetItem* createDirectionalDataItem(QString const& name);
     QTreeWidgetItem* createSliceDataItem(QString const& name);
     void createAxesLabelsItem();
