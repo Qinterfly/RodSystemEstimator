@@ -7,6 +7,7 @@
 
 #include <QtTest>
 #include <QtWidgets>
+#include "result.h"
 #include "viewers/apputilities.h"
 #include "viewers/convergenceviewer.h"
 #include "viewers/klpgraphviewer.h"

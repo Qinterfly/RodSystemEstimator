@@ -21,12 +21,12 @@ AbstractGraphData::~AbstractGraphData()
 }
 
 //! Compute the module of specified components
-GraphDataset AbstractGraphData::getAbsoluteData(KLP::FloatFrameObject const components[])
+GraphDataset AbstractGraphData::getAbsoluteData(KLP::FloatFrameObject const components[], int iStart, int iEnd)
 {
-    qint64 numData = components[0].size();
+    int numData = iEnd - iStart + 1;
     GraphDataset absoluteData(numData);
     float tModule;
-    for (int i = 0; i != numData; ++i)
+    for (int i = iStart; i <= iEnd; ++i)
     {
         tModule = 0.0;
         for (int j = 0; j != KLP::kNumDirections; ++j)
@@ -36,11 +36,25 @@ GraphDataset AbstractGraphData::getAbsoluteData(KLP::FloatFrameObject const comp
     return absoluteData;
 }
 
-//! Slice data through the specified direction
-GraphDataset AbstractGraphData::sliceDataByDirection(KLP::FloatFrameObject const components[], Direction direction)
+//! Slice data through the specified direction and index
+GraphDataset AbstractGraphData::sliceDataByDirectionAndIndex(KLP::FloatFrameObject const components[], Direction direction, int index)
 {
     if (direction == dFull)
-        return getAbsoluteData(components);
-    auto const& object = components[direction];
-    return GraphDataset(object.begin(), object.end());
+    {
+        if (index < 0)
+            return getAbsoluteData(components, 0, components[0].size() - 1);
+        else
+            return getAbsoluteData(components, index, index);
+    }
+    return sliceDataByIndex(components[direction], index);
+}
+
+//! Slice data by index
+//! \return if index is positive, return the value located at the specified index. Otherwise, return the full set of values
+GraphDataset AbstractGraphData::sliceDataByIndex(KLP::FloatFrameObject const& component, int index)
+{
+    if (index < 0)
+        return GraphDataset(component.begin(), component.end());
+    else
+        return GraphDataset(1, *component[index]);
 }

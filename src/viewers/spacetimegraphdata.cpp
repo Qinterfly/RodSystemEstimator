@@ -23,7 +23,7 @@ SpaceTimeGraphData::~SpaceTimeGraphData()
 }
 
 //! Retrieve the data of the specified type and direction from a given frame
-GraphDataset SpaceTimeGraphData::data(KLP::FrameCollection const& collection)
+GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collection, int sliceIndex)
 {
 
     switch (mType)
@@ -31,13 +31,13 @@ GraphDataset SpaceTimeGraphData::data(KLP::FrameCollection const& collection)
     case stTime:
         return GraphDataset(collection.time);
     case stParameter:
-        return GraphDataset(collection.parameter.begin(), collection.parameter.end());
+        return sliceDataByIndex(collection.parameter, sliceIndex);
     case stNaturalLength:
-        return GraphDataset(collection.naturalLength.begin(), collection.naturalLength.end());
+        return sliceDataByIndex(collection.naturalLength, sliceIndex);
     case stAccumulatedNaturalLength:
-        return GraphDataset(collection.accumulatedNaturalLength.begin(), collection.accumulatedNaturalLength.end());
+        return sliceDataByIndex(collection.accumulatedNaturalLength, sliceIndex);
     case stCoordiante:
-        return sliceDataByDirection(collection.coordinates, mDirection);
+        return sliceDataByDirectionAndIndex(collection.coordinates, mDirection, sliceIndex);
     default:
         break;
     }

@@ -23,24 +23,24 @@ KinematicsGraphData::~KinematicsGraphData()
 }
 
 //! Retrieve the data of the specified type and direction from a given frame
-GraphDataset KinematicsGraphData::data(KLP::FrameCollection const& collection)
+GraphDataset KinematicsGraphData::getDataset(KLP::FrameCollection const& collection, int sliceIndex)
 {
     if (mType == kStrain)
-        return GraphDataset(collection.strain.begin(), collection.strain.end());
+        return sliceDataByIndex(collection.strain, sliceIndex);
     switch (mType)
     {
     case kDisplacement:
-        return sliceDataByDirection(collection.state.displacements, mDirection);
+        return sliceDataByDirectionAndIndex(collection.state.displacements, mDirection, sliceIndex);
     case kRotation:
-        return sliceDataByDirection(collection.state.rotations, mDirection);
+        return sliceDataByDirectionAndIndex(collection.state.rotations, mDirection, sliceIndex);
     case kSpeed:
-        return sliceDataByDirection(collection.firstDerivativeState.displacements, mDirection);
+        return sliceDataByDirectionAndIndex(collection.firstDerivativeState.displacements, mDirection, sliceIndex);
     case kAngularSpeed:
-        return sliceDataByDirection(collection.firstDerivativeState.rotations, mDirection);
+        return sliceDataByDirectionAndIndex(collection.firstDerivativeState.rotations, mDirection, sliceIndex);
     case kAcceleration:
-        return sliceDataByDirection(collection.secondDerivativeState.displacements, mDirection);
+        return sliceDataByDirectionAndIndex(collection.secondDerivativeState.displacements, mDirection, sliceIndex);
     case kAngularAcceleration:
-        return sliceDataByDirection(collection.secondDerivativeState.rotations, mDirection);
+        return sliceDataByDirectionAndIndex(collection.secondDerivativeState.rotations, mDirection, sliceIndex);
     default:
         break;
     }

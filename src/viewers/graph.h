@@ -33,6 +33,7 @@ public:
     QCPScatterStyle scatterStyle() const { return mScatterStyle; }
     double scatterSize() const { return mScatterSize; }
     QStringList const& axesLabels() const { return mAxesLabels; }
+    bool isSlicedData(int iData) const { return mSliceIndices[iData] > 0; }
     // Setters
     void setName(QString const& name) { mName = name; }
     void setData(AbstractGraphData* pData, int iData);
@@ -50,6 +51,7 @@ private:
     GraphIDType mID;
     // Data
     AbstractGraphData* mpData[KLP::kNumDirections] = {nullptr, nullptr, nullptr};
+    int mSliceIndices[KLP::kNumDirections] = {-1, -1, -1};
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
     uint mLineWidth = 1;

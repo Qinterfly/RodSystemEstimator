@@ -71,7 +71,7 @@ void PropertyTreeWidget::updateValues()
         index = isDirectionalData ? data[i]->direction() : -1;
         pComboBox->setCurrentIndex(index);
         // Slice
-        Qt::CheckState sliceState = isDirectionalData && data[i]->isSliced() ? Qt::Checked : Qt::Unchecked;
+        Qt::CheckState sliceState = isDirectionalData && mpGraph->isSlicedData(i) ? Qt::Checked : Qt::Unchecked;
         mSliceDataItems[i]->setCheckState(0, sliceState);
     }
     // Line style
