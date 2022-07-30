@@ -25,10 +25,10 @@ public:
     ~FrameObject() = default;
     bool isEmpty() const { return !mpData; }
     qint64 size() const { return mSize; }
-    iterator begin() const { return iterator(&mpData[0], mNormFactor, mStep); }
-    iterator end() const { return iterator(&mpData[mSize], mNormFactor, mStep); }
+    iterator begin() const { return iterator(mpData, mNormFactor, mStep); }
+    iterator end() const { return begin() + mSize; }
     iterator operator[](int index) const { return begin() + index; }
-    template<typename K> friend QDebug operator<<(QDebug stream, FrameObject<K>& frameObject);
+    template<typename K> friend QDebug operator<<(QDebug stream, FrameObject<K> const& frameObject);
 
 private:
     T const* mpData;
@@ -38,7 +38,7 @@ private:
 };
 
 template<typename K>
-inline QDebug operator<<(QDebug stream, FrameObject<K>& frameObject)
+inline QDebug operator<<(QDebug stream, FrameObject<K> const& frameObject)
 {
     stream = stream.noquote();
     for (auto it = frameObject.begin(); it != frameObject.end(); ++it)

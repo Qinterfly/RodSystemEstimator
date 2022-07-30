@@ -212,25 +212,25 @@ void KLPGraphViewer::openResults(QStringList const& locationFiles)
     mpResultListModel->selectItem();
 }
 
-//! Process selected results
-void KLPGraphViewer::processSelectedResults()
-{
-    // Show information about the selected result
-    mpTextInfo->clear();
-    QModelIndexList indices = mpListResults->selectionModel()->selectedIndexes();
-    if (indices.size() == 1)
-    {
-        int iSelected = indices[0].row();
-        showResultInfo(mResults[iSelected]->info());
-    }
-}
-
 //! Replace the current set of graphs with the new one
 void KLPGraphViewer::setGraphs(MapGraphs&& graphs)
 {
     mGraphs = graphs;
     mpGraphListModel->updateContent();
     mpGraphListModel->selectItem();
+}
+
+//! Process selected results
+void KLPGraphViewer::processSelectedResults()
+{
+    mpTextInfo->clear();
+    QModelIndexList indices = mpListResults->selectionModel()->selectedIndexes();
+    if (indices.size() == 0)
+        return;
+    auto pFirstResult = mResults[indices[0].row()];
+    if (indices.size() == 1)
+        showResultInfo(pFirstResult->info());
+    mpPropertyTreeWidget->setSelectedResult(pFirstResult);
 }
 
 //! Process selected graphs

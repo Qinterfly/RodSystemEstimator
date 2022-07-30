@@ -30,10 +30,11 @@ public:
     QCPGraph::LineStyle lineStyle() const { return mLineStyle; }
     uint lineWidth() const { return mLineWidth; }
     QColor color() const { return mColor; }
-    QCPScatterStyle scatterStyle() const { return mScatterStyle; }
+    QCPScatterStyle::ScatterShape scatterShape() const { return mScatterShape; }
     double scatterSize() const { return mScatterSize; }
     QStringList const& axesLabels() const { return mAxesLabels; }
-    bool isSlicedData(int iData) const { return mSliceIndices[iData] > 0; }
+    bool isSliced(int iData) const { return mSliceIndices[iData] >= 0; }
+    qint64 sliceIndex(int iData) const { return mSliceIndices[iData]; }
     // Setters
     void setName(QString const& name) { mName = name; }
     void setData(AbstractGraphData* pData, int iData);
@@ -42,22 +43,23 @@ public:
     void setLineStyle(QCPGraph::LineStyle const& lineStyle) { mLineStyle = lineStyle; }
     void setLineWidth(uint lineWidth) { mLineWidth = lineWidth; }
     void setColor(QColor const& color) { mColor = color; }
-    void setScatterStyle(QCPScatterStyle const& scatterStyle) { mScatterStyle = scatterStyle; }
+    void setScatterShape(QCPScatterStyle::ScatterShape const& scatterShape) { mScatterShape = scatterShape; }
     void setScatterSize(double scatterSize) { mScatterSize = scatterSize; }
     void setAxesLabels(QStringList const& axesLabels) { mAxesLabels = axesLabels; }
+    void setSliceIndex(qint64 sliceIndex, int iData) { mSliceIndices[iData] = sliceIndex; }
 
 private:
     QString mName;
     GraphIDType mID;
     // Data
     AbstractGraphData* mpData[KLP::kNumDirections] = {nullptr, nullptr, nullptr};
-    int mSliceIndices[KLP::kNumDirections] = {-1, -1, -1};
+    qint64 mSliceIndices[KLP::kNumDirections] = {-1, -1, -1};
     // Line options
     QCPGraph::LineStyle mLineStyle = QCPGraph::lsLine;
     uint mLineWidth = 1;
     QColor mColor = Qt::blue;
     // Scatter options
-    QCPScatterStyle mScatterStyle = QCPScatterStyle::ssNone;
+    QCPScatterStyle::ScatterShape mScatterShape = QCPScatterStyle::ssNone;
     double mScatterSize = 5;
     // Axes labels
     QStringList mAxesLabels = QStringList({"Ось X", "Ось Y", "Ось Z"});

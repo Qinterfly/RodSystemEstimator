@@ -72,7 +72,7 @@ void TestViewers::testGraphs()
     AbstractGraphData* pParameter = new SpaceTimeGraphData(SpaceTimeGraphData::stParameter);
     AbstractGraphData* pLength = new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength);
     AbstractGraphData* pTime = new SpaceTimeGraphData(SpaceTimeGraphData::stTime);
-    AbstractGraphData* pDisplacement = new KinematicsGraphData(KinematicsGraphData::kDisplacement);
+    AbstractGraphData* pDisplacement = new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst);
     // Assign graph data
     mGraphs[0]->setData(pCoordinate, pParameter);
     mGraphs[1]->setData(pLength, pTime, pDisplacement);
@@ -84,11 +84,7 @@ void TestViewers::testGraphData()
     KLP::Result result(mkTestDataPath + "dynamic-impulse-1.klp");
     auto collection = result.getFrameCollection(1);
     auto pXData = mGraphs[0]->data()[1];
-    auto limits = pXData->getDatasetLimits(collection);
-    float foundValue = pXData->findClosestValue(collection, 2.0);
-    QCOMPARE(104, limits.indices.second);
-    QCOMPARE(3.0, limits.values.second);
-    QCOMPARE(2.0, foundValue);
+    QCOMPARE(104, pXData->getDataset(collection).size());
 }
 
 //! Represent content of the KLP file

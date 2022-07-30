@@ -15,13 +15,6 @@
 namespace RSE::Viewers
 {
 
-//! Limits of indices and values associated with graph data
-struct GraphDataLimits
-{
-    std::pair<qint64, qint64> indices;
-    std::pair<float, float> values;
-};
-
 class AbstractGraphData : public QObject
 {
     Q_OBJECT
@@ -51,8 +44,6 @@ public:
     virtual int type() const = 0;
     Category category() const { return mCategory; }
     Direction direction() const { return mDirection; }
-    GraphDataLimits getDatasetLimits(KLP::FrameCollection const& collection);
-    float findClosestValue(KLP::FrameCollection const& collection, float sampleValue);
 
 protected:
     GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[], qint64 iStart, qint64 iEnd);
