@@ -35,10 +35,15 @@ using EnumData = QPair<QStringList, QList<QIcon>>;
 
 class PropertyTreeWidget : public QTreeWidget
 {
+    Q_OBJECT
+
 public:
     PropertyTreeWidget(QWidget* pParent = nullptr);
     void setSelectedGraph(PointerGraph pGraph);
     void setSelectedResult(PointerResult pResult);
+
+signals:
+    void graphChanged();
 
 private:
     void initialize();

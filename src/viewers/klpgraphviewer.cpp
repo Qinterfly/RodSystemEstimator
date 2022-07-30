@@ -157,6 +157,7 @@ CDockWidget* KLPGraphViewer::createPropertyWidget()
     CDockWidget* pDockWidget = new CDockWidget(tr("Редактор свойств графиков"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     mpPropertyTreeWidget = new PropertyTreeWidget();
+    connect(mpPropertyTreeWidget, &PropertyTreeWidget::graphChanged, this, &KLPGraphViewer::plot);
     // Arrangement
     pDockWidget->setWidget(mpPropertyTreeWidget);
     return pDockWidget;
@@ -256,4 +257,10 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
     mpTextInfo->append(tr("Общее число записей: %1").arg(info.numTotalRecords));
     mpTextInfo->append(tr("Число записей по времени: %1").arg(info.numTimeRecords));
     mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.ID));
+}
+
+//! Plot the resulting set of graphs
+void KLPGraphViewer::plot()
+{
+    // TODO
 }

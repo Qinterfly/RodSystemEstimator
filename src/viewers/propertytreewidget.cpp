@@ -282,6 +282,7 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
     mpGraph = pGraph;
     updateValues();
     show();
+    emit graphChanged();
 }
 
 //! Specify the single result to control slicing of data
@@ -433,6 +434,7 @@ void PropertyTreeWidget::assignGraphData(int iData)
             break;
         }
         mpGraph->setData(pData, iData);
+        emit graphChanged();
     }
 }
 
@@ -457,6 +459,7 @@ void PropertyTreeWidget::assignVisualProperties()
         axesLabels[i] = pEdit->text();
     }
     mpGraph->setAxesLabels(axesLabels);
+    emit graphChanged();
 }
 
 //! Assign the index for slicing along specified data direction
@@ -465,6 +468,7 @@ void PropertyTreeWidget::assignSliceIndex(int value, int iData)
     if (!mpGraph || !mpGraph->isSliced(iData))
         return;
     mpGraph->setSliceIndex(value, iData);
+    emit graphChanged();
 }
 
 //! Assign whether the graph data needs to be sliced
@@ -477,6 +481,7 @@ void PropertyTreeWidget::assignSliceCheckedState(int iData)
         {
             int sliceIndex = isChecked ? 0 : -1;
             mpGraph->setSliceIndex(sliceIndex, iData);
+            emit graphChanged();
         }
     }
 }
