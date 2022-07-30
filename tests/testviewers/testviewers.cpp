@@ -7,7 +7,7 @@
 
 #include <QtTest>
 #include <QtWidgets>
-#include "result.h"
+#include "klp/result.h"
 #include "viewers/apputilities.h"
 #include "viewers/convergenceviewer.h"
 #include "viewers/klpgraphviewer.h"
@@ -26,6 +26,7 @@ private slots:
     void initTestCase();
     void testConvergenceViewer();
     void testGraphs();
+    void testGraphData();
     void testKLPGraphViewer();
     void cleanupTestCase();
 
@@ -75,6 +76,19 @@ void TestViewers::testGraphs()
     // Assign graph data
     mGraphs[0]->setData(pCoordinate, pParameter);
     mGraphs[1]->setData(pLength, pTime, pDisplacement);
+}
+
+//! Retrieve data of graphs
+void TestViewers::testGraphData()
+{
+    KLP::Result result(mkTestDataPath + "dynamic-impulse-1.klp");
+    auto collection = result.getFrameCollection(1);
+    auto pXData = mGraphs[0]->data()[1];
+    auto limits = pXData->getDatasetLimits(collection);
+    float foundValue = pXData->findClosestValue(collection, 2.0);
+    QCOMPARE(104, limits.indices.second);
+    QCOMPARE(3.0, limits.values.second);
+    QCOMPARE(2.0, foundValue);
 }
 
 //! Represent content of the KLP file
