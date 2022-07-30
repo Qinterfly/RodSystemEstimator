@@ -23,7 +23,7 @@ SpaceTimeGraphData::~SpaceTimeGraphData()
 }
 
 //! Retrieve the data of the specified type and direction from a given frame
-GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collection, int sliceIndex)
+GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex)
 {
 
     switch (mType)

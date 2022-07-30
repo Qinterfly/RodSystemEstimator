@@ -32,7 +32,7 @@ public:
     Q_ENUM(KinematicsType)
     KinematicsGraphData(KinematicsType type, Direction direction = Direction::dFull);
     ~KinematicsGraphData();
-    GraphDataset getDataset(KLP::FrameCollection const& collection, int sliceIndex) override;
+    GraphDataset getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) override;
     int type() const override { return mType; }
 
 private:

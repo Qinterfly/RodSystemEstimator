@@ -23,7 +23,7 @@ KinematicsGraphData::~KinematicsGraphData()
 }
 
 //! Retrieve the data of the specified type and direction from a given frame
-GraphDataset KinematicsGraphData::getDataset(KLP::FrameCollection const& collection, int sliceIndex)
+GraphDataset KinematicsGraphData::getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex)
 {
     if (mType == kStrain)
         return sliceDataByIndex(collection.strain, sliceIndex);

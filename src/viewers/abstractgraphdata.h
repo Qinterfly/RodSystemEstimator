@@ -40,15 +40,15 @@ public:
     Q_ENUM(Direction)
     AbstractGraphData(Category category, Direction direction);
     virtual ~AbstractGraphData() = 0;
-    virtual GraphDataset getDataset(KLP::FrameCollection const& collection, int sliceIndex = -1) = 0;
+    virtual GraphDataset getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex = -1) = 0;
     virtual int type() const = 0;
     Category category() const { return mCategory; }
     Direction direction() const { return mDirection; }
 
 protected:
-    GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[], int iStart, int iEnd);
-    GraphDataset sliceDataByIndex(KLP::FloatFrameObject const& component, int index);
-    GraphDataset sliceDataByDirectionAndIndex(KLP::FloatFrameObject const components[], Direction direction, int index);
+    GraphDataset getAbsoluteData(KLP::FloatFrameObject const components[], qint64 iStart, qint64 iEnd);
+    GraphDataset sliceDataByIndex(KLP::FloatFrameObject const& component, qint64 index);
+    GraphDataset sliceDataByDirectionAndIndex(KLP::FloatFrameObject const components[], Direction direction, qint64 index);
 
 protected:
     Category mCategory;
