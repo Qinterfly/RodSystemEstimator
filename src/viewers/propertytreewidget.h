@@ -60,6 +60,7 @@ private:
     void setColorItem(QColor const& color);
     void setBlockedSignals(bool flag);
     void setSliceWidgets(int iData);
+    void setEnabledSliceWidgets(int iData);
     // Assign new properties to the current graph
     void assignGraphData(int iData);
     void assignVisualProperties();

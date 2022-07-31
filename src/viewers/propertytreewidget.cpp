@@ -84,6 +84,7 @@ void PropertyTreeWidget::updateValues()
         // Slice limits
         if (isDirectionalData)
             setSliceWidgets(i);
+        setEnabledSliceWidgets(i);
     }
     // Line style
     mpLineStyleWidget->clear();
@@ -159,8 +160,6 @@ void PropertyTreeWidget::createHierarchy()
     // Axes
     createAxesLabelsItem();
     pRoot->addChild(mpAxesLabelsItem);
-    // Specify default properties
-    updateValues();
     // Enable widgets to communicate
     specifyConnections();
 }
@@ -238,7 +237,15 @@ void PropertyTreeWidget::specifyConnections()
         connect(this, &QTreeWidget::itemChanged, this, [this, i](QTreeWidgetItem * pItem, int column)
         {
             if (mSliceDataItems[i] == pItem && column == 0)
+            {
+                bool isData = mpGraph && mpGraph->data()[i];
+                blockSignals(true);
+                if (pItem->checkState(0) == Qt::Checked && !isData)
+                    pItem->setCheckState(0, Qt::Unchecked);
+                blockSignals(false);
+                setEnabledSliceWidgets(i);
                 assignSliceCheckedState(i);
+            }
         });
         // Slice index
         auto funSliceIndex = [this,  i](int value) { assignSliceIndex(value, i); setSliceWidgets(i); };
@@ -398,6 +405,16 @@ void PropertyTreeWidget::setSliceWidgets(int iData)
             pIndexSlider->setValue(iSlice);
         }
     }
+}
+
+//! Set enabled state of widgets to slice data
+void PropertyTreeWidget::setEnabledSliceWidgets(int iData)
+{
+    bool isChecked = mSliceDataItems[iData]->checkState(0) == Qt::Checked;
+    QSpinBox* pIndexSpinBox = (QSpinBox*)itemWidget(mSliceDataItems[iData]->child(0), 1);
+    QSlider* pIndexSlider = (QSlider*)itemWidget(mSliceDataItems[iData]->child(1), 1);
+    pIndexSpinBox->setEnabled(isChecked);
+    pIndexSlider->setEnabled(isChecked);
 }
 
 //! Assign new graph data
