@@ -226,12 +226,13 @@ void KLPGraphViewer::processSelectedResults()
 {
     mpTextInfo->clear();
     QModelIndexList indices = mpListResults->selectionModel()->selectedIndexes();
-    if (indices.size() == 0)
-        return;
-    auto pFirstResult = mResults[indices[0].row()];
+    PointerResult pResult = nullptr;
     if (indices.size() == 1)
-        showResultInfo(pFirstResult->info());
-    mpPropertyTreeWidget->setSelectedResult(pFirstResult);
+    {
+        pResult = mResults[indices[0].row()];
+        showResultInfo(pResult->info());
+    }
+    mpPropertyTreeWidget->setSelectedResult(pResult);
 }
 
 //! Process selected graphs

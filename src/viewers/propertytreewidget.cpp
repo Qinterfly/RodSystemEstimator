@@ -238,7 +238,7 @@ void PropertyTreeWidget::specifyConnections()
         {
             if (mSliceDataItems[i] == pItem && column == 0)
             {
-                bool isData = mpGraph && mpGraph->data()[i];
+                bool isData = mpResult && mpGraph && mpGraph->data()[i];
                 blockSignals(true);
                 if (pItem->checkState(0) == Qt::Checked && !isData)
                     pItem->setCheckState(0, Qt::Unchecked);
