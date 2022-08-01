@@ -74,7 +74,7 @@ void TestViewers::testGraphs()
     // [SS, t, U]
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
+                        new KinematicsGraphData(KinematicsGraphData::kSpeed, AbstractGraphData::dFirst));
 }
 
 //! Slice graph data

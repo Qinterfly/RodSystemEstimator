@@ -264,6 +264,10 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
 //! Plot the resulting set of graphs
 void KLPGraphViewer::plot()
 {
+    mpFigure->clearGraphs();
+    mpFigure->clearPlottables();
+    mpFigure->clearItems();
+    delete mpFigure->plotLayout()->elementAt(1);
     QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
     QModelIndexList indicesGraphs  = mpListGraphs->selectionModel()->selectedIndexes();
     // Check if there is enough data to plot
@@ -313,10 +317,13 @@ void KLPGraphViewer::plotSurface(PointerGraph pGraph, PointerResult pResult)
         pColorMap = new QCPColorMap(mpFigure->xAxis, mpFigure->yAxis);
     else
         pColorMap = new QCPColorMap(mpFigure->yAxis, mpFigure->xAxis);
+    pColorMap->setInterpolate(true);
+    pColorMap->setTightBoundary(true);
     qint64 numTime = pResult->numTimeRecords();
     qint64 numData = pPlanarData->getDataset(pResult->getFrameCollection(0)).size();
-    pColorMap->data()->setRange(QCPRange(0, 10), QCPRange(0, 3));
     // Set the data
+    pColorMap->data()->setSize(numTime, numData);
+    pColorMap->data()->setRange(QCPRange(0, 10), QCPRange(0, 3));
     for (int iTime = 0; iTime != numTime; ++iTime)
     {
         KLP::FrameCollection const& collection = pResult->getFrameCollection(iTime);
@@ -342,6 +349,7 @@ void KLPGraphViewer::plotSurface(PointerGraph pGraph, PointerResult pResult)
     pColorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
     // Rescale axes
     mpFigure->rescaleAxes();
+    mpFigure->replot();
 }
 
 //! Represent plottable data as a curve
