@@ -183,7 +183,7 @@ void PropertyTreeWidget::createDataSlicerItem()
     mpDataSlicerItem->addChildren({pTypeItem, pIndexItem, pValueItem, pRangeItem});
     // Create widgets to deal with values
     QDoubleSpinBox* pValueWidget = new QDoubleSpinBox();
-    pValueWidget->setStepType(QDoubleSpinBox::AdaptiveDecimalStepType);
+    pValueWidget->setDecimals(3);
     QSlider* pRangeWidget = new QSlider();
     pRangeWidget->setOrientation(Qt::Horizontal);
     setItemWidget(pTypeItem, 1, new QComboBox());
@@ -218,9 +218,14 @@ void PropertyTreeWidget::specifyConnections()
             if (mpGraph)
                 mpGraph->eraseData(i);
             setTypeWidget(i);
+            mpDataSlicerItem->setCheckState(0, Qt::Unchecked);
         });
         // Type & direction
-        auto funAssignGraphData = [ this, i ]() { assignGraphData(i); resetSlicerWidgetsData(); };
+        auto funAssignGraphData = [ this, i ]()
+        {
+            assignGraphData(i);
+            mpDataSlicerItem->setCheckState(0, Qt::Unchecked);
+        };
         for (int j = 1; j != numData; ++j)
         {
             pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(j), 1);
@@ -321,31 +326,32 @@ void PropertyTreeWidget::setTypeWidget(int iData)
     AbstractGraphData::Category category = (AbstractGraphData::Category)currentDataIndex(iData, 0);
     // Get the widget to select types
     QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(1), 1);
-    pComboBox->blockSignals(true);
-    pComboBox->clear();
-    switch (category)
     {
-    case AbstractGraphData::cSpaceTime:
-        pComboBox->addItems(getEnumData(SpaceTimeGraphData::staticMetaObject, "SpaceTimeType").first);
-        break;
-    case AbstractGraphData::cKinematics:
-        pComboBox->addItems(getEnumData(KinematicsGraphData::staticMetaObject, "KinematicsType").first);
-        break;
-    case AbstractGraphData::cForce:
-        // TODO
-        break;
-    case AbstractGraphData::cEnergy:
-        // TODO
-        break;
-    case AbstractGraphData::cModal:
-        // TODO
-        break;
-    case AbstractGraphData::cEstimation:
-        // TODO
-        break;
+        QSignalBlocker blocker(pComboBox);
+        pComboBox->clear();
+        switch (category)
+        {
+        case AbstractGraphData::cSpaceTime:
+            pComboBox->addItems(getEnumData(SpaceTimeGraphData::staticMetaObject, "SpaceTimeType").first);
+            break;
+        case AbstractGraphData::cKinematics:
+            pComboBox->addItems(getEnumData(KinematicsGraphData::staticMetaObject, "KinematicsType").first);
+            break;
+        case AbstractGraphData::cForce:
+            // TODO
+            break;
+        case AbstractGraphData::cEnergy:
+            // TODO
+            break;
+        case AbstractGraphData::cModal:
+            // TODO
+            break;
+        case AbstractGraphData::cEstimation:
+            // TODO
+            break;
+        }
+        pComboBox->setCurrentIndex(-1);
     }
-    pComboBox->setCurrentIndex(-1);
-    pComboBox->blockSignals(false);
 }
 
 //! Set the color of the graph
