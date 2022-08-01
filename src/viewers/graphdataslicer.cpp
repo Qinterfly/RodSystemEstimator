@@ -42,7 +42,7 @@ void GraphDataSlicer::setLimits()
         if (value > maxValue)
             maxValue = value;
     }
-    mLimitsIndices = { 0, mDataset.size() };
+    mLimitsIndices = { 0, mDataset.size() - 1 };
     mLimitsValues  = { minValue, maxValue };
 }
 

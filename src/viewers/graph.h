@@ -48,6 +48,7 @@ public:
     void setData(AbstractGraphData* pXData = nullptr, AbstractGraphData* pYData = nullptr, AbstractGraphData* pZData = nullptr);
     void eraseData(int iData) { setData(nullptr, iData); }
     bool createDataSlicer(GraphDataSlicer::SliceType type, PointerResult pResult);
+    void removeDataSlicer();
     // Setters of visual properties
     void setLineStyle(QCPGraph::LineStyle const& lineStyle) { mLineStyle = lineStyle; }
     void setLineWidth(uint lineWidth) { mLineWidth = lineWidth; }

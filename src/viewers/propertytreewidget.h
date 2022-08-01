@@ -53,14 +53,21 @@ private:
     void createDataSlicerItem();
     void createAxesLabelsItem();
     void specifyConnections();
-    // Set values of properties
-    int currentDataIndex(int iData, int iChild);
-    void setTypeValue(int iData);
-    void setColorItem(QColor const& color);
     void setBlockedSignals(bool flag);
+    // Data and visual widgets
+    int currentDataIndex(int iData, int iChild);
+    void setTypeWidget(int iData);
+    void setColorItem(QColor const& color);
+    // Slicer widgets
+    void resetSlicerWidgetsData();
+    void updateSlicerWidgetsData();
+    void setBlockedSlicerWidgetsSignals(bool flag);
     // Assign new properties to the current graph
     void assignGraphData(int iData);
     void assignVisualProperties();
+    void assignSlicer();
+    void setSlicerIndex(qint64 index);
+    void setSlicerValue(float value);
     // Translation of enum keys
     EnumData getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator);
     void makeTranslationMap();

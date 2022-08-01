@@ -64,7 +64,7 @@ void PropertyTreeWidget::updateValues()
         pComboBox->clear();
         if (isDirectionalData)
         {
-            setTypeValue(i);
+            setTypeWidget(i);
             pComboBox->setCurrentIndex(data[i]->type());
         }
         // Direction
@@ -74,6 +74,10 @@ void PropertyTreeWidget::updateValues()
         index = isDirectionalData ? data[i]->direction() : -1;
         pComboBox->setCurrentIndex(index);
     }
+    // Data slicer
+    mpDataSlicerItem->setCheckState(0, mpGraph->isDataSlicer() ? Qt::Checked : Qt::Unchecked);
+    resetSlicerWidgetsData();
+    updateSlicerWidgetsData();
     // Line style
     mpLineStyleWidget->clear();
     mpLineStyleWidget->addItems(getEnumData(QCPGraph::staticMetaObject, "LineStyle").first);
@@ -178,11 +182,13 @@ void PropertyTreeWidget::createDataSlicerItem()
     QTreeWidgetItem* pRangeItem = new QTreeWidgetItem({tr("Диапазон")});
     mpDataSlicerItem->addChildren({pTypeItem, pIndexItem, pValueItem, pRangeItem});
     // Create widgets to deal with values
+    QDoubleSpinBox* pValueWidget = new QDoubleSpinBox();
+    pValueWidget->setStepType(QDoubleSpinBox::AdaptiveDecimalStepType);
     QSlider* pRangeWidget = new QSlider();
     pRangeWidget->setOrientation(Qt::Horizontal);
     setItemWidget(pTypeItem, 1, new QComboBox());
     setItemWidget(pIndexItem, 1, new QSpinBox());
-    setItemWidget(pValueItem, 1, new QDoubleSpinBox());
+    setItemWidget(pValueItem, 1, pValueWidget);
     setItemWidget(pRangeItem, 1, pRangeWidget);
 }
 
@@ -211,16 +217,43 @@ void PropertyTreeWidget::specifyConnections()
         {
             if (mpGraph)
                 mpGraph->eraseData(i);
-            setTypeValue(i);
+            setTypeWidget(i);
         });
         // Type & direction
-        auto funAssignGraphData = [ this, i ]() { assignGraphData(i); };
+        auto funAssignGraphData = [ this, i ]() { assignGraphData(i); resetSlicerWidgetsData(); };
         for (int j = 1; j != numData; ++j)
         {
             pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(j), 1);
             connect(pComboBox, &QComboBox::currentIndexChanged, this, funAssignGraphData);
         }
     }
+    // State of the data slicer
+    connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem * pItem, int column)
+    {
+        if (mpDataSlicerItem == pItem && column == 0)
+        {
+            bool isFullSet = mpResult && mpGraph;
+            blockSignals(true);
+            if (pItem->checkState(0) == Qt::Checked && !isFullSet)
+                pItem->setCheckState(0, Qt::Unchecked);
+            blockSignals(false);
+            resetSlicerWidgetsData();
+            assignSlicer();
+            updateSlicerWidgetsData();
+        }
+    });
+    // Type of the data slicer
+    QComboBox* pTypeSlicerWidget = (QComboBox*)itemWidget(mpDataSlicerItem->child(0), 1);
+    connect(pTypeSlicerWidget, &QComboBox::currentIndexChanged, this, [this]() { assignSlicer(); updateSlicerWidgetsData(); });
+    // Indices of the data slicer
+    auto funSlicerIndex = [this](qint64 index) { setSlicerIndex(index); updateSlicerWidgetsData(); };
+    QSpinBox* pIndexSlicerWidget = (QSpinBox*)itemWidget(mpDataSlicerItem->child(1), 1);
+    QSlider* pRangeSlicerWidget = (QSlider*)itemWidget(mpDataSlicerItem->child(3), 1);
+    connect(pIndexSlicerWidget, &QSpinBox::valueChanged, this, funSlicerIndex);
+    connect(pRangeSlicerWidget, &QSlider::valueChanged, this, funSlicerIndex);
+    // Value of the data slicer
+    QDoubleSpinBox* pValueSlicerWidget = (QDoubleSpinBox*)itemWidget(mpDataSlicerItem->child(2), 1);
+    connect(pValueSlicerWidget, &QDoubleSpinBox::valueChanged, this, [this](float value) { setSlicerValue(value); updateSlicerWidgetsData(); });
     // Line properties
     connect(mpLineStyleWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
     connect(mpLineWidthWidget, &QSpinBox::valueChanged, this, &PropertyTreeWidget::assignVisualProperties);
@@ -262,6 +295,8 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
 //! Specify the single result to control slicing of data
 void PropertyTreeWidget::setSelectedResult(PointerResult pResult)
 {
+    if (mpResult != pResult && mpGraph)
+        mpGraph->removeDataSlicer();
     if (!pResult)
     {
         mpResult.reset();
@@ -280,7 +315,7 @@ int PropertyTreeWidget::currentDataIndex(int iData, int iChild)
 }
 
 //! Represent the type of the given graph data
-void PropertyTreeWidget::setTypeValue(int iData)
+void PropertyTreeWidget::setTypeWidget(int iData)
 {
     // Retrieve the current category
     AbstractGraphData::Category category = (AbstractGraphData::Category)currentDataIndex(iData, 0);
@@ -331,6 +366,86 @@ void PropertyTreeWidget::setBlockedSignals(bool flag)
             pWidget->blockSignals(flag);
         ++iter;
     }
+}
+
+//! Clear data of widgets associated with the data slicer
+void PropertyTreeWidget::resetSlicerWidgetsData()
+{
+    setBlockedSlicerWidgetsSignals(true);
+    // Widgets
+    QComboBox* pTypeWidget = (QComboBox*)itemWidget(mpDataSlicerItem->child(0), 1);
+    QSpinBox* pIndexWidget = (QSpinBox*)itemWidget(mpDataSlicerItem->child(1), 1);
+    QDoubleSpinBox* pValueWidget = (QDoubleSpinBox*)itemWidget(mpDataSlicerItem->child(2), 1);
+    QSlider* pRangeWidget = (QSlider*)itemWidget(mpDataSlicerItem->child(3), 1);
+    // Enabled state
+    bool isEnabled = mpDataSlicerItem->checkState(0) == Qt::Checked;
+    int numWidgets = mpDataSlicerItem->childCount();
+    for (int i = 0; i != numWidgets; ++i)
+        itemWidget(mpDataSlicerItem->child(i), 1)->setEnabled(isEnabled);
+    // Types
+    pTypeWidget->clear();
+    if (isEnabled)
+    {
+        auto const& sliceTypes = getEnumData(GraphDataSlicer::staticMetaObject, "SliceType").first;
+        auto const& readyIndices = mpGraph->indicesReadyData();
+        for (auto i : readyIndices)
+            pTypeWidget->addItem(sliceTypes[i], i);
+    }
+    pTypeWidget->setCurrentIndex(-1);
+    // Limits
+    pIndexWidget->setRange(0, 0);
+    pValueWidget->setRange(0, 0);
+    pRangeWidget->setRange(0, 0);
+    // Values
+    pIndexWidget->setValue(0);
+    pValueWidget->setValue(0.0);
+    pRangeWidget->setValue(0);
+    setBlockedSlicerWidgetsSignals(false);
+}
+
+//! Specify the data of the widget associated with the slicer
+void PropertyTreeWidget::updateSlicerWidgetsData()
+{
+    if (!mpGraph->isDataSlicer())
+        return;
+    setBlockedSlicerWidgetsSignals(true);
+    // Widgets
+    QComboBox* pTypeWidget = (QComboBox*)itemWidget(mpDataSlicerItem->child(0), 1);
+    QSpinBox* pIndexWidget = (QSpinBox*)itemWidget(mpDataSlicerItem->child(1), 1);
+    QDoubleSpinBox* pValueWidget = (QDoubleSpinBox*)itemWidget(mpDataSlicerItem->child(2), 1);
+    QSlider* pRangeWidget = (QSlider*)itemWidget(mpDataSlicerItem->child(3), 1);
+    // Specify indices and values as well as their ranges
+    GraphDataSlicer const& dataSlicer = mpGraph->dataSlicer();
+    auto [minSliceIndex, maxSliceIndex] = dataSlicer.limitsIndices();
+    // Ranges
+    pIndexWidget->setRange(minSliceIndex, maxSliceIndex);
+    pValueWidget->setRange(dataSlicer.limitsValues().first, dataSlicer.limitsValues().second);
+    pRangeWidget->setRange(minSliceIndex, maxSliceIndex);
+    // Values
+    qint64 typeIndex = -1;
+    qint64 sliceIndex = dataSlicer.index();
+    float sliceValue = dataSlicer.value();
+    for (int i = 0; i != pTypeWidget->count(); ++i)
+    {
+        if (pTypeWidget->itemData(i).toInt() == dataSlicer.type())
+        {
+            typeIndex = i;
+            break;
+        }
+    }
+    pTypeWidget->setCurrentIndex(typeIndex);
+    pIndexWidget->setValue(sliceIndex);
+    pValueWidget->setValue(sliceValue);
+    pRangeWidget->setValue(sliceIndex);
+    setBlockedSlicerWidgetsSignals(false);
+}
+
+//! Set the enabled state of items to slice data
+void PropertyTreeWidget::setBlockedSlicerWidgetsSignals(bool flag)
+{
+    int numChildren = mpDataSlicerItem->childCount();
+    for (int i = 0; i != numChildren; ++i)
+        itemWidget(mpDataSlicerItem->child(i), 1)->blockSignals(flag);
 }
 
 //! Assign new graph data
@@ -395,6 +510,46 @@ void PropertyTreeWidget::assignVisualProperties()
     emit graphChanged();
 }
 
+//! Make a new instance of the data slicer or delete the current one
+void PropertyTreeWidget::assignSlicer()
+{
+    bool isEnabled = mpDataSlicerItem->checkState(0) == Qt::Checked;
+    bool isSlicer = mpGraph->isDataSlicer();
+    // Remove data slicer if it is no longer needed
+    if (!isEnabled && isSlicer)
+    {
+        mpGraph->removeDataSlicer();
+        emit graphChanged();
+        return;
+    }
+    // Try to create a new data slicer
+    QComboBox* pTypeWidget = (QComboBox*)itemWidget(mpDataSlicerItem->child(0), 1);
+    int currentIndex = pTypeWidget->currentIndex();
+    if (currentIndex < 0)
+        return;
+    int iType = pTypeWidget->itemData(currentIndex, Qt::UserRole).toInt();
+    mpGraph->createDataSlicer((GraphDataSlicer::SliceType)iType, mpResult);
+    emit graphChanged();
+}
+
+//! Specify the leading index for slicing
+void PropertyTreeWidget::setSlicerIndex(qint64 index)
+{
+    if (!mpGraph->isDataSlicer())
+        return;
+    mpGraph->dataSlicer().setIndex(index);
+    emit graphChanged();
+}
+
+//! Specfiy the leading value for slicing
+void PropertyTreeWidget::setSlicerValue(float value)
+{
+    if (!mpGraph->isDataSlicer())
+        return;
+    mpGraph->dataSlicer().setClosestValue(value);
+    emit graphChanged();
+}
+
 //! Retrieve translated keys and icons from a meta object
 EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator)
 {
@@ -426,9 +581,9 @@ EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::str
 void PropertyTreeWidget::makeTranslationMap()
 {
     // Slice enum
-    mEnumTranslator["sdX"] = "X";
-    mEnumTranslator["sdY"] = "Y";
-    mEnumTranslator["sdZ"] = "Z";
+    mEnumTranslator["sdX"] = "Данные X";
+    mEnumTranslator["sdY"] = "Данные Y";
+    mEnumTranslator["sdZ"] = "Данные Z";
     // Category enum
     mEnumTranslator["cSpaceTime"]  = tr("Пространство-время");
     mEnumTranslator["cKinematics"] = tr("Кинематическая");

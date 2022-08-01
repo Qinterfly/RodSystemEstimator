@@ -24,8 +24,7 @@ Graph::~Graph()
         if (mpData[i])
             delete mpData[i];
     }
-    if (mpDataSlicer)
-        delete mpDataSlicer;
+    removeDataSlicer();
 }
 
 //! Specify data for all axes
@@ -61,8 +60,17 @@ bool Graph::createDataSlicer(GraphDataSlicer::SliceType type, PointerResult pRes
 {
     if (!isData(type))
         return false;
-    if (mpDataSlicer)
-        delete mpDataSlicer;
+    removeDataSlicer();
     mpDataSlicer = new GraphDataSlicer(type, mpData[type], pResult);
     return true;
+}
+
+//! Remove data slicer if created
+void Graph::removeDataSlicer()
+{
+    if (mpDataSlicer)
+    {
+        delete mpDataSlicer;
+        mpDataSlicer = nullptr;
+    }
 }
