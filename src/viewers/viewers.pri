@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/aliasviewers.h \
     $$PWD/apputilities.h \
     $$PWD/convergenceviewer.h \
+    $$PWD/graphdataslicer.h \
     $$PWD/graphlistmodel.h \
     $$PWD/klpgraphviewer.h \
     $$PWD/propertytreewidget.h \
@@ -17,6 +18,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/apputilities.cpp \
     $$PWD/convergenceviewer.cpp \
+    $$PWD/graphdataslicer.cpp \
     $$PWD/graphlistmodel.cpp \
     $$PWD/klpgraphviewer.cpp \
     $$PWD/propertytreewidget.cpp \

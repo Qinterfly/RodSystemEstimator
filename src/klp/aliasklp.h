@@ -15,7 +15,8 @@ namespace KLP
 {
 
 class Result;
-using Results = std::vector<std::shared_ptr<Result>>;
+using PointerResult = std::shared_ptr<Result>;
+using Results = std::vector<PointerResult>;
 
 }
 

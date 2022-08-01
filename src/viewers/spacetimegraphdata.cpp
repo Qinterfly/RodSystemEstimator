@@ -29,7 +29,7 @@ GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collecti
     switch (mType)
     {
     case stTime:
-        return GraphDataset(collection.time);
+        return GraphDataset(1, collection.time);
     case stParameter:
         return sliceDataByIndex(collection.parameter, sliceIndex);
     case stNaturalLength:

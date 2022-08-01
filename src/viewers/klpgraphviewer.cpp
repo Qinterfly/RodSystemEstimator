@@ -19,7 +19,7 @@
 #include "klpgraphviewer.h"
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
-#include "propertytreewidget.h"
+#include "graph.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -30,6 +30,8 @@ using namespace RSE::Models;
 static const QString skGroupName = "KLPGraphViewer";
 static const QString skResultFileExtension = ".klp";
 static const QSize skToolBarIconSize = {22, 22};
+
+QVector<int> getPlottableIndices(PlottableData const& datasets);
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QWidget(pParent), mLastPath(lastPath), mSettings(settings)
@@ -263,5 +265,25 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
 //! Plot the resulting set of graphs
 void KLPGraphViewer::plot()
 {
-    // TODO
+    mpFigure->clearPlottables();
+    QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
+    QModelIndexList indicesGraphs  = mpListGraphs->selectionModel()->selectedIndexes();
+    // Check if there is enough data to plot
+    if (indicesResults.empty() || indicesGraphs.empty())
+        return;
+    int numResults = indicesResults.size();
+    int numGraphs  = indicesGraphs.size();
+    // Iterate through results
+    for (int i = 0; i != numResults; ++i)
+    {
+        int iResult = indicesResults[i].row();
+        PointerResult pResult = mResults[iResult];
+        // Iterate through graphs
+        for (int j = 0; j != numGraphs; ++j)
+        {
+            int jGraph = indicesGraphs[j].row();
+            PointerGraph pGraph = mGraphs[jGraph];
+            // TODO
+        }
+    }
 }

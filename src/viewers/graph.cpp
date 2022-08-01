@@ -24,6 +24,8 @@ Graph::~Graph()
         if (mpData[i])
             delete mpData[i];
     }
+    if (mpDataSlicer)
+        delete mpDataSlicer;
 }
 
 //! Specify data for all axes
@@ -40,4 +42,27 @@ void Graph::setData(AbstractGraphData* pData, int iData)
     if (mpData[iData])
         delete mpData[iData];
     mpData[iData] = pData;
+}
+
+//! Retrieve indices of assigned graph data
+QVector<int> Graph::indicesReadyData() const
+{
+    QVector<int> indices;
+    for (int i = 0; i != KLP::kNumDirections; ++i)
+    {
+        if (mpData[i])
+            indices.push_back(i);
+    }
+    return indices;
+}
+
+//! Create an instance of object to slice one of datasets
+bool Graph::createDataSlicer(GraphDataSlicer::SliceType type, PointerResult pResult)
+{
+    if (!isData(type))
+        return false;
+    if (mpDataSlicer)
+        delete mpDataSlicer;
+    mpDataSlicer = new GraphDataSlicer(type, mpData[type], pResult);
+    return true;
 }

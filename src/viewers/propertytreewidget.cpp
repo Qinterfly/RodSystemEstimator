@@ -11,10 +11,10 @@
 #include <QSlider>
 #include <QHeaderView>
 #include "propertytreewidget.h"
+#include "graph.h"
 #include "abstractgraphdata.h"
 #include "spacetimegraphdata.h"
 #include "kinematicsgraphdata.h"
-#include "graph.h"
 #include "klp/result.h"
 
 using namespace RSE::Viewers;
@@ -73,18 +73,6 @@ void PropertyTreeWidget::updateValues()
         pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
         index = isDirectionalData ? data[i]->direction() : -1;
         pComboBox->setCurrentIndex(index);
-        // Slice state
-        Qt::CheckState sliceState = isDirectionalData && mpGraph->isSliced(i) ? Qt::Checked : Qt::Unchecked;
-        mSliceDataItems[i]->setCheckState(0, sliceState);
-        // Slice index
-        QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mSliceDataItems[i]->child(0), 1);
-        QSlider* pSlider = (QSlider*)itemWidget(mSliceDataItems[i]->child(1), 1);
-        pSpinBox->setValue(0);
-        pSlider->setValue(0);
-        // Slice limits
-        if (isDirectionalData)
-            setSliceWidgets(i);
-        setEnabledSliceWidgets(i);
     }
     // Line style
     mpLineStyleWidget->clear();
@@ -131,11 +119,9 @@ void PropertyTreeWidget::createHierarchy()
     mDataItems.push_back(createDirectionalDataItem(tr("Данные по Y")));
     mDataItems.push_back(createDirectionalDataItem(tr("Данные по Z")));
     pRoot->addChildren(mDataItems);
-    // Properties for slicing data: XSData, YSData, ZSData
-    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по X")));
-    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по Y")));
-    mSliceDataItems.push_back(createSliceDataItem(tr("Срез данных по Z")));
-    pRoot->addChildren(mSliceDataItems);
+    // Data slicer
+    createDataSlicerItem();
+    pRoot->addChild(mpDataSlicerItem);
     // Line properties
     QTreeWidgetItem* pLineStyleItem = new QTreeWidgetItem({tr("Тип линии")});
     QTreeWidgetItem* pLineWidthItem = new QTreeWidgetItem({tr("Толщина линии")});
@@ -181,22 +167,23 @@ QTreeWidgetItem* PropertyTreeWidget::createDirectionalDataItem(QString const& na
 }
 
 //! Create a nested hierarchy of items to slice data
-QTreeWidgetItem* PropertyTreeWidget::createSliceDataItem(QString const& name)
+void PropertyTreeWidget::createDataSlicerItem()
 {
     // Create keys
-    QTreeWidgetItem* pRootItem = new QTreeWidgetItem({name});
-    pRootItem->setCheckState(0, Qt::Unchecked);
+    mpDataSlicerItem = new QTreeWidgetItem({tr("Срез данных")});
+    mpDataSlicerItem->setCheckState(0, Qt::Unchecked);
+    QTreeWidgetItem* pTypeItem  = new QTreeWidgetItem({tr("Тип")});
     QTreeWidgetItem* pIndexItem = new QTreeWidgetItem({tr("Индекс")});
+    QTreeWidgetItem* pValueItem = new QTreeWidgetItem({tr("Значение")});
     QTreeWidgetItem* pRangeItem = new QTreeWidgetItem({tr("Диапазон")});
-    pRootItem->addChildren({pIndexItem, pRangeItem});
+    mpDataSlicerItem->addChildren({pTypeItem, pIndexItem, pValueItem, pRangeItem});
     // Create widgets to deal with values
-    QSpinBox* pSpinBox = new QSpinBox();
-    pSpinBox->setMinimum(0);
-    QSlider* pSlider = new QSlider();
-    pSlider->setOrientation(Qt::Horizontal);
-    setItemWidget(pIndexItem, 1, pSpinBox);
-    setItemWidget(pRangeItem, 1, pSlider);
-    return pRootItem;
+    QSlider* pRangeWidget = new QSlider();
+    pRangeWidget->setOrientation(Qt::Horizontal);
+    setItemWidget(pTypeItem, 1, new QComboBox());
+    setItemWidget(pIndexItem, 1, new QSpinBox());
+    setItemWidget(pValueItem, 1, new QDoubleSpinBox());
+    setItemWidget(pRangeItem, 1, pRangeWidget);
 }
 
 //! Create an item to specify labels for axes
@@ -227,32 +214,12 @@ void PropertyTreeWidget::specifyConnections()
             setTypeValue(i);
         });
         // Type & direction
-        auto funAssignGraphData = [ this, i ]() { assignGraphData(i); setSliceWidgets(i); };
+        auto funAssignGraphData = [ this, i ]() { assignGraphData(i); };
         for (int j = 1; j != numData; ++j)
         {
             pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(j), 1);
             connect(pComboBox, &QComboBox::currentIndexChanged, this, funAssignGraphData);
         }
-        // Slicing state
-        connect(this, &QTreeWidget::itemChanged, this, [this, i](QTreeWidgetItem * pItem, int column)
-        {
-            if (mSliceDataItems[i] == pItem && column == 0)
-            {
-                bool isData = mpResult && mpGraph && mpGraph->data()[i];
-                blockSignals(true);
-                if (pItem->checkState(0) == Qt::Checked && !isData)
-                    pItem->setCheckState(0, Qt::Unchecked);
-                blockSignals(false);
-                setEnabledSliceWidgets(i);
-                assignSliceCheckedState(i);
-            }
-        });
-        // Slice index
-        auto funSliceIndex = [this,  i](int value) { assignSliceIndex(value, i); setSliceWidgets(i); };
-        QSpinBox* pSpinBox = (QSpinBox*)itemWidget(mSliceDataItems[i]->child(0), 1);
-        QSlider* pSlider = (QSlider*)itemWidget(mSliceDataItems[i]->child(1), 1);
-        connect(pSpinBox, &QSpinBox::valueChanged, this, funSliceIndex);
-        connect(pSlider, &QSlider::valueChanged, this, funSliceIndex);
     }
     // Line properties
     connect(mpLineStyleWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
@@ -366,57 +333,6 @@ void PropertyTreeWidget::setBlockedSignals(bool flag)
     }
 }
 
-//! Specify values and limites of widgets for slicing
-void PropertyTreeWidget::setSliceWidgets(int iData)
-{
-    if (!mpGraph || !mpResult)
-        return;
-    const int kBaseFrame = 0;
-    // Obtain the boundary values for slicing
-    AbstractGraphData* pData = mpGraph->data()[iData];
-    if (!pData)
-        return;
-    int maxIndex;
-    bool isTime = pData->category() == AbstractGraphData::cSpaceTime && pData->type() == SpaceTimeGraphData::stTime;
-    if (isTime)
-    {
-        maxIndex = mpResult->numTimeRecords() - 1;
-    }
-    else
-    {
-        auto const& collection = mpResult->getFrameCollection(kBaseFrame);
-        auto const& dataset = pData->getDataset(collection);
-        maxIndex = dataset.size() - 1;
-    }
-    // Retrieve widgets for slicing
-    QSpinBox* pIndexSpinBox = (QSpinBox*)itemWidget(mSliceDataItems[iData]->child(0), 1);
-    QSlider* pIndexSlider = (QSlider*)itemWidget(mSliceDataItems[iData]->child(1), 1);
-    {
-        QSignalBlocker blockerIndexSpinBox(pIndexSpinBox);
-        QSignalBlocker blockerIndexSlider(pIndexSlider);
-        // Specify limits
-        pIndexSpinBox->setRange(0, maxIndex);
-        pIndexSlider->setRange(0, maxIndex);
-        // Set current indices
-        if (mpGraph->isSliced(iData))
-        {
-            int iSlice = mpGraph->sliceIndex(iData);
-            pIndexSpinBox->setValue(iSlice);
-            pIndexSlider->setValue(iSlice);
-        }
-    }
-}
-
-//! Set enabled state of widgets to slice data
-void PropertyTreeWidget::setEnabledSliceWidgets(int iData)
-{
-    bool isChecked = mSliceDataItems[iData]->checkState(0) == Qt::Checked;
-    QSpinBox* pIndexSpinBox = (QSpinBox*)itemWidget(mSliceDataItems[iData]->child(0), 1);
-    QSlider* pIndexSlider = (QSlider*)itemWidget(mSliceDataItems[iData]->child(1), 1);
-    pIndexSpinBox->setEnabled(isChecked);
-    pIndexSlider->setEnabled(isChecked);
-}
-
 //! Assign new graph data
 void PropertyTreeWidget::assignGraphData(int iData)
 {
@@ -479,30 +395,6 @@ void PropertyTreeWidget::assignVisualProperties()
     emit graphChanged();
 }
 
-//! Assign the index for slicing along specified data direction
-void PropertyTreeWidget::assignSliceIndex(int value, int iData)
-{
-    if (!mpGraph || !mpGraph->isSliced(iData))
-        return;
-    mpGraph->setSliceIndex(value, iData);
-    emit graphChanged();
-}
-
-//! Assign whether the graph data needs to be sliced
-void PropertyTreeWidget::assignSliceCheckedState(int iData)
-{
-    bool isChecked = mSliceDataItems[iData]->checkState(0) == Qt::Checked;
-    if (mpGraph && mpGraph->data()[iData])
-    {
-        if (mpGraph->isSliced(iData) != isChecked)
-        {
-            int sliceIndex = isChecked ? 0 : -1;
-            mpGraph->setSliceIndex(sliceIndex, iData);
-            emit graphChanged();
-        }
-    }
-}
-
 //! Retrieve translated keys and icons from a meta object
 EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator)
 {
@@ -533,6 +425,10 @@ EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::str
 //! Specify translations for enum options
 void PropertyTreeWidget::makeTranslationMap()
 {
+    // Slice enum
+    mEnumTranslator["sdX"] = "X";
+    mEnumTranslator["sdY"] = "Y";
+    mEnumTranslator["sdZ"] = "Z";
     // Category enum
     mEnumTranslator["cSpaceTime"]  = tr("Пространство-время");
     mEnumTranslator["cKinematics"] = tr("Кинематическая");

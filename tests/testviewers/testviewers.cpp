@@ -26,7 +26,7 @@ private slots:
     void initTestCase();
     void testConvergenceViewer();
     void testGraphs();
-    void testGraphData();
+    void testDataSlicer();
     void testKLPGraphViewer();
     void cleanupTestCase();
 
@@ -60,31 +60,31 @@ void TestViewers::testConvergenceViewer()
 //! Create graphs of different types
 void TestViewers::testGraphs()
 {
-    const int kNumGraphs = 5;
+    const int kNumGraphs = 2;
     // Create multiple graphs
     for (int i = 0; i != kNumGraphs; ++i)
     {
         auto pGraph = std::make_shared<Graph>(tr("Тест %1").arg(i));
         mGraphs.insert({i, pGraph});
     }
-    // Create graph data of several types
-    AbstractGraphData* pCoordinate = new SpaceTimeGraphData(SpaceTimeGraphData::stCoordiante);
-    AbstractGraphData* pParameter = new SpaceTimeGraphData(SpaceTimeGraphData::stParameter);
-    AbstractGraphData* pLength = new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength);
-    AbstractGraphData* pTime = new SpaceTimeGraphData(SpaceTimeGraphData::stTime);
-    AbstractGraphData* pDisplacement = new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst);
-    // Assign graph data
-    mGraphs[0]->setData(pCoordinate, pParameter);
-    mGraphs[1]->setData(pLength, pTime, pDisplacement);
+    // [Xi, t, Ut]
+    mGraphs[0]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
+                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                        new KinematicsGraphData(KinematicsGraphData::kSpeed));
+    // [SS, t, U]
+    mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
+                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                        new KinematicsGraphData(KinematicsGraphData::kDisplacement));
 }
 
-//! Retrieve data of graphs
-void TestViewers::testGraphData()
+//! Slice graph data
+void TestViewers::testDataSlicer()
 {
-    KLP::Result result(mkTestDataPath + "dynamic-impulse-1.klp");
-    auto collection = result.getFrameCollection(1);
-    auto pXData = mGraphs[0]->data()[1];
-    QCOMPARE(104, pXData->getDataset(collection).size());
+    KLP::PointerResult pResult = std::make_shared<KLP::Result>(mkTestDataPath + "dynamic-impulse-1.klp");
+    PointerGraph pGraph = mGraphs[0];
+    QCOMPARE(true, pGraph->createDataSlicer(GraphDataSlicer::sdY, pResult));
+    auto& dataSlicer = pGraph->dataSlicer();
+    QCOMPARE(2.0, dataSlicer.setClosestValue(2.0));
 }
 
 //! Represent content of the KLP file

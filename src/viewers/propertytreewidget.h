@@ -9,7 +9,8 @@
 #define PROPERTYTREEWIDGET_H
 
 #include <QTreeWidget>
-#include "abstractgraphdata.h"
+#include "aliasklp.h"
+#include "aliasviewers.h"
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -28,10 +29,8 @@ namespace RSE
 namespace Viewers
 {
 
-class Graph;
-using PointerGraph = std::shared_ptr<Graph>;
-using PointerResult = std::shared_ptr<KLP::Result>;
 using EnumData = QPair<QStringList, QList<QIcon>>;
+using KLP::PointerResult;
 
 class PropertyTreeWidget : public QTreeWidget
 {
@@ -51,7 +50,7 @@ private:
     // Construct widgets
     void createHierarchy();
     QTreeWidgetItem* createDirectionalDataItem(QString const& name);
-    QTreeWidgetItem* createSliceDataItem(QString const& name);
+    void createDataSlicerItem();
     void createAxesLabelsItem();
     void specifyConnections();
     // Set values of properties
@@ -59,23 +58,21 @@ private:
     void setTypeValue(int iData);
     void setColorItem(QColor const& color);
     void setBlockedSignals(bool flag);
-    void setSliceWidgets(int iData);
-    void setEnabledSliceWidgets(int iData);
     // Assign new properties to the current graph
     void assignGraphData(int iData);
     void assignVisualProperties();
-    void assignSliceIndex(int value, int iData);
-    void assignSliceCheckedState(int iData);
     // Translation of enum keys
     EnumData getEnumData(QMetaObject const& metaObject, std::string const& nameEnumerator);
     void makeTranslationMap();
 
 private:
+    // Data items
     PointerGraph mpGraph = nullptr;
     PointerResult mpResult = nullptr;
-    QMap<QString, QString> mEnumTranslator;
     QList<QTreeWidgetItem*> mDataItems;
-    QList<QTreeWidgetItem*> mSliceDataItems;
+    QTreeWidgetItem* mpDataSlicerItem;
+    // Visual items
+    QMap<QString, QString> mEnumTranslator;
     QComboBox* mpLineStyleWidget;
     QSpinBox* mpLineWidthWidget;
     QTreeWidgetItem* mpColorItem;

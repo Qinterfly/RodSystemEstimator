@@ -11,6 +11,7 @@
 #include "qcustomplot.h"
 #include "klp/aliasklp.h"
 #include "aliasviewers.h"
+#include "propertytreewidget.h"
 
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -73,6 +74,9 @@ private:
     void saveSettings();
     void restoreSettings();
     void closeEvent(QCloseEvent* pEvent) override;
+    // Plotting
+    void plotSurface();
+    void plotCurve();
 
 private:
     QString mLastPath;
