@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the PropertyTreeWidget class
  */
 
@@ -602,7 +602,7 @@ void PropertyTreeWidget::makeTranslationMap()
     mEnumTranslator["stParameter"]                = tr("Параметр");
     mEnumTranslator["stNaturalLength"]            = tr("Естественная длина");
     mEnumTranslator["stAccumulatedNaturalLength"] = tr("Суммарная естественная длина");
-    mEnumTranslator["stCoordiante"]               = tr("Координата");
+    mEnumTranslator["stCoordinate"]               = tr("Координата");
     // Kinematics enum
     mEnumTranslator["kStrain"]              = tr("Продольная деформация");
     mEnumTranslator["kDisplacement"]        = tr("Перемещение");

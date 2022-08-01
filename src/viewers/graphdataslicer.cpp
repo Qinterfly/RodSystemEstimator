@@ -16,8 +16,8 @@ static const int skBaseTimeFrame = 0;
 GraphDataSlicer::GraphDataSlicer(SliceType type, AbstractGraphData* pData, KLP::PointerResult pResult)
     : mType(type)
 {
-    bool isTime = pData->category() == AbstractGraphData::cSpaceTime && pData->type() == SpaceTimeGraphData::stTime;
-    if (isTime)
+    mIsTime = pData->category() == AbstractGraphData::cSpaceTime && pData->type() == SpaceTimeGraphData::stTime;
+    if (mIsTime)
     {
         mDataset = pResult->time();
     }

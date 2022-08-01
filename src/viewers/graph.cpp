@@ -1,11 +1,12 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the Graph class
  */
 
 #include "graph.h"
+#include "spacetimegraphdata.h"
 
 using namespace RSE::Viewers;
 
@@ -53,6 +54,26 @@ QVector<int> Graph::indicesReadyData() const
             indices.push_back(i);
     }
     return indices;
+}
+
+//! Retrieve the index of the time data
+int Graph::indexTimeData() const
+{
+    int iTimeData = -1;
+    for (int i = 0; i != KLP::kNumDirections; ++i)
+    {
+        AbstractGraphData* pData = mpData[i];
+        if (!pData)
+            continue;
+        bool isTime = pData->category() == AbstractGraphData::cSpaceTime
+                      && pData->type() == SpaceTimeGraphData::stTime;
+        if (isTime)
+        {
+            iTimeData = i;
+            break;
+        }
+    }
+    return iTimeData;
 }
 
 //! Create an instance of object to slice one of datasets

@@ -36,6 +36,7 @@ public:
     float value() const { return mDataset[mIndex]; }
     std::pair<qint64, qint64> limitsIndices() const { return mLimitsIndices; }
     std::pair<float, float> limitsValues() const { return mLimitsValues; }
+    bool isTime() const { return mIsTime; }
     // Setters
     void setIndex(qint64 index);
     float setClosestValue(float searchValue);
@@ -49,6 +50,7 @@ private:
     GraphDataset mDataset;
     std::pair<qint64, qint64> mLimitsIndices;
     std::pair<float, float> mLimitsValues;
+    bool mIsTime;
 };
 
 }

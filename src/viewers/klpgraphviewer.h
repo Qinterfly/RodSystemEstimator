@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Declaration of the KLPGraphViewer class
  */
 
@@ -75,8 +75,8 @@ private:
     void restoreSettings();
     void closeEvent(QCloseEvent* pEvent) override;
     // Plotting
-    void plotSurface();
-    void plotCurve();
+    void plotSurface(PointerGraph pGraph, PointerResult pResult);
+    void plotCurve(PointerGraph pGraph, PointerResult pResult);
 
 private:
     QString mLastPath;

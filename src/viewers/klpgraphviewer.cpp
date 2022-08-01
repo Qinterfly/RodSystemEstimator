@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the KLPGraphViewer class
  */
 
@@ -30,8 +30,6 @@ using namespace RSE::Models;
 static const QString skGroupName = "KLPGraphViewer";
 static const QString skResultFileExtension = ".klp";
 static const QSize skToolBarIconSize = {22, 22};
-
-QVector<int> getPlottableIndices(PlottableData const& datasets);
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QWidget(pParent), mLastPath(lastPath), mSettings(settings)
@@ -122,6 +120,7 @@ CDockWidget* KLPGraphViewer::createFigureWidget()
     mpFigure = new QCustomPlot();
     mpFigure->setAntialiasedElement(QCP::AntialiasedElement::aeAll, true);
     mpFigure->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    mpFigure->axisRect()->setupFullAxesBox(true);
     pDockWidget->setWidget(mpFigure);
     return pDockWidget;
 }
@@ -265,7 +264,6 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
 //! Plot the resulting set of graphs
 void KLPGraphViewer::plot()
 {
-    mpFigure->clearPlottables();
     QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
     QModelIndexList indicesGraphs  = mpListGraphs->selectionModel()->selectedIndexes();
     // Check if there is enough data to plot
@@ -283,7 +281,71 @@ void KLPGraphViewer::plot()
         {
             int jGraph = indicesGraphs[j].row();
             PointerGraph pGraph = mGraphs[jGraph];
-            // TODO
+            // Check if time data is presented
+            if (!pGraph->isTimeData())
+                continue;
+            // Determine the type of the graph to plot
+            if (pGraph->isDataSlicer())
+                plotCurve(pGraph, pResult);
+            else
+                plotSurface(pGraph, pResult);
         }
     }
+}
+
+//! Represent plottable data as a surface
+void KLPGraphViewer::plotSurface(PointerGraph pGraph, PointerResult pResult)
+{
+    int const kResponseData = 2;
+    // It is assumed that X and Y data are planar
+    int iTimeData = pGraph->indexTimeData();
+    bool isPlanarTime = iTimeData != kResponseData;
+    if (!isPlanarTime)
+        return;
+    // Slice data for plotting
+    int iPlanarData = iTimeData == 1 ? 0 : 1;
+    AbstractGraphData* pPlanarData   = pGraph->data()[iPlanarData];
+    AbstractGraphData* pResponseData = pGraph->data()[kResponseData];
+    QVector<float> time = pResult->time();
+    // The color map is rotated so that the time is always the key
+    QCPColorMap* pColorMap;
+    if (iTimeData == 1)
+        pColorMap = new QCPColorMap(mpFigure->xAxis, mpFigure->yAxis);
+    else
+        pColorMap = new QCPColorMap(mpFigure->yAxis, mpFigure->xAxis);
+    qint64 numTime = pResult->numTimeRecords();
+    qint64 numData = pPlanarData->getDataset(pResult->getFrameCollection(0)).size();
+    pColorMap->data()->setRange(QCPRange(0, 10), QCPRange(0, 3));
+    // Set the data
+    for (int iTime = 0; iTime != numTime; ++iTime)
+    {
+        KLP::FrameCollection const& collection = pResult->getFrameCollection(iTime);
+        float key = time[iTime];
+        GraphDataset const& valueDataset = pPlanarData->getDataset(collection);
+        GraphDataset const& responseDataset = pResponseData->getDataset(collection);
+        if (numData != valueDataset.size() || numData != responseDataset.size())
+            continue;
+        for (int jData = 0; jData != numData; ++jData)
+            pColorMap->data()->setData(key, valueDataset[jData], responseDataset[jData]);
+    }
+    // Add a color scale
+    QCPColorScale* pColorScale = new QCPColorScale(mpFigure);
+    mpFigure->plotLayout()->addElement(0, 1, pColorScale);
+    pColorScale->setType(QCPAxis::atRight);
+    pColorMap->setColorScale(pColorScale);
+    // Set the color gradient of the color map
+    pColorMap->setGradient(QCPColorGradient::gpPolar);
+    pColorMap->rescaleDataRange();
+    // Synchronize data
+    QCPMarginGroup* marginGroup = new QCPMarginGroup(mpFigure);
+    mpFigure->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+    pColorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+    // Rescale axes
+    mpFigure->rescaleAxes();
+}
+
+//! Represent plottable data as a curve
+void KLPGraphViewer::plotCurve(PointerGraph pGraph, PointerResult pResult)
+{
+    // TODO
 }

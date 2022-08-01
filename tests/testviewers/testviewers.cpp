@@ -74,13 +74,13 @@ void TestViewers::testGraphs()
     // [SS, t, U]
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new KinematicsGraphData(KinematicsGraphData::kDisplacement));
+                        new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
 }
 
 //! Slice graph data
 void TestViewers::testDataSlicer()
 {
-    KLP::PointerResult pResult = std::make_shared<KLP::Result>(mkTestDataPath + "dynamic-impulse-1.klp");
+    KLP::PointerResult pResult = std::make_shared<KLP::Result>(mkTestDataPath + "dynamic-impulse-2.klp");
     PointerGraph pGraph = mGraphs[0];
     QCOMPARE(true, pGraph->createDataSlicer(GraphDataSlicer::sdY, pResult));
     auto& dataSlicer = pGraph->dataSlicer();

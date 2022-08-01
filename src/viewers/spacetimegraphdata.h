@@ -25,7 +25,7 @@ public:
         stParameter,
         stNaturalLength,
         stAccumulatedNaturalLength,
-        stCoordiante
+        stCoordinate
     };
     Q_ENUM(SpaceTimeType)
     SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);

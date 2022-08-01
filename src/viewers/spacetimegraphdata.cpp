@@ -36,7 +36,7 @@ GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collecti
         return sliceDataByIndex(collection.naturalLength, sliceIndex);
     case stAccumulatedNaturalLength:
         return sliceDataByIndex(collection.accumulatedNaturalLength, sliceIndex);
-    case stCoordiante:
+    case stCoordinate:
         return sliceDataByDirectionAndIndex(collection.coordinates, mDirection, sliceIndex);
     default:
         break;
