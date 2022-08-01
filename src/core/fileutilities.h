@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Declaration of utilities targeted to working with files
  */
 
@@ -14,21 +14,11 @@
 class QFile;
 class QString;
 
-namespace RSE
-{
-
-namespace Utilities
-{
-
-namespace File
+namespace RSE::Utilities::File
 {
 
 QPair<Core::AbstractDataObject::ObjectType, QSharedPointer<QFile>> getDataObjectFile(QString const& path, QString const& fileName);
 QString loadFileContent(QString const& path);
-
-}
-
-}
 
 }
 

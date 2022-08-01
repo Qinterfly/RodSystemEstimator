@@ -29,7 +29,7 @@ public:
         sdZ
     };
     Q_ENUM(SliceType)
-    GraphDataSlicer(SliceType type, AbstractGraphData* pData, KLP::PointerResult pResult);
+    GraphDataSlicer(SliceType type, AbstractGraphData const* pData, KLP::PointerResult pResult);
     // Getters
     SliceType type() const { return mType; }
     qint64 index() const { return mIndex; }
@@ -38,6 +38,7 @@ public:
     std::pair<float, float> limitsValues() const { return mLimitsValues; }
     bool isTime() const { return mIsTime; }
     // Setters
+    void setResult(KLP::PointerResult pResult);
     void setIndex(qint64 index);
     float setClosestValue(float searchValue);
 
@@ -46,6 +47,7 @@ private:
 
 private:
     SliceType const mType;
+    AbstractGraphData const* mpData;
     qint64 mIndex;
     GraphDataset mDataset;
     std::pair<qint64, qint64> mLimitsIndices;

@@ -57,7 +57,8 @@ public:
     void setColor(QColor const& color) { mColor = color; }
     void setScatterShape(QCPScatterStyle::ScatterShape const& scatterShape) { mScatterShape = scatterShape; }
     void setScatterSize(double scatterSize) { mScatterSize = scatterSize; }
-    void setAxesLabels(QStringList const& axesLabels) { mAxesLabels = axesLabels; }
+    void setAxisLabel(QString const& label, int iData) { mAxesLabels[iData] = label; }
+    void setAxesLabels(QStringList const& labels) { mAxesLabels = labels; }
 
 private:
     QString mName;

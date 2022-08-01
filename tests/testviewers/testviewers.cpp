@@ -7,6 +7,7 @@
 
 #include <QtTest>
 #include <QtWidgets>
+#include "core/numericalutilities.h"
 #include "klp/result.h"
 #include "viewers/apputilities.h"
 #include "viewers/convergenceviewer.h"
@@ -17,6 +18,7 @@
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;
+using namespace RSE::Utilities::Numerical;
 
 class TestViewers : public QObject
 {
@@ -71,20 +73,22 @@ void TestViewers::testGraphs()
     mGraphs[0]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kSpeed));
+    mGraphs[0]->setAxesLabels({tr("Параметр"), tr("Время"), tr("Скорость")});
     // [SS, t, U]
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new KinematicsGraphData(KinematicsGraphData::kSpeed, AbstractGraphData::dFirst));
+                        new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
+    mGraphs[1]->setAxesLabels({tr("Накопленная длина"), tr("Время"), tr("Перемещние")});
 }
 
 //! Slice graph data
 void TestViewers::testDataSlicer()
 {
     KLP::PointerResult pResult = std::make_shared<KLP::Result>(mkTestDataPath + "dynamic-impulse-2.klp");
-    PointerGraph pGraph = mGraphs[0];
-    QCOMPARE(true, pGraph->createDataSlicer(GraphDataSlicer::sdY, pResult));
+    PointerGraph pGraph = mGraphs[1];
+    QCOMPARE(true, pGraph->createDataSlicer(GraphDataSlicer::sdX, pResult));
     auto& dataSlicer = pGraph->dataSlicer();
-    QCOMPARE(2.0, dataSlicer.setClosestValue(2.0));
+    QVERIFY(fuzzyCompare(dataSlicer.setClosestValue(0.5), 0.52, 1e-3));
 }
 
 //! Represent content of the KLP file

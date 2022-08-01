@@ -56,6 +56,7 @@ private:
     void setBlockedSignals(bool flag);
     // Data and visual widgets
     int currentDataIndex(int iData, int iChild);
+    QString currentDataText(int iData, int iChild);
     void setTypeWidget(int iData);
     void setColorItem(QColor const& color);
     // Slicer widgets

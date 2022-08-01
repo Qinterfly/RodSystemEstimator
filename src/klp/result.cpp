@@ -30,7 +30,7 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float no
         return nullFrameObject;
     // Construct the resulting object
     unsigned char* pBuffer = (unsigned char*) mContent.data();
-    float* pData = (float*)&pBuffer[indexData.position + shift];
+    float* pData = (float*)&pBuffer[indexData.position] + shift;
     return FloatFrameObject(pData, normFactor, indexData.partSize, indexData.step);
 }
 
@@ -38,14 +38,14 @@ FloatFrameObject Result::getFrameObject(qint64 iFrame, RecordType type, float no
 void Result::setStateFrameData(StateFrame& state, RecordType type, qint64 iFrame, qint64 iStartData,
                                std::vector<float> const& normFactors) const
 {
-    qint64 iInsert;
+    qint64 iInsert = iStartData;
     for (int k = 0; k != kNumDirections; ++k)
     {
-        iInsert = iStartData + k;
         state.displacements[k] = getFrameObject(iFrame, type, normFactors[0],     iInsert);
         state.rotations[k]     = getFrameObject(iFrame, type, normFactors[1], 3 + iInsert);
         state.forces[k]        = getFrameObject(iFrame, type, normFactors[2], 6 + iInsert);
         state.moments[k]       = getFrameObject(iFrame, type, normFactors[3], 9 + iInsert);
+        ++iInsert;
     }
 }
 

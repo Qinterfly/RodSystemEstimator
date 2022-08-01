@@ -32,7 +32,7 @@ public:
     explicit Result(QString const& pathFile);
     ~Result() = default;
     bool isEmpty() const { return mContent.isEmpty(); }
-    QVector<float> const& time() const { return mTime; }
+    QVector<double> const& time() const { return mTime; }
     QString const& pathFile() const { return mkPathFile; }
     int numRods(qint64 iFrame) const;
     qint64 numTotalRecords() const { return mNumTotalRecords; }
@@ -57,7 +57,7 @@ private:
     //! Number of records
     qint64 mNumTotalRecords;
     //! Time array
-    QVector<float> mTime;
+    QVector<double> mTime;
     //! Number of bytes per rod
     char mNumBytesRod;
 };

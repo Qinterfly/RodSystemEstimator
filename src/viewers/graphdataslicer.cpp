@@ -13,10 +13,16 @@ using namespace RSE::Viewers;
 
 static const int skBaseTimeFrame = 0;
 
-GraphDataSlicer::GraphDataSlicer(SliceType type, AbstractGraphData* pData, KLP::PointerResult pResult)
-    : mType(type)
+GraphDataSlicer::GraphDataSlicer(SliceType type, AbstractGraphData const* pData, KLP::PointerResult pResult)
+    : mType(type), mpData(pData), mIndex(0)
 {
     mIsTime = pData->category() == AbstractGraphData::cSpaceTime && pData->type() == SpaceTimeGraphData::stTime;
+    setResult(pResult);
+}
+
+//! Specify a set of results
+void GraphDataSlicer::setResult(KLP::PointerResult pResult)
+{
     if (mIsTime)
     {
         mDataset = pResult->time();
@@ -24,10 +30,10 @@ GraphDataSlicer::GraphDataSlicer(SliceType type, AbstractGraphData* pData, KLP::
     else
     {
         KLP::FrameCollection const& collection = pResult->getFrameCollection(skBaseTimeFrame);
-        mDataset = pData->getDataset(collection);
+        mDataset = mpData->getDataset(collection);
     }
     setLimits();
-    mIndex = mLimitsIndices.first;
+    setIndex(mIndex);
 }
 
 //! Specify limits of values and indices for slicing

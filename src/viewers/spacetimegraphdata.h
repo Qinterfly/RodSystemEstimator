@@ -30,7 +30,7 @@ public:
     Q_ENUM(SpaceTimeType)
     SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);
     ~SpaceTimeGraphData();
-    GraphDataset getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) override;
+    GraphDataset getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) const override;
     int type() const override { return mType; }
 
 private:

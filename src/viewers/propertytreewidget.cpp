@@ -115,8 +115,8 @@ void PropertyTreeWidget::updateValues()
 //! Create a hierachy of properties: keys and empty values
 void PropertyTreeWidget::createHierarchy()
 {
-    int const kMaxLineWidth = 10;
-    double const kMaxScatterSize = 20;
+    int const kMaxLineWidth = 50;
+    double const kMaxScatterSize = 100;
     QTreeWidgetItem* pRoot = invisibleRootItem();
     // Properties of data
     mDataItems.push_back(createDirectionalDataItem(tr("Данные по X")));
@@ -184,6 +184,7 @@ void PropertyTreeWidget::createDataSlicerItem()
     // Create widgets to deal with values
     QDoubleSpinBox* pValueWidget = new QDoubleSpinBox();
     pValueWidget->setDecimals(3);
+    pValueWidget->setStepType(QDoubleSpinBox::AdaptiveDecimalStepType);
     QSlider* pRangeWidget = new QSlider();
     pRangeWidget->setOrientation(Qt::Horizontal);
     setItemWidget(pTypeItem, 1, new QComboBox());
@@ -209,23 +210,20 @@ void PropertyTreeWidget::specifyConnections()
 {
     // Data properties
     int numData = mDataItems.size();
+    auto funSlicer = [this]() { resetSlicerWidgetsData(); assignSlicer(); updateSlicerWidgetsData(); };
     for (int i = 0; i != numData; ++i)
     {
         // Category
         QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
-        connect(pComboBox, &QComboBox::currentIndexChanged, this, [ this, i ]()
+        connect(pComboBox, &QComboBox::currentIndexChanged, this, [ this, i, funSlicer]()
         {
             if (mpGraph)
                 mpGraph->eraseData(i);
             setTypeWidget(i);
-            mpDataSlicerItem->setCheckState(0, Qt::Unchecked);
+            funSlicer();
         });
         // Type & direction
-        auto funAssignGraphData = [ this, i ]()
-        {
-            assignGraphData(i);
-            mpDataSlicerItem->setCheckState(0, Qt::Unchecked);
-        };
+        auto funAssignGraphData = [ this, i, funSlicer ]() { assignGraphData(i); funSlicer(); updateValues(); };
         for (int j = 1; j != numData; ++j)
         {
             pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(j), 1);
@@ -233,7 +231,7 @@ void PropertyTreeWidget::specifyConnections()
         }
     }
     // State of the data slicer
-    connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem * pItem, int column)
+    connect(this, &QTreeWidget::itemChanged, this, [this, funSlicer](QTreeWidgetItem * pItem, int column)
     {
         if (mpDataSlicerItem == pItem && column == 0)
         {
@@ -242,9 +240,7 @@ void PropertyTreeWidget::specifyConnections()
             if (pItem->checkState(0) == Qt::Checked && !isFullSet)
                 pItem->setCheckState(0, Qt::Unchecked);
             blockSignals(false);
-            resetSlicerWidgetsData();
-            assignSlicer();
-            updateSlicerWidgetsData();
+            funSlicer();
         }
     });
     // Type of the data slicer
@@ -258,7 +254,7 @@ void PropertyTreeWidget::specifyConnections()
     connect(pRangeSlicerWidget, &QSlider::valueChanged, this, funSlicerIndex);
     // Value of the data slicer
     QDoubleSpinBox* pValueSlicerWidget = (QDoubleSpinBox*)itemWidget(mpDataSlicerItem->child(2), 1);
-    connect(pValueSlicerWidget, &QDoubleSpinBox::valueChanged, this, [this](float value) { setSlicerValue(value); updateSlicerWidgetsData(); });
+    connect(pValueSlicerWidget, &QDoubleSpinBox::editingFinished, this, [this, pValueSlicerWidget]() { setSlicerValue(pValueSlicerWidget->value()); updateSlicerWidgetsData(); });
     // Line properties
     connect(mpLineStyleWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
     connect(mpLineWidthWidget, &QSpinBox::valueChanged, this, &PropertyTreeWidget::assignVisualProperties);
@@ -300,16 +296,18 @@ void PropertyTreeWidget::setSelectedGraph(PointerGraph pGraph)
 //! Specify the single result to control slicing of data
 void PropertyTreeWidget::setSelectedResult(PointerResult pResult)
 {
-    if (mpResult != pResult && mpGraph)
-        mpGraph->removeDataSlicer();
     if (!pResult)
     {
         mpResult.reset();
         updateValues();
+        emit graphChanged();
         return;
     }
+    if (mpResult != pResult && mpGraph && mpGraph->isDataSlicer())
+        mpGraph->dataSlicer().setResult(pResult);
     mpResult = pResult;
     updateValues();
+    emit graphChanged();
 }
 
 //! Get current data index
@@ -317,6 +315,13 @@ int PropertyTreeWidget::currentDataIndex(int iData, int iChild)
 {
     QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(iChild), 1);
     return pComboBox->currentIndex();
+}
+
+//! Get current data text
+QString PropertyTreeWidget::currentDataText(int iData, int iChild)
+{
+    QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(iChild), 1);
+    return pComboBox->currentText();
 }
 
 //! Represent the type of the given graph data
@@ -462,8 +467,10 @@ void PropertyTreeWidget::assignGraphData(int iData)
     int iCategory = currentDataIndex(iData, 0);
     int iType = currentDataIndex(iData, 1);
     int iDirection = currentDataIndex(iData, 2);
-    if (iCategory >= 0 && iType >= 0 && iDirection >= 0)
+    if (iCategory >= 0 && iType >= 0)
     {
+        if (iDirection < 0)
+            iDirection = AbstractGraphData::dFull;
         AbstractGraphData* pData = nullptr;
         auto direction = (AbstractGraphData::Direction)iDirection;
         switch (iCategory)
@@ -488,6 +495,7 @@ void PropertyTreeWidget::assignGraphData(int iData)
             break;
         }
         mpGraph->setData(pData, iData);
+        mpGraph->setAxisLabel(currentDataText(iData, 1), iData);
         emit graphChanged();
     }
 }
@@ -506,13 +514,11 @@ void PropertyTreeWidget::assignVisualProperties()
     mpGraph->setScatterSize(mpScatterSizeWidget->value());
     // Axes labels
     int numData = mpAxesLabelsItem->childCount();
-    QStringList axesLabels(numData);
     for (int i = 0; i != numData; ++i)
     {
         QLineEdit* pEdit = (QLineEdit*)itemWidget(mpAxesLabelsItem->child(i), 1);
-        axesLabels[i] = pEdit->text();
+        mpGraph->setAxisLabel(pEdit->text(), i);
     }
-    mpGraph->setAxesLabels(axesLabels);
     emit graphChanged();
 }
 

@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/databasecables.h \
     $$PWD/fileutilities.h \
     $$PWD/io.h \
+    $$PWD/numericalutilities.h \
     $$PWD/solutionmanager.h \
     $$PWD/solutionoptions.h \
     $$PWD/support.h \

@@ -9,8 +9,10 @@
 #include "core/damper.h"
 #include "core/rodsystem.h"
 #include "core/databasecables.h"
+#include "core/numericalutilities.h"
 
 using namespace RSE::Core;
+using namespace RSE::Utilities::Numerical;
 
 class TestCore : public QObject
 {
@@ -29,12 +31,6 @@ private:
     Damper* mpDamper;
     RodSystem* mpRodSystem;
 };
-
-//! Compare the two floating-point numbers
-inline bool fuzzyCompare(double p1, double p2, double eps)
-{
-    return (qAbs(p1 - p2) <= eps * qMin(qAbs(p1), qAbs(p2)));
-}
 
 //! Initialize objects
 void TestCore::initTestCase()

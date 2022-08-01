@@ -17,7 +17,8 @@ namespace RSE::Viewers
 
 class Graph;
 using GraphIDType = qint64;
-using GraphDataset = QVector<float>;
+using GraphValueType = double;
+using GraphDataset = QVector<GraphValueType>;
 using PointerGraph = std::shared_ptr<Graph>;
 using MapGraphs = std::map<GraphIDType, PointerGraph>;
 
