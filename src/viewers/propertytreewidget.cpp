@@ -133,7 +133,7 @@ void PropertyTreeWidget::createHierarchy()
     pRoot->addChildren({pLineStyleItem, pLineWidthItem, mpColorItem});
     mpLineStyleWidget = new QComboBox();
     mpLineWidthWidget = new QSpinBox();
-    mpLineWidthWidget->setRange(0, kMaxLineWidth);
+    mpLineWidthWidget->setRange(1, kMaxLineWidth);
     mpLineWidthWidget->setValue(1);
     setItemWidget(pLineStyleItem, 1, mpLineStyleWidget);
     setItemWidget(pLineWidthItem, 1, mpLineWidthWidget);

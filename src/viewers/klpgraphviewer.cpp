@@ -31,6 +31,9 @@ static const QString skGroupName = "KLPGraphViewer";
 static const QString skResultFileExtension = ".klp";
 static const QSize skToolBarIconSize = {22, 22};
 
+using CurveData = QPair<QVector<GraphDataset>, QVector<int>>;
+CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, QVector<int> const& indicesData);
+
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QWidget(pParent), mLastPath(lastPath), mSettings(settings)
 {
@@ -300,22 +303,43 @@ void KLPGraphViewer::plot()
 }
 
 //! Represent plottable data as a surface
-void KLPGraphViewer::plotSurface(PointerGraph pGraph, PointerResult pResult)
+void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const pResult)
 {
     // TODO
 }
 
 //! Represent plottable data as a curve
-void KLPGraphViewer::plotCurve(PointerGraph pGraph, PointerResult pResult)
+void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult)
 {
     QVector<int> const& indicesData = pGraph->indicesReadyData();
-    if (indicesData.size() < 2)
+    auto [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
+    // Check if the curve data is complete
+    if (curveValues.size() < 2 || curveValues[0].size() != curveValues[1].size())
         return;
+    // Plot the curve
+    QCPGraph* pCurve = mpFigure->addGraph();
+    pCurve->setData(curveValues[0], curveValues[1]);
+    // Specify visual properties
+    pCurve->setPen(QPen(pGraph->color(), pGraph->lineWidth()));
+    pCurve->setLineStyle(pGraph->lineStyle());
+    pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
+    // Specify labels
+    mpFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
+    mpFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
+    // Rescale axes and update
+    mpFigure->rescaleAxes();
+    mpFigure->replot();
+}
+
+//! Helper function to retrieve data associated with a 2D-curve
+CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, QVector<int> const& indicesData)
+{
+    if (indicesData.size() < 2)
+        return CurveData();
+    QVector<GraphDataset> curveValues;
+    QVector<int> curveIndices;
     bool isDataSlicer = pGraph->isDataSlicer();
     int iTimeData = pGraph->indexTimeData();
-    QVector<GraphDataset> curveData;
-    QVector<int> curveIndices;
-    // Prepare curve data
     if (isDataSlicer)
     {
         GraphDataSlicer const& dataSlicer = pGraph->dataSlicer();
@@ -328,20 +352,20 @@ void KLPGraphViewer::plotCurve(PointerGraph pGraph, PointerResult pResult)
                 if (iData == iTimeData)
                     continue;
                 AbstractGraphData* pData = pGraph->data()[iData];
-                curveData.push_back(pData->getDataset(collection));
+                curveValues.push_back(pData->getDataset(collection));
                 curveIndices.push_back(iData);
             }
         }
         else
         {
             int numTime = pResult->numTimeRecords();
-            curveData = { GraphDataset(numTime), GraphDataset(numTime) };
             int iSliceData = dataSlicer.type();
             for (int iData : indicesData)
             {
                 if (iData == iSliceData)
                     continue;
                 curveIndices.push_back(iData);
+                curveValues.push_back(GraphDataset(numTime));
             }
             int numCurves = curveIndices.size();
             for (int iTime = 0; iTime != numTime; ++iTime)
@@ -351,25 +375,10 @@ void KLPGraphViewer::plotCurve(PointerGraph pGraph, PointerResult pResult)
                 {
                     int jData = curveIndices[k];
                     AbstractGraphData* pData = pGraph->data()[jData];
-                    curveData[k][iTime] = pData->getDataset(collection, sliceIndex)[0];
+                    curveValues[k][iTime] = pData->getDataset(collection, sliceIndex)[0];
                 }
             }
         }
     }
-    // Check if the curve data is complete
-    if (curveData.size() < 2 || curveData[0].size() != curveData[1].size())
-        return;
-    // Plot the curve
-    QCPGraph* pCurve = mpFigure->addGraph();
-    pCurve->setData(curveData[0], curveData[1]);
-    // Specify visual properties
-    pCurve->setPen(QPen(pGraph->color(), pGraph->lineWidth()));
-    pCurve->setLineStyle(pGraph->lineStyle());
-    pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
-    // Specify labels
-    mpFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
-    mpFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
-    // Rescale axes and update
-    mpFigure->rescaleAxes();
-    mpFigure->replot();
+    return CurveData(curveValues, curveIndices);
 }

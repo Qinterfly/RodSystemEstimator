@@ -12,6 +12,8 @@ using namespace RSE::Viewers;
 
 GraphIDType Graph::smMaxGraphID = 0;
 
+using DataSign = QPair<AbstractGraphData::Category, int>;
+
 Graph::Graph(QString const& name)
     : mName(name)
 {
@@ -47,12 +49,20 @@ void Graph::setData(AbstractGraphData* pData, int iData)
 //! Retrieve indices of assigned graph data
 QVector<int> Graph::indicesReadyData() const
 {
-    QVector<int> indices;
+    // Create the set of unique graph data
+    QMap<DataSign, int> uniqueData;
     for (int i = 0; i != KLP::kNumDirections; ++i)
     {
-        if (mpData[i])
-            indices.push_back(i);
+        if (!mpData[i])
+            continue;
+        DataSign sign(mpData[i]->category(), mpData[i]->type());
+        if (!uniqueData.contains(sign))
+            uniqueData[sign] = i;
     }
+    // Retrieve indices of unique entities
+    QVector<int> indices;
+    for (auto item : uniqueData)
+        indices.push_back(item);
     return indices;
 }
 

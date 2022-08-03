@@ -75,8 +75,8 @@ private:
     void restoreSettings();
     void closeEvent(QCloseEvent* pEvent) override;
     // Plotting
-    void plotSurface(PointerGraph pGraph, PointerResult pResult);
-    void plotCurve(PointerGraph pGraph, PointerResult pResult);
+    void plotSurface(PointerGraph const pGraph, PointerResult const pResult);
+    void plotCurve(PointerGraph const pGraph, PointerResult const pResult);
 
 private:
     QString mLastPath;
