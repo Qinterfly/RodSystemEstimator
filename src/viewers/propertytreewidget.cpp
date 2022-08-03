@@ -637,10 +637,10 @@ void PropertyTreeWidget::makeTranslationMap()
     mEnumTranslator["enPotential"] = tr("Потенциальная энергия");
     mEnumTranslator["enFull"]      = tr("Полная энергия");
     // Estimation enum
-    mEnumTranslator["esDisplacement"] = tr("Невязка перемещения");
-    mEnumTranslator["esRotation"]     = tr("Невязка вектора поворота");
-    mEnumTranslator["esForce"]        = tr("Невязка усилий");
-    mEnumTranslator["esMoment"]       = tr("Невязка моментов");
+    mEnumTranslator["esDisplacement"] = tr("Ошибка перемещения");
+    mEnumTranslator["esRotation"]     = tr("Ошибка вектора поворота");
+    mEnumTranslator["esForce"]        = tr("Ошибка усилий");
+    mEnumTranslator["esMoment"]       = tr("Ошибка моментов");
     // Direction enum
     mEnumTranslator["dFirst"]  = tr("Первое");
     mEnumTranslator["dSecond"] = tr("Второе");

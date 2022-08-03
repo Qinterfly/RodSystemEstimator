@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Declaration of the ConvergenceViewer class
  */
 
@@ -33,8 +33,8 @@ private:
 private:
     QString const mkPathFile;
     QCustomPlot* mpFigure;
-    QStringList mAvailableColors;
-    QVector<QCPScatterStyle::ScatterShape> mAvailableShapes;
+    QStringList mStandardColorNames;
+    QVector<QCPScatterStyle::ScatterShape> mStandardShapes;
     QVector<int> mCalcModes;
     Core::Array<double> mDampingValues;
 };

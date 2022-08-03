@@ -27,12 +27,17 @@ public:
     void updateContent();
     void removeSelected();
     void selectItem(int iSelect = -1);
+    QColor resultColor(KLP::PointerResult pResult) const { return mResultColors[pResult]; }
 
 private:
     void clearContent();
+    QColor getAvailableColor();
 
 private:
     KLP::Results& mResults;
+    QStringList mStandardColorNames;
+    QMap<KLP::PointerResult, QColor> mResultColors;
+
 };
 
 }

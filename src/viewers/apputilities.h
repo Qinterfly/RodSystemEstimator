@@ -21,6 +21,7 @@ namespace App
 
 void setStyle();
 void moveToCenter(QWidget* pChildWidget, QWidget* pLeadingWidget = nullptr);
+QStringList standardColorNames();
 
 }
 

@@ -1,12 +1,13 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the ConvergenceViewer class
  */
 
 #include <QVBoxLayout>
 #include "convergenceviewer.h"
+#include "apputilities.h"
 
 using namespace RSE::Viewers;
 
@@ -39,11 +40,11 @@ void ConvergenceViewer::initialize()
     // Configure the legend
     mpFigure->legend->setVisible(true);
     // Create a set of available colors for graphs
-    mAvailableColors = {"red", "green", "blue", "black", "orange", "cyan", "magenta", "gray", "purple", "darkyellow"};
+    mStandardColorNames = Utilities::App::standardColorNames();
     // Construct a set of marker styles
-    mAvailableShapes << QCPScatterStyle::ssDisc << QCPScatterStyle::ssPlus << QCPScatterStyle::ssCircle << QCPScatterStyle::ssCross
-                     << QCPScatterStyle::ssSquare <<  QCPScatterStyle::ssDiamond << QCPScatterStyle::ssStar << QCPScatterStyle::ssTriangle
-                     << QCPScatterStyle::ssTriangleInverted << QCPScatterStyle::ssCrossSquare;
+    mStandardShapes << QCPScatterStyle::ssDisc << QCPScatterStyle::ssPlus << QCPScatterStyle::ssCircle << QCPScatterStyle::ssCross
+                    << QCPScatterStyle::ssSquare <<  QCPScatterStyle::ssDiamond << QCPScatterStyle::ssStar << QCPScatterStyle::ssTriangle
+                    << QCPScatterStyle::ssTriangleInverted << QCPScatterStyle::ssCrossSquare;
     // Arrangement of widgets
     QVBoxLayout* pLayout = new QVBoxLayout();
     pLayout->addWidget(mpFigure);
@@ -65,8 +66,8 @@ void ConvergenceViewer::plot()
     QVector<double> yValues(numCalcModes);
     // Plot the graphs
     int iColor = 0, iShape = 0;
-    int numAvailableColors = mAvailableColors.size();
-    int numAvailableShapes = mAvailableShapes.size();
+    int numColors = mStandardColorNames.size();
+    int numShapes = mStandardShapes.size();
     mpFigure->clearGraphs();
     for (int iDamper = 0; iDamper != numDampers; ++iDamper)
     {
@@ -77,14 +78,14 @@ void ConvergenceViewer::plot()
         pGraph->setData(xValues, yValues);
         pGraph->setName(tr("Демпфер: №%1").arg(QString::number(iDamper + 1)));
         // Assign the coor
-        if (iColor >= numAvailableColors - 1)
+        if (iColor >= numColors - 1)
             iColor = 0;
-        pGraph->setPen(QPen(mAvailableColors[iColor]));
+        pGraph->setPen(QPen(mStandardColorNames[iColor]));
         ++iColor;
         // Set the marker
-        if (iShape >= numAvailableShapes - 1)
+        if (iShape >= numShapes - 1)
             iShape = 0;
-        pGraph->setScatterStyle(QCPScatterStyle(mAvailableShapes[iShape], kShapeSize));
+        pGraph->setScatterStyle(QCPScatterStyle(mStandardShapes[iShape], kShapeSize));
         ++iShape;
     }
     // Rescale axes and update

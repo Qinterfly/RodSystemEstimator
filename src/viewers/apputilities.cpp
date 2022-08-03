@@ -35,3 +35,15 @@ void App::moveToCenter(QWidget* pChildWidget, QWidget* pLeadingWidget)
     QPoint newPosition = pChildWidget->pos() + leadingGeometry.center() - pChildWidget->geometry().center();
     pChildWidget->move(newPosition);
 }
+
+//! Retrieve a set of names of standard colors
+QStringList App::standardColorNames()
+{
+    QStringList colors =
+    {
+        "red", "green", "blue",
+        "black", "orange", "cyan",
+        "magenta", "gray", "purple", "darkyellow"
+    };
+    return colors;
+}

@@ -7,6 +7,7 @@
 
 #include <QFileInfo>
 #include <QListView>
+#include "apputilities.h"
 #include "resultlistmodel.h"
 #include "klp/result.h"
 
@@ -15,6 +16,7 @@ using namespace RSE::Models;
 ResultListModel::ResultListModel(KLP::Results& results, QObject* pParent)
     : QStandardItemModel(pParent), mResults(results)
 {
+    mStandardColorNames = Utilities::App::standardColorNames();
     updateContent();
 }
 
@@ -33,8 +35,11 @@ void ResultListModel::updateContent()
     {
         QString fileName = QFileInfo(result->pathFile()).baseName();
         QStandardItem* pItem = new QStandardItem();
+        QColor color = mResultColors.contains(result) ? mResultColors[result] : getAvailableColor();
         pItem->setText(fileName);
+        pItem->setData(color, Qt::DecorationRole);
         appendRow(pItem);
+        mResultColors[result] = color;
     }
 }
 
@@ -58,8 +63,11 @@ void ResultListModel::removeSelected()
     KLP::Results newResults;
     for (int i = 0; i != numResults; ++i)
     {
+        KLP::PointerResult pResult = mResults[i];
         if (mask[i])
-            newResults.push_back(mResults[i]);
+            newResults.push_back(pResult);
+        else
+            mResultColors.remove(pResult);
     }
     mResults = newResults;
     updateContent();
@@ -76,4 +84,11 @@ void ResultListModel::selectItem(int iSelect)
         return;
     QListView* pParent = (QListView*)parent();
     pParent->setCurrentIndex(index(iSelect, 0));
+}
+
+//! Retireve the next available color from the predefined set of colors
+QColor ResultListModel::getAvailableColor()
+{
+    static int iColor = 0;
+    return QColor(mStandardColorNames[iColor++]);
 }

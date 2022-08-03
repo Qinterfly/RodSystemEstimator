@@ -57,7 +57,7 @@ void KLPGraphViewer::initialize()
     CDockManager::setConfigFlag(CDockManager::EqualSplitOnInsertion, true);
     mpDockManager = new CDockManager(this);
     mpDockManager->setStyleSheet("");
-    RSE::Utilities::App::moveToCenter(this, parentWidget());
+    Utilities::App::moveToCenter(this, parentWidget());
 }
 
 //! Construct graphical interface
@@ -87,6 +87,7 @@ CDockWidget* KLPGraphViewer::createResultWidget()
     mpResultListModel = new ResultListModel(mResults, mpListResults);
     mpListResults->setModel(mpResultListModel);
     mpListResults->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    mpListResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
     connect(mpListResults->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedResults);
     // Info
     mpTextInfo = new QTextEdit();
@@ -279,6 +280,7 @@ void KLPGraphViewer::plot()
     int numResults = indicesResults.size();
     int numGraphs  = indicesGraphs.size();
     // Iterate through results
+    bool isCompareResults = numResults > 1;
     for (int i = 0; i != numResults; ++i)
     {
         int iResult = indicesResults[i].row();
@@ -303,7 +305,7 @@ void KLPGraphViewer::plot()
             if (!pGraph->isDataSlicer() && numData == KLP::kNumDirections)
                 plotSurface(pGraph, pResult);
             else
-                plotCurve(pGraph, pResult);
+                plotCurve(pGraph, pResult, isCompareResults);
         }
     }
 }
@@ -315,7 +317,7 @@ void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const 
 }
 
 //! Represent plottable data as a curve
-void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult)
+void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult, bool isCompareResults)
 {
     QVector<int> const& indicesData = pGraph->indicesUniqueData();
     auto [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
@@ -326,7 +328,8 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     QCPGraph* pCurve = mpFigure->addGraph();
     pCurve->setData(curveValues[0], curveValues[1]);
     // Specify visual properties
-    pCurve->setPen(QPen(pGraph->color(), pGraph->lineWidth()));
+    QColor color = isCompareResults ? mpResultListModel->resultColor(pResult) : pGraph->color();
+    pCurve->setPen(QPen(color, pGraph->lineWidth()));
     pCurve->setLineStyle(pGraph->lineStyle());
     pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
     // Add title
