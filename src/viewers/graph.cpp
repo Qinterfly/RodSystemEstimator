@@ -12,7 +12,7 @@ using namespace RSE::Viewers;
 
 GraphIDType Graph::smMaxGraphID = 0;
 
-using DataSign = QPair<AbstractGraphData::Category, int>;
+using DataSign = std::pair<AbstractGraphData::Category, int>;
 
 Graph::Graph(QString const& name)
     : mName(name)
@@ -50,7 +50,7 @@ void Graph::setData(AbstractGraphData* pData, int iData)
 QVector<int> Graph::indicesUniqueData() const
 {
     // Create the set of unique graph data
-    QMap<DataSign, int> uniqueData;
+    std::map<DataSign, int> uniqueData;
     for (int i = 0; i != KLP::kNumDirections; ++i)
     {
         if (!mpData[i])
@@ -62,7 +62,8 @@ QVector<int> Graph::indicesUniqueData() const
     // Retrieve indices of unique entities
     QVector<int> indices;
     for (auto item : uniqueData)
-        indices.push_back(item);
+        indices.push_back(item.second);
+    std::sort(indices.begin(), indices.end());
     return indices;
 }
 

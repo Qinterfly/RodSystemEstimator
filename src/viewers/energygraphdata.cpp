@@ -23,11 +23,11 @@ GraphDataset EnergyGraphData::getDataset(KLP::FrameCollection const& collection,
 
     switch (mType)
     {
-    case eKinetic:
+    case enKinetic:
         return sliceByIndex(collection.energy.kinetic, sliceIndex);
-    case ePotential:
+    case enPotential:
         return sliceByIndex(collection.energy.potential, sliceIndex);
-    case eFull:
+    case enFull:
         return sliceByIndex(collection.energy.full, sliceIndex);
     default:
         break;

@@ -21,9 +21,9 @@ class EnergyGraphData : public AbstractGraphData
 public:
     enum EnergyType
     {
-        eKinetic,
-        ePotential,
-        eFull
+        enKinetic,
+        enPotential,
+        enFull
     };
     Q_ENUM(EnergyType)
     EnergyGraphData(EnergyType type, Direction direction = Direction::dFull);

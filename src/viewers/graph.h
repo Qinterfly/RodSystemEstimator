@@ -43,6 +43,7 @@ public:
     QColor color() const { return mColor; }
     QCPScatterStyle::ScatterShape scatterShape() const { return mScatterShape; }
     double scatterSize() const { return mScatterSize; }
+    QString const& title() const { return mTitle; }
     QStringList const& axesLabels() const { return mAxesLabels; }
     // Setters of data properties
     void setName(QString const& name) { mName = name; }
@@ -57,8 +58,9 @@ public:
     void setColor(QColor const& color) { mColor = color; }
     void setScatterShape(QCPScatterStyle::ScatterShape const& scatterShape) { mScatterShape = scatterShape; }
     void setScatterSize(double scatterSize) { mScatterSize = scatterSize; }
+    void setTitle(QString const& title) { mTitle = title; }
     void setAxisLabel(QString const& label, int iData) { mAxesLabels[iData] = label; }
-    void setAxesLabels(QStringList const& labels) { mAxesLabels = labels; }
+    void setAxesLabels(QString const& xLabel, QString const& yLabel, QString const& zLabel = "") { mAxesLabels = { xLabel, yLabel, zLabel }; }
 
 private:
     QString mName;
@@ -73,6 +75,8 @@ private:
     // Scatter options
     QCPScatterStyle::ScatterShape mScatterShape = QCPScatterStyle::ssNone;
     double mScatterSize = 5;
+    // Title
+    QString mTitle;
     // Axes labels
     QStringList mAxesLabels = QStringList({"Ось X", "Ось Y", "Ось Z"});
 

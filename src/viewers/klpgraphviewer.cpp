@@ -121,6 +121,8 @@ CDockWidget* KLPGraphViewer::createFigureWidget()
     CDockWidget* pDockWidget = new CDockWidget(tr("Графический просмотр объектов"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     mpFigure = new QCustomPlot();
+    mpFigure->plotLayout()->insertRow(0);
+    mpFigure->plotLayout()->addElement(0, 0, new QCPTextElement(mpFigure, "", QFont("sans", font().pointSize(), QFont::Bold)));
     mpFigure->setAntialiasedElement(QCP::AntialiasedElement::aeAll, true);
     mpFigure->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     mpFigure->axisRect()->setupFullAxesBox(true);
@@ -327,6 +329,9 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     pCurve->setPen(QPen(pGraph->color(), pGraph->lineWidth()));
     pCurve->setLineStyle(pGraph->lineStyle());
     pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
+    // Add title
+    QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
+    pTitleElement->setText(pGraph->title());
     // Specify labels
     mpFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
     mpFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
@@ -377,7 +382,7 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
                 {
                     int jData = curveIndices[k];
                     AbstractGraphData* pData = pGraph->data()[jData];
-                    curveValues[k][iTime] = pData->getDataset(collection, sliceIndex)[0];
+                    curveValues[k][iTime] = pData->getDataset(collection, sliceIndex).first();
                 }
             }
         }
@@ -388,7 +393,7 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
             return CurveData();
         int numTime = pResult->numTimeRecords();
         curveIndices = indicesData;
-        curveValues = { GraphDataset(numTime), GraphDataset(numTime) };
+        curveValues = QVector<GraphDataset>(2, GraphDataset(numTime));
         int numCurves = curveIndices.size();
         for (int iTime = 0; iTime != numTime; ++iTime)
         {
@@ -397,7 +402,7 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
             {
                 int jData = curveIndices[k];
                 AbstractGraphData* pData = pGraph->data()[jData];
-                curveValues[k][iTime] = pData->getDataset(collection)[0];
+                curveValues[k][iTime] = pData->getDataset(collection).first();
             }
         }
     }

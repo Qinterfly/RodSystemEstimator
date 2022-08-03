@@ -11,12 +11,13 @@
 #include <QSlider>
 #include <QHeaderView>
 #include "propertytreewidget.h"
+#include "klp/result.h"
 #include "graph.h"
 #include "abstractgraphdata.h"
 #include "spacetimegraphdata.h"
 #include "kinematicsgraphdata.h"
 #include "energygraphdata.h"
-#include "klp/result.h"
+#include "estimationgraphdata.h"
 
 using namespace RSE::Viewers;
 
@@ -102,6 +103,8 @@ void PropertyTreeWidget::updateValues()
     mpScatterShapeWidget->setCurrentIndex(mpGraph->scatterShape());
     // Scatter size
     mpScatterSizeWidget->setValue(mpGraph->scatterSize());
+    // Title
+    mpTitleWidget->setText(mpGraph->title());
     // Axes labels
     QLineEdit* pEdit;
     QStringList const& axesLabels = mpGraph->axesLabels();
@@ -148,6 +151,11 @@ void PropertyTreeWidget::createHierarchy()
     mpScatterSizeWidget->setValue(5);
     setItemWidget(pScatterShapeItem, 1, mpScatterShapeWidget);
     setItemWidget(pScatterSizeItem, 1, mpScatterSizeWidget);
+    // Title
+    QTreeWidgetItem* pTitleItem = new QTreeWidgetItem({tr("Название")});
+    pRoot->addChild(pTitleItem);
+    mpTitleWidget = new QLineEdit();
+    setItemWidget(pTitleItem, 1, mpTitleWidget);
     // Axes
     createAxesLabelsItem();
     pRoot->addChild(mpAxesLabelsItem);
@@ -271,6 +279,8 @@ void PropertyTreeWidget::specifyConnections()
     // Scatter properties
     connect(mpScatterShapeWidget, &QComboBox::currentIndexChanged, this, &PropertyTreeWidget::assignVisualProperties);
     connect(mpScatterSizeWidget, &QDoubleSpinBox::valueChanged, this, &PropertyTreeWidget::assignVisualProperties);
+    // Title
+    connect(mpTitleWidget, &QLineEdit::textChanged, this, &PropertyTreeWidget::assignVisualProperties);
     // Axes labels
     for (int i = 0; i != numData; ++i)
     {
@@ -353,7 +363,7 @@ void PropertyTreeWidget::setTypeWidget(int iData)
             // TODO
             break;
         case AbstractGraphData::cEstimation:
-            // TODO
+            pComboBox->addItems(getEnumData(EstimationGraphData::staticMetaObject, "EstimationType").first);
             break;
         }
         pComboBox->setCurrentIndex(-1);
@@ -398,10 +408,16 @@ void PropertyTreeWidget::resetSlicerWidgetsData()
     pTypeWidget->clear();
     if (isEnabled)
     {
-        auto const& sliceTypes = getEnumData(GraphDataSlicer::staticMetaObject, "SliceType").first;
         auto const& indicesData = mpGraph->indicesUniqueData();
         for (auto i : indicesData)
-            pTypeWidget->addItem(sliceTypes[i], i);
+        {
+            // Only space and time data can be chosen for slicing
+            if (mpGraph->data()[i]->category() == AbstractGraphData::cSpaceTime)
+            {
+                QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(1), 1);
+                pTypeWidget->addItem(pComboBox->currentText(), i);
+            }
+        }
     }
     pTypeWidget->setCurrentIndex(-1);
     // Limits
@@ -492,7 +508,7 @@ void PropertyTreeWidget::assignGraphData(int iData)
             // TODO
             break;
         case AbstractGraphData::cEstimation:
-            // TODO
+            pData = new EstimationGraphData((EstimationGraphData::EstimationType)iType, direction);
             break;
         }
         mpGraph->setData(pData, iData);
@@ -513,6 +529,8 @@ void PropertyTreeWidget::assignVisualProperties()
     // Scatter properties
     mpGraph->setScatterShape((QCPScatterStyle::ScatterShape)mpScatterShapeWidget->currentIndex());
     mpGraph->setScatterSize(mpScatterSizeWidget->value());
+    // Title
+    mpGraph->setTitle(mpTitleWidget->text());
     // Axes labels
     int numData = mpAxesLabelsItem->childCount();
     for (int i = 0; i != numData; ++i)
@@ -593,10 +611,6 @@ EnumData PropertyTreeWidget::getEnumData(QMetaObject const& metaObject, std::str
 //! Specify translations for enum options
 void PropertyTreeWidget::makeTranslationMap()
 {
-    // Slice enum
-    mEnumTranslator["sdX"] = "Данные X";
-    mEnumTranslator["sdY"] = "Данные Y";
-    mEnumTranslator["sdZ"] = "Данные Z";
     // Category enum
     mEnumTranslator["cSpaceTime"]  = tr("Пространство-время");
     mEnumTranslator["cKinematics"] = tr("Кинематическая");
@@ -613,15 +627,20 @@ void PropertyTreeWidget::makeTranslationMap()
     // Kinematics enum
     mEnumTranslator["kStrain"]              = tr("Продольная деформация");
     mEnumTranslator["kDisplacement"]        = tr("Перемещение");
-    mEnumTranslator["kRotation"]            = tr("Проекция вектора поворота");
+    mEnumTranslator["kRotation"]            = tr("Вектор поворота");
     mEnumTranslator["kSpeed"]               = tr("Линейная скорость");
     mEnumTranslator["kAngularSpeed"]        = tr("Угловая скорость");
     mEnumTranslator["kAcceleration"]        = tr("Линейное ускорение");
     mEnumTranslator["kAngularAcceleration"] = tr("Угловое ускорение");
     // Energy enum
-    mEnumTranslator["eKinetic"]   = tr("Кинетическая энергия");
-    mEnumTranslator["ePotential"] = tr("Потенциальная энергия");
-    mEnumTranslator["eFull"]      = tr("Полная энергия");
+    mEnumTranslator["enKinetic"]   = tr("Кинетическая энергия");
+    mEnumTranslator["enPotential"] = tr("Потенциальная энергия");
+    mEnumTranslator["enFull"]      = tr("Полная энергия");
+    // Estimation enum
+    mEnumTranslator["esDisplacement"] = tr("Невязка перемещения");
+    mEnumTranslator["esRotation"]     = tr("Невязка вектора поворота");
+    mEnumTranslator["esForce"]        = tr("Невязка усилий");
+    mEnumTranslator["esMoment"]       = tr("Невязка моментов");
     // Direction enum
     mEnumTranslator["dFirst"]  = tr("Первое");
     mEnumTranslator["dSecond"] = tr("Второе");

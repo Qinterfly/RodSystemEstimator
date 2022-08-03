@@ -16,6 +16,7 @@
 #include "viewers/spacetimegraphdata.h"
 #include "viewers/kinematicsgraphdata.h"
 #include "viewers/energygraphdata.h"
+#include "viewers/estimationgraphdata.h"
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;
@@ -63,7 +64,7 @@ void TestViewers::testConvergenceViewer()
 //! Create graphs of different types
 void TestViewers::testGraphs()
 {
-    const int kNumGraphs = 3;
+    const int kNumGraphs = 4;
     // Create multiple graphs
     for (int i = 0; i != kNumGraphs; ++i)
     {
@@ -74,16 +75,21 @@ void TestViewers::testGraphs()
     mGraphs[0]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kSpeed));
-    mGraphs[0]->setAxesLabels({tr("Параметр"), tr("Время"), tr("Скорость")});
+    mGraphs[0]->setAxesLabels(tr("Параметр"), tr("Время"), tr("Скорость"));
     // [SS, t, U]
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
-    mGraphs[1]->setAxesLabels({tr("Накопленная длина"), tr("Время"), tr("Перемещение")});
-    // [t, Ef]
+    mGraphs[1]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Перемещение"));
+    // [t, Ep]
     mGraphs[2]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new EnergyGraphData(EnergyGraphData::eFull));
-    mGraphs[2]->setAxesLabels({tr("Время"), tr("Полная энергия"), tr("")});
+                        new EnergyGraphData(EnergyGraphData::enPotential));
+    mGraphs[2]->setAxesLabels(tr("Время"), tr("Потенциальная энергия"));
+    // [SS, t, eU]
+    mGraphs[3]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
+                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                        new EstimationGraphData(EstimationGraphData::esDisplacement));
+    mGraphs[3]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Невязка перемещения"));
 }
 
 //! Slice graph data

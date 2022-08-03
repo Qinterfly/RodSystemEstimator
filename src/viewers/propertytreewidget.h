@@ -86,6 +86,7 @@ private:
     QTreeWidgetItem* mpColorItem;
     QComboBox* mpScatterShapeWidget;
     QDoubleSpinBox* mpScatterSizeWidget;
+    QLineEdit* mpTitleWidget;
     QTreeWidgetItem* mpAxesLabelsItem;
 };
 
