@@ -1,12 +1,13 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the KLPResultListModel class
  */
 
 #include <QFileInfo>
 #include <QListView>
+#include <QColorDialog>
 #include "apputilities.h"
 #include "resultlistmodel.h"
 #include "klp/result.h"
@@ -17,6 +18,7 @@ ResultListModel::ResultListModel(KLP::Results& results, QObject* pParent)
     : QStandardItemModel(pParent), mResults(results)
 {
     mStandardColorNames = Utilities::App::standardColorNames();
+    specifyConnections();
     updateContent();
 }
 
@@ -35,11 +37,13 @@ void ResultListModel::updateContent()
     {
         QString fileName = QFileInfo(result->pathFile()).baseName();
         QStandardItem* pItem = new QStandardItem();
-        QColor color = mResultColors.contains(result) ? mResultColors[result] : getAvailableColor();
+        KLP::Result* pResult = result.get();
+        QColor color = mResultColors.contains(pResult) ? mResultColors[pResult] : getAvailableColor();
         pItem->setText(fileName);
         pItem->setData(color, Qt::DecorationRole);
+        pItem->setData((qintptr)pResult, Qt::UserRole);
+        mResultColors[pResult] = color;
         appendRow(pItem);
-        mResultColors[result] = color;
     }
 }
 
@@ -67,7 +71,7 @@ void ResultListModel::removeSelected()
         if (mask[i])
             newResults.push_back(pResult);
         else
-            mResultColors.remove(pResult);
+            mResultColors.remove(pResult.get());
     }
     mResults = newResults;
     updateContent();
@@ -91,4 +95,27 @@ QColor ResultListModel::getAvailableColor()
 {
     static int iColor = 0;
     return QColor(mStandardColorNames[iColor++]);
+}
+
+//! Enable widgets to communicate
+void ResultListModel::specifyConnections()
+{
+    QListView* pView = (QListView*)parent();
+    // Create a color dialog to modify the color of a project
+    connect(pView, &QListView::doubleClicked, this, [this, pView](const QModelIndex & index)
+    {
+        // Acuqire the addres of the current result
+        int iItem = index.row();
+        qintptr* pIHolderResult = (qintptr*)item(iItem)->data(Qt::UserRole).data();
+        KLP::Result* pResult = (KLP::Result*)(*pIHolderResult);
+        QColorDialog* pDialog = new QColorDialog(pView);
+        // Connect it with the color dialog
+        connect(pDialog, &QColorDialog::colorSelected, this, [this, pResult, iItem](QColor const & color)
+        {
+            mResultColors[pResult] = color;
+            updateContent();
+            selectItem(iItem);
+        });
+        pDialog->show();
+    });
 }

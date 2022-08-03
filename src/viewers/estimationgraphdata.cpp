@@ -19,7 +19,6 @@ EstimationGraphData::EstimationGraphData(EstimationType type, Direction directio
 //! Retrieve the data of the specified type and direction from a given frame
 GraphDataset EstimationGraphData::getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) const
 {
-
     switch (mType)
     {
     case esDisplacement:

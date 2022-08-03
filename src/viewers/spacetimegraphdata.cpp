@@ -20,7 +20,6 @@ SpaceTimeGraphData::SpaceTimeGraphData(SpaceTimeType type, Direction direction)
 //! Retrieve the data of the specified type and direction from a given frame
 GraphDataset SpaceTimeGraphData::getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) const
 {
-
     switch (mType)
     {
     case stTime:
