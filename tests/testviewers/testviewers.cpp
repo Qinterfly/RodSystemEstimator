@@ -84,12 +84,12 @@ void TestViewers::testGraphs()
     // Time - kinetic energy
     mGraphs[2]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new EnergyGraphData(EnergyGraphData::enKinetic));
-    mGraphs[2]->setAxesLabels(tr("Время"), tr("Потенциальная энергия"));
-    // Natural length - time - displacement
+    mGraphs[2]->setAxesLabels(tr("Время"), tr("Кинетическая энергия"));
+    // Natural length - time - error of displacement
     mGraphs[3]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new EstimationGraphData(EstimationGraphData::esDisplacement));
-    mGraphs[3]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Невязка перемещения"));
+    mGraphs[3]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Ошибка перемещения"));
 }
 
 //! Slice graph data
