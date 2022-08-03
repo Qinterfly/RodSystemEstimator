@@ -36,6 +36,7 @@ public:
     GraphDataSlicer& dataSlicer() const { return *mpDataSlicer; }
     QVector<int> indicesUniqueData() const;
     int indexTimeData() const;
+    int indexData(int iCategory, int iType = -1) const;
     bool isTimeData() const { return indexTimeData() >= 0; }
     // Getters of visual properties
     QCPGraph::LineStyle lineStyle() const { return mLineStyle; }

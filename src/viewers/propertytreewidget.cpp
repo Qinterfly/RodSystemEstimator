@@ -65,14 +65,14 @@ void PropertyTreeWidget::updateValues()
         pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(1), 1);
         pComboBox->clear();
         if (isDirectionalData)
-        {
             setTypeWidget(i);
-            pComboBox->setCurrentIndex(data[i]->type());
-        }
+        index = isDirectionalData ? data[i]->type() : -1;
+        pComboBox->setCurrentIndex(index);
         // Direction
         pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(2), 1);
         pComboBox->clear();
-        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
+        if (isDirectionalData)
+            setDirectionWidget(i);
         index = isDirectionalData ? data[i]->direction() : -1;
         pComboBox->setCurrentIndex(index);
     }
@@ -226,9 +226,9 @@ void PropertyTreeWidget::specifyConnections()
         QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
         connect(pComboBox, &QComboBox::currentIndexChanged, this, [ this, i, funSlicer]()
         {
-            if (mpGraph)
-                mpGraph->eraseData(i);
+            assignGraphData(i);
             setTypeWidget(i);
+            setDirectionWidget(i);
             funSlicer();
         });
         // Type & direction
@@ -370,6 +370,18 @@ void PropertyTreeWidget::setTypeWidget(int iData)
     }
 }
 
+//! Represent the direction of the given graph data
+void PropertyTreeWidget::setDirectionWidget(int iData)
+{
+    QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[iData]->child(2), 1);
+    {
+        QSignalBlocker blocker(pComboBox);
+        pComboBox->clear();
+        pComboBox->addItems(getEnumData(AbstractGraphData::staticMetaObject, "Direction").first);
+        pComboBox->setCurrentIndex(-1);
+    }
+}
+
 //! Set the color of the graph
 void PropertyTreeWidget::setColorItem(QColor const& color)
 {
@@ -479,8 +491,6 @@ void PropertyTreeWidget::setBlockedSlicerWidgetsSignals(bool flag)
 //! Assign new graph data
 void PropertyTreeWidget::assignGraphData(int iData)
 {
-    if (!mpGraph)
-        return;
     int iCategory = currentDataIndex(iData, 0);
     int iType = currentDataIndex(iData, 1);
     int iDirection = currentDataIndex(iData, 2);
@@ -513,15 +523,17 @@ void PropertyTreeWidget::assignGraphData(int iData)
         }
         mpGraph->setData(pData, iData);
         mpGraph->setAxisLabel(currentDataText(iData, 1), iData);
-        emit graphChanged();
     }
+    else
+    {
+        mpGraph->eraseData(iData);
+    }
+    emit graphChanged();
 }
 
 //! Assign visual properties of current graph
 void PropertyTreeWidget::assignVisualProperties()
 {
-    if (!mpGraph)
-        return;
     // Line properties
     mpGraph->setLineStyle((QCPGraph::LineStyle)mpLineStyleWidget->currentIndex());
     mpGraph->setLineWidth(mpLineWidthWidget->value());
@@ -619,28 +631,28 @@ void PropertyTreeWidget::makeTranslationMap()
     mEnumTranslator["cModal"]      = tr("Модальная");
     mEnumTranslator["cEstimation"] = tr("Оценочная");
     // Spacetime enum
-    mEnumTranslator["stTime"]                     = tr("Время");
-    mEnumTranslator["stParameter"]                = tr("Параметр");
-    mEnumTranslator["stNaturalLength"]            = tr("Естественная длина");
-    mEnumTranslator["stAccumulatedNaturalLength"] = tr("Суммарная естественная длина");
-    mEnumTranslator["stCoordinate"]               = tr("Координата");
+    mEnumTranslator["stTime"]                     = tr("Время, c");
+    mEnumTranslator["stParameter"]                = tr("Параметр, м/м");
+    mEnumTranslator["stNaturalLength"]            = tr("Естественная длина, м");
+    mEnumTranslator["stAccumulatedNaturalLength"] = tr("Суммарная естественная длина, м");
+    mEnumTranslator["stCoordinate"]               = tr("Координата, м");
     // Kinematics enum
-    mEnumTranslator["kStrain"]              = tr("Продольная деформация");
-    mEnumTranslator["kDisplacement"]        = tr("Перемещение");
-    mEnumTranslator["kRotation"]            = tr("Вектор поворота");
-    mEnumTranslator["kSpeed"]               = tr("Линейная скорость");
-    mEnumTranslator["kAngularSpeed"]        = tr("Угловая скорость");
-    mEnumTranslator["kAcceleration"]        = tr("Линейное ускорение");
-    mEnumTranslator["kAngularAcceleration"] = tr("Угловое ускорение");
+    mEnumTranslator["kStrain"]              = tr("Продольная деформация, м/м");
+    mEnumTranslator["kDisplacement"]        = tr("Перемещение, м");
+    mEnumTranslator["kRotation"]            = tr("Вектор поворота, рад");
+    mEnumTranslator["kSpeed"]               = tr("Линейная скорость, м/c");
+    mEnumTranslator["kAngularSpeed"]        = tr("Угловая скорость, рад/c");
+    mEnumTranslator["kAcceleration"]        = tr("Линейное ускорение, м/c^2");
+    mEnumTranslator["kAngularAcceleration"] = tr("Угловое ускорение, рад/c^2");
     // Energy enum
-    mEnumTranslator["enKinetic"]   = tr("Кинетическая энергия");
-    mEnumTranslator["enPotential"] = tr("Потенциальная энергия");
-    mEnumTranslator["enFull"]      = tr("Полная энергия");
+    mEnumTranslator["enKinetic"]   = tr("Кинетическая энергия, Дж");
+    mEnumTranslator["enPotential"] = tr("Потенциальная энергия, Дж");
+    mEnumTranslator["enFull"]      = tr("Полная энергия, Дж");
     // Estimation enum
-    mEnumTranslator["esDisplacement"] = tr("Ошибка перемещения");
-    mEnumTranslator["esRotation"]     = tr("Ошибка вектора поворота");
-    mEnumTranslator["esForce"]        = tr("Ошибка усилий");
-    mEnumTranslator["esMoment"]       = tr("Ошибка моментов");
+    mEnumTranslator["esDisplacement"] = tr("Ошибка перемещения, м");
+    mEnumTranslator["esRotation"]     = tr("Ошибка вектора поворота, рад");
+    mEnumTranslator["esForce"]        = tr("Ошибка усилий, Н");
+    mEnumTranslator["esMoment"]       = tr("Ошибка моментов, Н*м");
     // Direction enum
     mEnumTranslator["dFirst"]  = tr("Первое");
     mEnumTranslator["dSecond"] = tr("Второе");

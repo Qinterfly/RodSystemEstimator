@@ -58,6 +58,7 @@ private:
     int currentDataIndex(int iData, int iChild);
     QString currentDataText(int iData, int iChild);
     void setTypeWidget(int iData);
+    void setDirectionWidget(int iData);
     void setColorItem(QColor const& color);
     // Slicer widgets
     void resetSlicerWidgetsData();

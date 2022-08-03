@@ -70,21 +70,30 @@ QVector<int> Graph::indicesUniqueData() const
 //! Retrieve the index of the time data
 int Graph::indexTimeData() const
 {
-    int iTimeData = -1;
+    return indexData(AbstractGraphData::cSpaceTime, SpaceTimeGraphData::stTime);
+}
+
+//! Retrieve the index of the data of the requested category and type (optional)
+int Graph::indexData(int iCategory, int iType) const
+{
+    int iData = -1;
+    bool isData;
     for (int i = 0; i != KLP::kNumDirections; ++i)
     {
         AbstractGraphData* pData = mpData[i];
         if (!pData)
             continue;
-        bool isTime = pData->category() == AbstractGraphData::cSpaceTime
-                      && pData->type() == SpaceTimeGraphData::stTime;
-        if (isTime)
+        isData = pData->category() == iCategory;
+        // Check if the type is specified
+        if (iType >= 0)
+            isData = isData && pData->type() == iType;
+        if (isData)
         {
-            iTimeData = i;
+            iData = i;
             break;
         }
     }
-    return iTimeData;
+    return iData;
 }
 
 //! Create an instance of object to slice one of datasets

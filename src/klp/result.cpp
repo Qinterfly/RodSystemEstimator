@@ -106,7 +106,6 @@ bool Result::read()
     QFile file(mkPathFile);
     if (!file.open(QIODeviceBase::ReadOnly))
         return false;
-    QDataStream stream(&file);
     mContent = file.readAll();
     file.close();
     return true;
@@ -116,9 +115,11 @@ bool Result::read()
 void Result::buildIndex()
 {
     // Reading constants
-    const int kStartIndex = 17;
+    const int kStartIndex      = 17;
     const int kShiftNumRecords = 10;
-    const int kShiftTime = 4;
+    const int kShiftTime       = 4;
+    const short kSizeDouble    = sizeof(double);
+    const short kSizeFloat     = sizeof(float);
 
     // Slice the content data
     unsigned char* pBuffer = (unsigned char*) mContent.data();
@@ -169,6 +170,8 @@ void Result::buildIndex()
     qint64 iRecord = 0;
     qint64 iStartData;
     int iType;
+    double* pDoubleValue;
+    float* pFloatValue;
     iStartEntry = kStartIndex;
     for (qint64 k = 0; k != mNumTotalRecords; ++k)
     {
@@ -189,6 +192,15 @@ void Result::buildIndex()
                 if (*pLengthEntry > 4)
                     mNumBytesRod = 4;
                 ++kk;
+            }
+            // Convert double to float, if necessary
+            if (*pStartEntry == -kSizeDouble)
+            {
+                *pStartEntry = -kSizeFloat;
+                pDoubleValue = (double*)&pBuffer[iStartData];
+                pFloatValue = (float*)&pBuffer[iStartData];
+                for (qint64 i = 0; i != *pLengthEntry; ++i)
+                    pFloatValue[i] = (float)pDoubleValue[i];
             }
             // Assign the record
             iRecord = kk - 1;

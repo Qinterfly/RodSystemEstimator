@@ -270,6 +270,8 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
 //! Plot the resulting set of graphs
 void KLPGraphViewer::plot()
 {
+    QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
+    pTitleElement->setText(QString());
     mpFigure->clearPlottables();
     mpFigure->replot();
     QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
@@ -392,7 +394,8 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
     }
     else
     {
-        if (indicesData.size() > 2)
+        bool isEnergy = pGraph->indexData(AbstractGraphData::cEnergy) >= 0;
+        if (indicesData.size() > 2 || !isEnergy)
             return CurveData();
         int numTime = pResult->numTimeRecords();
         curveIndices = indicesData;

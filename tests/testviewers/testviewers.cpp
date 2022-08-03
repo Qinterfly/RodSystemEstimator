@@ -71,21 +71,21 @@ void TestViewers::testGraphs()
         auto pGraph = std::make_shared<Graph>(tr("Тест %1").arg(i));
         mGraphs.insert({i, pGraph});
     }
-    // [Xi, t, Ut]
+    // Parameter - time - speed
     mGraphs[0]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kSpeed));
     mGraphs[0]->setAxesLabels(tr("Параметр"), tr("Время"), tr("Скорость"));
-    // [SS, t, U]
+    // Natural length - time - displacement
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
     mGraphs[1]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Перемещение"));
-    // [t, Ep]
+    // Time - kinetic energy
     mGraphs[2]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new EnergyGraphData(EnergyGraphData::enPotential));
+                        new EnergyGraphData(EnergyGraphData::enKinetic));
     mGraphs[2]->setAxesLabels(tr("Время"), tr("Потенциальная энергия"));
-    // [SS, t, eU]
+    // Natural length - time - displacement
     mGraphs[3]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new EstimationGraphData(EstimationGraphData::esDisplacement));
