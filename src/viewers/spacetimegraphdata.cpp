@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the SpaceTimeGraphData class
  */
 
@@ -13,11 +13,6 @@ using namespace RSE::Viewers;
 SpaceTimeGraphData::SpaceTimeGraphData(SpaceTimeType type, Direction direction)
     : AbstractGraphData(Category::cSpaceTime, direction)
     , mType(type)
-{
-
-}
-
-SpaceTimeGraphData::~SpaceTimeGraphData()
 {
 
 }

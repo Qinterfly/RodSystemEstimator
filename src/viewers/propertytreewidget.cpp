@@ -15,6 +15,7 @@
 #include "abstractgraphdata.h"
 #include "spacetimegraphdata.h"
 #include "kinematicsgraphdata.h"
+#include "energygraphdata.h"
 #include "klp/result.h"
 
 using namespace RSE::Viewers;
@@ -346,7 +347,7 @@ void PropertyTreeWidget::setTypeWidget(int iData)
             // TODO
             break;
         case AbstractGraphData::cEnergy:
-            // TODO
+            pComboBox->addItems(getEnumData(EnergyGraphData::staticMetaObject, "EnergyType").first);
             break;
         case AbstractGraphData::cModal:
             // TODO
@@ -398,8 +399,8 @@ void PropertyTreeWidget::resetSlicerWidgetsData()
     if (isEnabled)
     {
         auto const& sliceTypes = getEnumData(GraphDataSlicer::staticMetaObject, "SliceType").first;
-        auto const& readyIndices = mpGraph->indicesReadyData();
-        for (auto i : readyIndices)
+        auto const& indicesData = mpGraph->indicesUniqueData();
+        for (auto i : indicesData)
             pTypeWidget->addItem(sliceTypes[i], i);
     }
     pTypeWidget->setCurrentIndex(-1);
@@ -485,7 +486,7 @@ void PropertyTreeWidget::assignGraphData(int iData)
             // TODO
             break;
         case AbstractGraphData::cEnergy:
-            // TODO
+            pData = new EnergyGraphData((EnergyGraphData::EnergyType)iType, direction);
             break;
         case AbstractGraphData::cModal:
             // TODO
@@ -617,6 +618,10 @@ void PropertyTreeWidget::makeTranslationMap()
     mEnumTranslator["kAngularSpeed"]        = tr("Угловая скорость");
     mEnumTranslator["kAcceleration"]        = tr("Линейное ускорение");
     mEnumTranslator["kAngularAcceleration"] = tr("Угловое ускорение");
+    // Energy enum
+    mEnumTranslator["eKinetic"]   = tr("Кинетическая энергия");
+    mEnumTranslator["ePotential"] = tr("Потенциальная энергия");
+    mEnumTranslator["eFull"]      = tr("Полная энергия");
     // Direction enum
     mEnumTranslator["dFirst"]  = tr("Первое");
     mEnumTranslator["dSecond"] = tr("Второе");

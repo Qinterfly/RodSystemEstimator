@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Testing the widgets which are used to view distributions of parameters
  */
 
@@ -15,6 +15,7 @@
 #include "viewers/graph.h"
 #include "viewers/spacetimegraphdata.h"
 #include "viewers/kinematicsgraphdata.h"
+#include "viewers/energygraphdata.h"
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;
@@ -62,7 +63,7 @@ void TestViewers::testConvergenceViewer()
 //! Create graphs of different types
 void TestViewers::testGraphs()
 {
-    const int kNumGraphs = 2;
+    const int kNumGraphs = 3;
     // Create multiple graphs
     for (int i = 0; i != kNumGraphs; ++i)
     {
@@ -78,7 +79,11 @@ void TestViewers::testGraphs()
     mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
                         new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
                         new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
-    mGraphs[1]->setAxesLabels({tr("Накопленная длина"), tr("Время"), tr("Перемещние")});
+    mGraphs[1]->setAxesLabels({tr("Накопленная длина"), tr("Время"), tr("Перемещение")});
+    // [t, Ef]
+    mGraphs[2]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                        new EnergyGraphData(EnergyGraphData::eFull));
+    mGraphs[2]->setAxesLabels({tr("Время"), tr("Полная энергия"), tr("")});
 }
 
 //! Slice graph data

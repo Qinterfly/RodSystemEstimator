@@ -34,7 +34,7 @@ public:
     bool isData(int iData) const { return mpData[iData]; }
     bool isDataSlicer() const { return mpDataSlicer; }
     GraphDataSlicer& dataSlicer() const { return *mpDataSlicer; }
-    QVector<int> indicesReadyData() const;
+    QVector<int> indicesUniqueData() const;
     int indexTimeData() const;
     bool isTimeData() const { return indexTimeData() >= 0; }
     // Getters of visual properties

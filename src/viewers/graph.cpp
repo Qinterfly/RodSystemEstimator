@@ -47,7 +47,7 @@ void Graph::setData(AbstractGraphData* pData, int iData)
 }
 
 //! Retrieve indices of assigned graph data
-QVector<int> Graph::indicesReadyData() const
+QVector<int> Graph::indicesUniqueData() const
 {
     // Create the set of unique graph data
     QMap<DataSign, int> uniqueData;

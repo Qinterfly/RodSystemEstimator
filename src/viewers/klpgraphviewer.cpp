@@ -293,8 +293,12 @@ void KLPGraphViewer::plot()
             // Check if time data is presented
             if (!pGraph->isTimeData())
                 continue;
+            // Skip underfilled graphs
+            int numData = pGraph->indicesUniqueData().size();
+            if (numData < 2)
+                continue;
             // Determine the type of the graph to plot
-            if (!pGraph->isDataSlicer())
+            if (!pGraph->isDataSlicer() && numData == KLP::kNumDirections)
                 plotSurface(pGraph, pResult);
             else
                 plotCurve(pGraph, pResult);
@@ -311,7 +315,7 @@ void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const 
 //! Represent plottable data as a curve
 void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult)
 {
-    QVector<int> const& indicesData = pGraph->indicesReadyData();
+    QVector<int> const& indicesData = pGraph->indicesUniqueData();
     auto [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
     // Check if the curve data is complete
     if (curveValues.size() < 2 || curveValues[0].size() != curveValues[1].size())
@@ -334,8 +338,6 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
 //! Helper function to retrieve data associated with a 2D-curve
 CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, QVector<int> const& indicesData)
 {
-    if (indicesData.size() < 2)
-        return CurveData();
     QVector<GraphDataset> curveValues;
     QVector<int> curveIndices;
     bool isDataSlicer = pGraph->isDataSlicer();
@@ -377,6 +379,25 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
                     AbstractGraphData* pData = pGraph->data()[jData];
                     curveValues[k][iTime] = pData->getDataset(collection, sliceIndex)[0];
                 }
+            }
+        }
+    }
+    else
+    {
+        if (indicesData.size() > 2)
+            return CurveData();
+        int numTime = pResult->numTimeRecords();
+        curveIndices = indicesData;
+        curveValues = { GraphDataset(numTime), GraphDataset(numTime) };
+        int numCurves = curveIndices.size();
+        for (int iTime = 0; iTime != numTime; ++iTime)
+        {
+            KLP::FrameCollection const& collection = pResult->getFrameCollection(iTime);
+            for (int k = 0; k != numCurves; ++k)
+            {
+                int jData = curveIndices[k];
+                AbstractGraphData* pData = pGraph->data()[jData];
+                curveValues[k][iTime] = pData->getDataset(collection)[0];
             }
         }
     }

@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the KinematisGraphData class
  */
 
@@ -13,11 +13,6 @@ using namespace RSE::Viewers;
 KinematicsGraphData::KinematicsGraphData(KinematicsType type, Direction direction)
     : AbstractGraphData(Category::cKinematics, direction)
     , mType(type)
-{
-
-}
-
-KinematicsGraphData::~KinematicsGraphData()
 {
 
 }

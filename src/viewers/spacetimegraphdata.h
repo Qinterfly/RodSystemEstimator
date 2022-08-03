@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Declaration of the SpaceTimeGraphData class
  */
 
@@ -29,7 +29,7 @@ public:
     };
     Q_ENUM(SpaceTimeType)
     SpaceTimeGraphData(SpaceTimeType type, Direction direction = Direction::dFull);
-    ~SpaceTimeGraphData();
+    ~SpaceTimeGraphData() = default;
     GraphDataset getDataset(KLP::FrameCollection const& collection, qint64 sliceIndex) const override;
     int type() const override { return mType; }
 

@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/aliasviewers.h \
     $$PWD/apputilities.h \
     $$PWD/convergenceviewer.h \
+    $$PWD/energygraphdata.h \
     $$PWD/graphdataslicer.h \
     $$PWD/graphlistmodel.h \
     $$PWD/klpgraphviewer.h \
@@ -18,6 +19,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/apputilities.cpp \
     $$PWD/convergenceviewer.cpp \
+    $$PWD/energygraphdata.cpp \
     $$PWD/graphdataslicer.cpp \
     $$PWD/graphlistmodel.cpp \
     $$PWD/klpgraphviewer.cpp \
