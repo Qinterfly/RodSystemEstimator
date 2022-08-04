@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/convergenceviewer.h \
     $$PWD/energygraphdata.h \
     $$PWD/estimationgraphdata.h \
+    $$PWD/figuremanager.h \
     $$PWD/graphdataslicer.h \
     $$PWD/graphlistmodel.h \
     $$PWD/klpgraphviewer.h \
@@ -22,6 +23,7 @@ SOURCES += \
     $$PWD/convergenceviewer.cpp \
     $$PWD/energygraphdata.cpp \
     $$PWD/estimationgraphdata.cpp \
+    $$PWD/figuremanager.cpp \
     $$PWD/graphdataslicer.cpp \
     $$PWD/graphlistmodel.cpp \
     $$PWD/klpgraphviewer.cpp \

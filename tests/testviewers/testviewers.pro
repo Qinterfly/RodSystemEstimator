@@ -1,5 +1,5 @@
 
-QT += testlib gui widgets opengl openglwidgets
+QT += testlib gui widgets opengl openglwidgets datavisualization
 CONFIG += qt warn_on depend_includepath testcase
 
 CONFIG += c++latest

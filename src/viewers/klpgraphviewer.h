@@ -8,13 +8,14 @@
 #ifndef KLPGRAPHVIEWER_H
 #define KLPGRAPHVIEWER_H
 
-#include "qcustomplot.h"
 #include "klp/aliasklp.h"
 #include "aliasviewers.h"
 #include "propertytreewidget.h"
 
 QT_BEGIN_NAMESPACE
 class QSettings;
+class QListView;
+class QTextEdit;
 QT_END_NAMESPACE
 
 namespace ads
@@ -40,6 +41,7 @@ class GraphListModel;
 namespace Viewers
 {
 
+class FigureManager;
 class PropertyTreeWidget;
 
 //! Class to graphically represent content of KLP output files
@@ -83,7 +85,7 @@ private:
     QSettings& mSettings;
     // GUI
     ads::CDockManager* mpDockManager = nullptr;
-    QCustomPlot* mpFigure;
+    FigureManager* mpFigureManager = nullptr;
     QListView* mpListResults;
     QTextEdit* mpTextInfo;
     QListView* mpListGraphs;

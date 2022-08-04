@@ -1,5 +1,5 @@
 
-QT  += core gui widgets opengl openglwidgets
+QT  += core gui widgets opengl openglwidgets datavisualization
 
 TARGET   = RodSystemEstimator
 TEMPLATE = app

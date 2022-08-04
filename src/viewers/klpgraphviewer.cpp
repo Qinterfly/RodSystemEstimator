@@ -17,6 +17,7 @@
 #include "klp/result.h"
 #include "apputilities.h"
 #include "klpgraphviewer.h"
+#include "figuremanager.h"
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
 #include "graph.h"
@@ -44,6 +45,7 @@ KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWi
 
 KLPGraphViewer::~KLPGraphViewer()
 {
+    delete mpFigureManager;
     delete mpDockManager;
 }
 
@@ -117,18 +119,13 @@ CDockWidget* KLPGraphViewer::createResultWidget()
     return pDockWidget;
 }
 
-//! Create a widget to plot graphs
+//! Create a widget to plot graphs and surfaces
 CDockWidget* KLPGraphViewer::createFigureWidget()
 {
     CDockWidget* pDockWidget = new CDockWidget(tr("Графический просмотр объектов"));
     pDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    mpFigure = new QCustomPlot();
-    mpFigure->plotLayout()->insertRow(0);
-    mpFigure->plotLayout()->addElement(0, 0, new QCPTextElement(mpFigure, "", QFont("sans", font().pointSize(), QFont::Bold)));
-    mpFigure->setAntialiasedElement(QCP::AntialiasedElement::aeAll, true);
-    mpFigure->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    mpFigure->axisRect()->setupFullAxesBox(true);
-    pDockWidget->setWidget(mpFigure);
+    mpFigureManager = new FigureManager(pDockWidget);
+    mpFigureManager->selectGraphFigure();
     return pDockWidget;
 }
 
@@ -271,11 +268,7 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
 //! Plot the resulting set of graphs
 void KLPGraphViewer::plot()
 {
-    QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
-    pTitleElement->setText(QString());
-    mpFigure->clearPlottables();
-    mpFigure->clearItems();
-    mpFigure->replot();
+    mpFigureManager->clear();
     QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
     QModelIndexList indicesGraphs  = mpListGraphs->selectionModel()->selectedIndexes();
     // Check if there is enough data to plot
@@ -312,25 +305,28 @@ void KLPGraphViewer::plot()
                 plotCurve(pGraph, pResult, isCompareResults);
         }
     }
-    mpFigure->legend->setVisible(isCompareResults);
+    mpFigureManager->graphFigure()->legend->setVisible(isCompareResults);
 }
 
 //! Represent plottable data as a surface
 void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const pResult)
 {
+    mpFigureManager->selectSurfaceFigure();
     // TODO
 }
 
 //! Represent plottable data as a curve
 void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult, bool isCompareResults)
 {
+    mpFigureManager->selectGraphFigure();
+    QCustomPlot* pFigure = mpFigureManager->graphFigure();
     QVector<int> const& indicesData = pGraph->indicesUniqueData();
     auto [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
     // Check if the curve data is complete
     if (curveValues.size() < 2 || curveValues[0].size() != curveValues[1].size())
         return;
     // Plot the curve
-    QCPGraph* pCurve = mpFigure->addGraph();
+    QCPGraph* pCurve = pFigure->addGraph();
     pCurve->setData(curveValues[0], curveValues[1]);
     // Specify visual properties
     QColor color = isCompareResults ? mpResultListModel->resultColor(pResult) : pGraph->color();
@@ -339,14 +335,14 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
     pCurve->setName(pResult->name());
     // Add title
-    QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
+    QCPTextElement* pTitleElement = (QCPTextElement*)pFigure->plotLayout()->element(0, 0);
     pTitleElement->setText(pGraph->title());
     // Specify labels
-    mpFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
-    mpFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
+    pFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
+    pFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
     // Rescale axes and update
-    mpFigure->rescaleAxes();
-    mpFigure->replot();
+    pFigure->rescaleAxes();
+    pFigure->replot();
 }
 
 //! Helper function to retrieve data associated with a 2D-curve
@@ -391,7 +387,9 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
                 {
                     int jData = curveIndices[k];
                     AbstractGraphData* pData = pGraph->data()[jData];
-                    curveValues[k][iTime] = pData->getDataset(collection, sliceIndex).first();
+                    GraphDataset const& dataset = pData->getDataset(collection, sliceIndex);
+                    if (!dataset.isEmpty())
+                        curveValues[k][iTime] = dataset.first();
                 }
             }
         }
@@ -412,7 +410,9 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
             {
                 int jData = curveIndices[k];
                 AbstractGraphData* pData = pGraph->data()[jData];
-                curveValues[k][iTime] = pData->getDataset(collection).first();
+                GraphDataset const& dataset = pData->getDataset(collection);
+                if (!dataset.isEmpty())
+                    curveValues[k][iTime] = dataset.first();
             }
         }
     }
