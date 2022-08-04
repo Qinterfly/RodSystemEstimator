@@ -6,9 +6,10 @@
  */
 
 #include <Q3DSurface>
+#include "DockWidget.h"
 #include "figuremanager.h"
 #include "qcustomplot.h"
-#include "DockWidget.h"
+#include "extendedsurfacehandler.h"
 
 using namespace RSE::Viewers;
 using ads::CDockWidget;
@@ -68,12 +69,15 @@ void FigureManager::initializeGraphFigure()
 //! Initialize the widget to plot surfaces
 void FigureManager::initializeSurfaceFigure()
 {
-    QString const kLabelFormat = "%.3f";
+    QString const kLabelFormat = "%.4g";
     mpSurfaceFigure = new Q3DSurface();
     mpSurfaceFigure->setSelectionMode(QAbstract3DGraph::SelectionItem);
+    mpSurfaceFigure->scene()->activeCamera()->setCameraPreset(Q3DCamera::CameraPresetIsometricRight);
     mpSurfaceFigureContainer = QWidget::createWindowContainer(mpSurfaceFigure);
     mpSurfaceFigureContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mpSurfaceFigureContainer->setFocusPolicy(Qt::StrongFocus);
+    ExtendedSurfaceHandler* pHandler = new ExtendedSurfaceHandler(mpSurfaceFigure);
+    mpSurfaceFigure->setActiveInputHandler(pHandler);
     // Shadows
     mpSurfaceFigure->setShadowQuality(Q3DSurface::ShadowQualityNone);
     // Axes

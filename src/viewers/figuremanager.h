@@ -8,9 +8,9 @@
 #ifndef FIGUREMANAGER_H
 #define FIGUREMANAGER_H
 
+class QWidget;
 class QCustomPlot;
 class Q3DSurface;
-class QWidget;
 
 namespace ads
 {
