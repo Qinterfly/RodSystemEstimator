@@ -89,6 +89,7 @@ CDockWidget* KLPGraphViewer::createResultWidget()
     mpListResults->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mpListResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
     connect(mpListResults->selectionModel(), &QItemSelectionModel::selectionChanged, this, &KLPGraphViewer::processSelectedResults);
+    connect(mpResultListModel, &ResultListModel::resultsUpdated, this, &KLPGraphViewer::processSelectedResults);
     // Info
     mpTextInfo = new QTextEdit();
     mpTextInfo->setReadOnly(true);
@@ -273,6 +274,7 @@ void KLPGraphViewer::plot()
     QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
     pTitleElement->setText(QString());
     mpFigure->clearPlottables();
+    mpFigure->clearItems();
     mpFigure->replot();
     QModelIndexList indicesResults = mpListResults->selectionModel()->selectedIndexes();
     QModelIndexList indicesGraphs  = mpListGraphs->selectionModel()->selectedIndexes();
@@ -310,6 +312,7 @@ void KLPGraphViewer::plot()
                 plotCurve(pGraph, pResult, isCompareResults);
         }
     }
+    mpFigure->legend->setVisible(isCompareResults);
 }
 
 //! Represent plottable data as a surface
@@ -334,6 +337,7 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     pCurve->setPen(QPen(color, pGraph->lineWidth()));
     pCurve->setLineStyle(pGraph->lineStyle());
     pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
+    pCurve->setName(pResult->name());
     // Add title
     QCPTextElement* pTitleElement = (QCPTextElement*)mpFigure->plotLayout()->element(0, 0);
     pTitleElement->setText(pGraph->title());

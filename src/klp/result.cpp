@@ -1,12 +1,13 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Definition of the Result class
  */
 
 #include <QFile>
 #include <QDateTime>
+#include <QFileInfo>
 #include "result.h"
 
 using namespace KLP;
@@ -315,4 +316,10 @@ int Result::numRods(qint64 iFrame) const
         return -1;
     IndexData indexData = mIndex[iFrame].data[RecordType::R];
     return indexData.size / mNumBytesRod;
+}
+
+//! Retrieve the name of the result file
+QString Result::name() const
+{
+    return QFileInfo(mkPathFile).baseName();
 }

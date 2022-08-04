@@ -1,7 +1,7 @@
 /*!
  * \file
  * \author Pavel Lakiza
- * \date July 2022
+ * \date August 2022
  * \brief Declaration of the Result class
  */
 
@@ -34,6 +34,7 @@ public:
     bool isEmpty() const { return mContent.isEmpty(); }
     QVector<double> const& time() const { return mTime; }
     QString const& pathFile() const { return mkPathFile; }
+    QString name() const;
     int numRods(qint64 iFrame) const;
     qint64 numTotalRecords() const { return mNumTotalRecords; }
     qint64 numTimeRecords() const { return mTime.size(); }

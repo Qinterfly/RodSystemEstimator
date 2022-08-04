@@ -17,7 +17,6 @@ using namespace RSE::Models;
 ResultListModel::ResultListModel(KLP::Results& results, QObject* pParent)
     : QStandardItemModel(pParent), mResults(results)
 {
-    mStandardColorNames = Utilities::App::standardColorNames();
     specifyConnections();
     updateContent();
 }
@@ -27,6 +26,7 @@ void ResultListModel::updateData()
 {
     for (auto& result : mResults)
         result->update();
+    emit resultsUpdated();
 }
 
 //! Create items linked to results
@@ -86,15 +86,18 @@ void ResultListModel::selectItem(int iSelect)
         iSelect = numRows - 1;
     if (iSelect >= numRows)
         return;
-    QListView* pParent = (QListView*)parent();
-    pParent->setCurrentIndex(index(iSelect, 0));
+    QListView* pView = (QListView*)parent();
+    pView->setCurrentIndex(index(iSelect, 0));
 }
 
 //! Retireve the next available color from the predefined set of colors
 QColor ResultListModel::getAvailableColor()
 {
-    static int iColor = 0;
-    return QColor(mStandardColorNames[iColor++]);
+    static int siColor = 0;
+    static QStringList const skStandardColorNames = Utilities::App::standardColorNames();
+    if (siColor == skStandardColorNames.size())
+        siColor = 0;
+    return QColor(skStandardColorNames[siColor++]);
 }
 
 //! Enable widgets to communicate

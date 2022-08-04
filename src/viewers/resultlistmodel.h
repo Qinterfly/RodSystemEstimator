@@ -29,6 +29,9 @@ public:
     void selectItem(int iSelect = -1);
     QColor resultColor(KLP::PointerResult pResult) const { return mResultColors[pResult.get()]; }
 
+signals:
+    void resultsUpdated();
+
 private:
     void clearContent();
     QColor getAvailableColor();
@@ -36,9 +39,7 @@ private:
 
 private:
     KLP::Results& mResults;
-    QStringList mStandardColorNames;
     QMap<KLP::Result*, QColor> mResultColors;
-
 };
 
 }
