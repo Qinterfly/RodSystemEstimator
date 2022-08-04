@@ -569,7 +569,19 @@ void PropertyTreeWidget::assignSlicer()
     QComboBox* pTypeWidget = (QComboBox*)itemWidget(mpDataSlicerItem->child(0), 1);
     int currentIndex = pTypeWidget->currentIndex();
     if (currentIndex < 0)
-        return;
+    {
+        // Fast select the first slicing set if any available
+        if (isEnabled && !pTypeWidget->size().isEmpty())
+        {
+            QSignalBlocker blocker(pTypeWidget);
+            currentIndex = 0;
+            pTypeWidget->setCurrentIndex(currentIndex);
+        }
+        else
+        {
+            return;
+        }
+    }
     int iType = pTypeWidget->itemData(currentIndex, Qt::UserRole).toInt();
     mpGraph->createDataSlicer((GraphDataSlicer::SliceType)iType, mpResult);
     emit graphChanged();
