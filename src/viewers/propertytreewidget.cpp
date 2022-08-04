@@ -226,9 +226,9 @@ void PropertyTreeWidget::specifyConnections()
         QComboBox* pComboBox = (QComboBox*)itemWidget(mDataItems[i]->child(0), 1);
         connect(pComboBox, &QComboBox::currentIndexChanged, this, [ this, i, funSlicer]()
         {
-            assignGraphData(i);
             setTypeWidget(i);
             setDirectionWidget(i);
+            assignGraphData(i);
             funSlicer();
         });
         // Type & direction

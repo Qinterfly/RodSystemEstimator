@@ -7,6 +7,9 @@
 
 #include <QSettings>
 #include <QTextEdit>
+#include <Q3DSurface>
+#include <QSurfaceDataProxy>
+#include <QSurface3DSeries>
 #include "qcustomplot.h"
 #include "DockManager.h"
 #include "DockWidget.h"
@@ -34,6 +37,10 @@ static const QSize skToolBarIconSize = {22, 22};
 
 using CurveData = QPair<QVector<GraphDataset>, QVector<int>>;
 CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, QVector<int> const& indicesData);
+
+using SurfaceData = QPair<QSurfaceDataArray*, QVector<int>>;
+SurfaceData getSurfaceData(PointerGraph const pGraph, PointerResult const pResult);
+QLinearGradient getCustomGradient();
 
 KLPGraphViewer::KLPGraphViewer(QString const& lastPath, QSettings& settings, QWidget* pParent)
     : QWidget(pParent), mLastPath(lastPath), mSettings(settings)
@@ -300,19 +307,12 @@ void KLPGraphViewer::plot()
                 continue;
             // Determine the type of the graph to plot
             if (!pGraph->isDataSlicer() && numData == KLP::kNumDirections)
-                plotSurface(pGraph, pResult);
+                plotSurface(pGraph, pResult, isCompareResults);
             else
                 plotCurve(pGraph, pResult, isCompareResults);
         }
     }
     mpFigureManager->graphFigure()->legend->setVisible(isCompareResults);
-}
-
-//! Represent plottable data as a surface
-void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const pResult)
-{
-    mpFigureManager->selectSurfaceFigure();
-    // TODO
 }
 
 //! Represent plottable data as a curve
@@ -321,7 +321,7 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     mpFigureManager->selectGraphFigure();
     QCustomPlot* pFigure = mpFigureManager->graphFigure();
     QVector<int> const& indicesData = pGraph->indicesUniqueData();
-    auto [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
+    auto const& [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
     // Check if the curve data is complete
     if (curveValues.size() < 2 || curveValues[0].size() != curveValues[1].size())
         return;
@@ -343,6 +343,40 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     // Rescale axes and update
     pFigure->rescaleAxes();
     pFigure->replot();
+}
+
+//! Represent plottable data as a surface
+void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const pResult, bool isCompareResults)
+{
+    mpFigureManager->selectSurfaceFigure();
+    Q3DSurface* pFigure = mpFigureManager->surfaceFigure();
+    // Create a new series
+    QSurfaceDataProxy* pDataProxy = new QSurfaceDataProxy;
+    QSurface3DSeries* pSeries = new QSurface3DSeries(pDataProxy);
+    // Specify style settings
+    pSeries->setFlatShadingEnabled(true);
+    pFigure->activeTheme()->setType(Q3DTheme::ThemeDigia);
+    if (isCompareResults)
+    {
+        pSeries->setDrawMode(QSurface3DSeries::DrawWireframe);
+        pSeries->setWireframeColor(mpResultListModel->resultColor(pResult));
+    }
+    else
+    {
+        pSeries->setDrawMode(QSurface3DSeries::DrawSurface);
+        pSeries->setBaseGradient(getCustomGradient());
+        pSeries->setColorStyle(Q3DTheme::ColorStyleObjectGradient);
+    }
+    pSeries->setItemLabelFormat(QStringLiteral("(@xLabel, @zLabel): @yLabel"));
+    // Retrieve the surface data
+    auto const& [surfaceValues, surfaceIndices] = getSurfaceData(pGraph, pResult);
+    pDataProxy->resetArray(surfaceValues);
+    // Axes labels and the title
+    pFigure->axisX()->setTitle(pGraph->axesLabels()[surfaceIndices[0]]);
+    pFigure->axisY()->setTitle(pGraph->axesLabels()[surfaceIndices[1]]);
+    pFigure->axisZ()->setTitle(pGraph->axesLabels()[surfaceIndices[2]]);
+    // Add the series to the figure
+    pFigure->addSeries(pSeries);
 }
 
 //! Helper function to retrieve data associated with a 2D-curve
@@ -417,4 +451,62 @@ CurveData getCurveData(PointerGraph const pGraph, PointerResult const pResult, Q
         }
     }
     return CurveData(curveValues, curveIndices);
+}
+
+//! Helper function to retrieve data associated with a surface
+SurfaceData getSurfaceData(PointerGraph const pGraph, PointerResult const pResult)
+{
+    // It is supposed that response data associated with the Z-axis
+    const int iResponseData = 2;
+    // Set the null object
+    SurfaceData nullSurfaceData;
+    // Check whether time is set as a response
+    int iTimeData = pGraph->indexTimeData();
+    if (iTimeData == 2)
+        return nullSurfaceData;
+    // Obtain the index of the data located in the key-value plane
+    int iPlanarData = iTimeData == 0 ? 1 : 0;
+    // Estimate the size of the data at the first step
+    KLP::FrameCollection const& firstCollection = pResult->getFrameCollection(0);
+    qint64 numTime = pResult->numTimeRecords();
+    qint64 numPlanarData = pGraph->data()[iPlanarData]->getDataset(firstCollection).size();
+    qint64 numResponseData = pGraph->data()[iResponseData]->getDataset(firstCollection).size();
+    if (numPlanarData != numResponseData)
+        return nullSurfaceData;
+    QSurfaceDataArray* pDataArray = new QSurfaceDataArray;
+    pDataArray->reserve(numTime);
+    // Loop through the data
+    auto const& time = pResult->time();
+    for (qint64 iTime = 0; iTime != numTime; ++iTime)
+    {
+        auto currentTime = time[iTime];
+        KLP::FrameCollection const& collection = pResult->getFrameCollection(iTime);
+        GraphDataset const& planarData = pGraph->data()[iPlanarData]->getDataset(collection);
+        GraphDataset const& responseData = pGraph->data()[iResponseData]->getDataset(collection);
+        QSurfaceDataRow* pCurrentRow = new QSurfaceDataRow(numPlanarData);
+        for (int jDataPoint = 0; jDataPoint != numPlanarData; ++jDataPoint)
+        {
+            float x = planarData[jDataPoint];
+            float y = responseData[jDataPoint];
+            float z = currentTime;
+            (*pCurrentRow)[jDataPoint].setPosition(QVector3D(x, y, z));
+        }
+        *pDataArray << pCurrentRow;
+    }
+    // Specify surface indices
+    QVector<int> surfaceIndices = { iPlanarData, iResponseData, iTimeData };
+    return SurfaceData(pDataArray, surfaceIndices);
+}
+
+//! Retrieve a custom gradient for the 3D-plot
+QLinearGradient getCustomGradient()
+{
+    QLinearGradient gradient;
+    gradient.setColorAt(0.0, Qt::blue);
+    gradient.setColorAt(0.2, Qt::cyan);
+    gradient.setColorAt(0.4, Qt::green);
+    gradient.setColorAt(0.6, Qt::yellow);
+    gradient.setColorAt(0.8, QColor("orange"));
+    gradient.setColorAt(1.0, Qt::red);
+    return gradient;
 }

@@ -68,11 +68,26 @@ void FigureManager::initializeGraphFigure()
 //! Initialize the widget to plot surfaces
 void FigureManager::initializeSurfaceFigure()
 {
+    QString const kLabelFormat = "%.3f";
     mpSurfaceFigure = new Q3DSurface();
+    mpSurfaceFigure->setSelectionMode(QAbstract3DGraph::SelectionItem);
     mpSurfaceFigureContainer = QWidget::createWindowContainer(mpSurfaceFigure);
+    mpSurfaceFigureContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mpSurfaceFigureContainer->setFocusPolicy(Qt::StrongFocus);
+    // Shadows
+    mpSurfaceFigure->setShadowQuality(Q3DSurface::ShadowQualityNone);
+    // Axes
     mpSurfaceFigure->setAxisX(new QValue3DAxis);
     mpSurfaceFigure->setAxisY(new QValue3DAxis);
     mpSurfaceFigure->setAxisZ(new QValue3DAxis);
+    mpSurfaceFigure->axisX()->setLabelAutoRotation(30);
+    mpSurfaceFigure->axisY()->setLabelAutoRotation(90);
+    mpSurfaceFigure->axisZ()->setLabelAutoRotation(30);
+    for (auto axis : mpSurfaceFigure->axes())
+    {
+        axis->setLabelFormat(kLabelFormat);
+        axis->setTitleVisible(true);
+    }
 }
 
 //! Clear the widget to plot graphs

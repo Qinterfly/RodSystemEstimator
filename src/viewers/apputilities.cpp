@@ -18,6 +18,7 @@ using namespace RSE::Utilities;
 void App::setStyle()
 {
     const uint kFontSize = 10;
+    qputenv("QSG_RHI_BACKEND", "opengl");
     QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
     qApp->setStyle("Fusion");
     qApp->setFont(QFont("Source Sans Pro", kFontSize));
