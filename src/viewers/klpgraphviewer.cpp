@@ -360,7 +360,6 @@ void KLPGraphViewer::plot()
                 plotCurve(pGraph, pResult, isCompareResults);
         }
     }
-    mpFigureManager->graphFigure()->legend->setVisible(isCompareResults);
 }
 
 //! Represent plottable data as a curve
@@ -382,9 +381,11 @@ void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pR
     pCurve->setLineStyle(pGraph->lineStyle());
     pCurve->setScatterStyle(QCPScatterStyle(pGraph->scatterShape(), pGraph->scatterSize()));
     pCurve->setName(pResult->name());
-    // Add title
+    // Modify the title
     QCPTextElement* pTitleElement = (QCPTextElement*)pFigure->plotLayout()->element(0, 0);
     pTitleElement->setText(pGraph->title());
+    // Configure the legend
+    pFigure->legend->setVisible(isCompareResults);
     // Specify labels
     pFigure->xAxis->setLabel(pGraph->axesLabels()[curveIndices[0]]);
     pFigure->yAxis->setLabel(pGraph->axesLabels()[curveIndices[1]]);
