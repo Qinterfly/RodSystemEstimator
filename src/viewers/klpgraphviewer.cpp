@@ -276,7 +276,7 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
     mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.ID));
 }
 
-//! Create a predefined set of graphs
+//! Replace a current set of graphs with a standard one
 void KLPGraphViewer::setStandardGraphs()
 {
     const int kNumGraphs = 4;
@@ -285,7 +285,7 @@ void KLPGraphViewer::setStandardGraphs()
     for (int i = 0; i != kNumGraphs; ++i)
     {
         auto pGraph = std::make_shared<Graph>(QString::number(i));
-        graphs.insert({i, pGraph});
+        graphs.insert({ pGraph->id(), pGraph });
     }
     auto iterGraph = graphs.begin();
     PointerGraph pGraph;

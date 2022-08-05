@@ -15,8 +15,6 @@
 #include "viewers/graph.h"
 #include "viewers/spacetimegraphdata.h"
 #include "viewers/kinematicsgraphdata.h"
-#include "viewers/energygraphdata.h"
-#include "viewers/estimationgraphdata.h"
 
 using namespace RSE::Core;
 using namespace RSE::Viewers;

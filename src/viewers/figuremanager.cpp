@@ -23,6 +23,7 @@ FigureManager::FigureManager(CDockWidget* pFigureContainer)
 
 FigureManager::~FigureManager()
 {
+    clear();
     mpFigureContainer->takeWidget();
     delete mpGraphFigure;
     delete mpSurfaceFigureContainer;
@@ -122,7 +123,10 @@ void FigureManager::clearSurfaceFigure()
 {
     QString nullTitle;
     for (auto pSeries : mpSurfaceFigure->seriesList())
+    {
         mpSurfaceFigure->removeSeries(pSeries);
+        delete pSeries;
+    }
     mpSurfaceFigure->axisX()->setTitle(nullTitle);
     mpSurfaceFigure->axisY()->setTitle(nullTitle);
     mpSurfaceFigure->axisZ()->setTitle(nullTitle);
