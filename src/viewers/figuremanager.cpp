@@ -76,7 +76,7 @@ void FigureManager::initializeSurfaceFigure()
     mpSurfaceFigureContainer = QWidget::createWindowContainer(mpSurfaceFigure);
     mpSurfaceFigureContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mpSurfaceFigureContainer->setFocusPolicy(Qt::StrongFocus);
-    ExtendedSurfaceHandler* pHandler = new ExtendedSurfaceHandler(mpSurfaceFigure);
+    ExtendedSurfaceHandler* pHandler = new ExtendedSurfaceHandler(mpSurfaceFigure, mpSurfaceFigureContainer);
     mpSurfaceFigure->setActiveInputHandler(pHandler);
     // Shadows
     mpSurfaceFigure->setShadowQuality(Q3DSurface::ShadowQualityNone);

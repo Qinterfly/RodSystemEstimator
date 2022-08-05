@@ -22,17 +22,18 @@ ExtendedSurfaceHandler::ExtendedSurfaceHandler(Q3DSurface* pSurface, QObject* pP
 }
 
 //! Wait for the right button to be clicked
-void ExtendedSurfaceHandler::mousePressEvent(QMouseEvent* event, const QPoint& mousePos)
+void ExtendedSurfaceHandler::mousePressEvent(QMouseEvent* pEvent, const QPoint& mousePos)
 {
-    if (Qt::MiddleButton == event->button())
+    if (Qt::MiddleButton == pEvent->button())
         requestContextMenu(mousePos);
-    Q3DInputHandler::mousePressEvent(event, mousePos);
+    Q3DInputHandler::mousePressEvent(pEvent, mousePos);
 }
 
 //! Show a context menu at the specified position
 void ExtendedSurfaceHandler::requestContextMenu(QPoint const& position)
 {
-    QMenu* pMenu = new QMenu();
+    QWidget* pWidget = qobject_cast<QWidget*>(parent());
+    QMenu* pMenu = new QMenu(pWidget);
     pMenu->setAttribute(Qt::WA_DeleteOnClose, true);
     pMenu->addAction(tr("Скопировать изображение"), this, &ExtendedSurfaceHandler::copyImageToClipboard);
     pMenu->popup(mpSurface->mapToGlobal(position));

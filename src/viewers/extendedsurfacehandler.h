@@ -25,7 +25,7 @@ public:
     ExtendedSurfaceHandler(Q3DSurface* pSurface, QObject* pParent = nullptr);
 
 protected:
-    void mousePressEvent(QMouseEvent* event, const QPoint& mousePos) override;
+    void mousePressEvent(QMouseEvent* pEvent, const QPoint& mousePos) override;
 
 private:
     void requestContextMenu(QPoint const& position);
@@ -33,7 +33,6 @@ private:
 
 private:
     Q3DSurface* mpSurface;
-    QString mLastPath;
 };
 
 }
