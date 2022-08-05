@@ -9,7 +9,6 @@
 #define FIGUREMANAGER_H
 
 class QWidget;
-class QCustomPlot;
 class Q3DSurface;
 
 namespace ads
@@ -23,6 +22,8 @@ namespace RSE
 namespace Viewers
 {
 
+class ExtendedGraphPlot;
+
 //! Manager to create and select figures of different types: graphs and surfaces
 class FigureManager
 {
@@ -30,7 +31,7 @@ public:
     FigureManager(ads::CDockWidget* pFigureContainer);
     ~FigureManager();
     // Getters
-    QCustomPlot* graphFigure() { return mpGraphFigure; }
+    ExtendedGraphPlot* graphFigure() { return mpGraphFigure; }
     Q3DSurface* surfaceFigure() { return mpSurfaceFigure; }
     // Setters
     void clear();
@@ -45,7 +46,7 @@ private:
 
 private:
     ads::CDockWidget* mpFigureContainer;
-    QCustomPlot* mpGraphFigure;
+    ExtendedGraphPlot* mpGraphFigure;
     Q3DSurface* mpSurfaceFigure;
     QWidget* mpSurfaceFigureContainer;
 };

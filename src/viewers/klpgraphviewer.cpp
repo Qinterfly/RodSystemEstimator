@@ -10,7 +10,6 @@
 #include <Q3DSurface>
 #include <QSurfaceDataProxy>
 #include <QSurface3DSeries>
-#include "qcustomplot.h"
 #include "DockManager.h"
 #include "DockWidget.h"
 #include "DockAreaWidget.h"
@@ -24,6 +23,7 @@
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
 #include "graph.h"
+#include "extendedgraphplot.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -319,7 +319,7 @@ void KLPGraphViewer::plot()
 void KLPGraphViewer::plotCurve(PointerGraph const pGraph, PointerResult const pResult, bool isCompareResults)
 {
     mpFigureManager->selectGraphFigure();
-    QCustomPlot* pFigure = mpFigureManager->graphFigure();
+    ExtendedGraphPlot* pFigure = mpFigureManager->graphFigure();
     QVector<int> const& indicesData = pGraph->indicesUniqueData();
     auto const& [curveValues, curveIndices] = getCurveData(pGraph, pResult, indicesData);
     // Check if the curve data is complete
@@ -370,6 +370,8 @@ void KLPGraphViewer::plotSurface(PointerGraph const pGraph, PointerResult const 
     pSeries->setItemLabelFormat(QStringLiteral("(@xLabel, @zLabel): @yLabel"));
     // Retrieve the surface data
     auto const& [surfaceValues, surfaceIndices] = getSurfaceData(pGraph, pResult);
+    if (surfaceIndices.isEmpty() || surfaceValues->isEmpty())
+        return;
     pDataProxy->resetArray(surfaceValues);
     // Axes labels and the title
     pFigure->axisX()->setTitle(pGraph->axesLabels()[surfaceIndices[0]]);

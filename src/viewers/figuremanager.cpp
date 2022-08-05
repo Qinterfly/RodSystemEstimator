@@ -8,7 +8,7 @@
 #include <Q3DSurface>
 #include "DockWidget.h"
 #include "figuremanager.h"
-#include "qcustomplot.h"
+#include "extendedgraphplot.h"
 #include "extendedsurfacehandler.h"
 
 using namespace RSE::Viewers;
@@ -58,12 +58,23 @@ void FigureManager::selectSurfaceFigure()
 //! Initalize the widget to plot graphs
 void FigureManager::initializeGraphFigure()
 {
-    mpGraphFigure = new QCustomPlot();
-    mpGraphFigure->plotLayout()->insertRow(0);
-    mpGraphFigure->plotLayout()->addElement(0, 0, new QCPTextElement(mpGraphFigure, "", QFont("sans", -1, QFont::Bold)));
+    QString const kNameFont = "Source Sans Pro";
+    int const kSizeFont = 12;
+    // Set interactions
+    mpGraphFigure = new ExtendedGraphPlot();
     mpGraphFigure->setAntialiasedElement(QCP::AntialiasedElement::aeAll, true);
     mpGraphFigure->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     mpGraphFigure->axisRect()->setupFullAxesBox(true);
+    // Add title
+    mpGraphFigure->plotLayout()->insertRow(0);
+    mpGraphFigure->plotLayout()->addElement(0, 0, new QCPTextElement(mpGraphFigure, "", QFont(kNameFont, kSizeFont, QFont::Bold)));
+    // Specify font
+    QFont font(kNameFont, kSizeFont);
+    mpGraphFigure->setFont(font);
+    mpGraphFigure->xAxis->setTickLabelFont(font);
+    mpGraphFigure->xAxis->setLabelFont(font);
+    mpGraphFigure->yAxis->setTickLabelFont(font);
+    mpGraphFigure->yAxis->setLabelFont(font);
 }
 
 //! Initialize the widget to plot surfaces
@@ -73,9 +84,11 @@ void FigureManager::initializeSurfaceFigure()
     mpSurfaceFigure = new Q3DSurface();
     mpSurfaceFigure->setSelectionMode(QAbstract3DGraph::SelectionItem);
     mpSurfaceFigure->scene()->activeCamera()->setCameraPreset(Q3DCamera::CameraPresetIsometricRight);
+    // Create the container
     mpSurfaceFigureContainer = QWidget::createWindowContainer(mpSurfaceFigure);
     mpSurfaceFigureContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mpSurfaceFigureContainer->setFocusPolicy(Qt::StrongFocus);
+    // Set the handler for the input actions
     ExtendedSurfaceHandler* pHandler = new ExtendedSurfaceHandler(mpSurfaceFigure, mpSurfaceFigureContainer);
     mpSurfaceFigure->setActiveInputHandler(pHandler);
     // Shadows
@@ -107,6 +120,10 @@ void FigureManager::clearGraphFigure()
 //! Clear the widget to plot surfaces
 void FigureManager::clearSurfaceFigure()
 {
+    QString nullTitle;
     for (auto pSeries : mpSurfaceFigure->seriesList())
         mpSurfaceFigure->removeSeries(pSeries);
+    mpSurfaceFigure->axisX()->setTitle(nullTitle);
+    mpSurfaceFigure->axisY()->setTitle(nullTitle);
+    mpSurfaceFigure->axisZ()->setTitle(nullTitle);
 }

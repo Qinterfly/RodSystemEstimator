@@ -28,11 +28,15 @@ protected:
     void mousePressEvent(QMouseEvent* pEvent, const QPoint& mousePos) override;
 
 private:
-    void requestContextMenu(QPoint const& position);
+    void createActions();
+    void showContextMenu(QPoint const& position);
     void copyImageToClipboard();
+    void saveImage();
 
 private:
     Q3DSurface* mpSurface;
+    QAction* mpCopyAction;
+    QAction* mpSaveAction;
 };
 
 }
