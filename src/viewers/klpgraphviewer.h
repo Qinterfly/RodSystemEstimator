@@ -56,6 +56,7 @@ public:
     void openResultsDialog();
     void openResults(QStringList const& locationFiles);
     // Graphs
+    void setStandardGraphs();
     void setGraphs(MapGraphs&& graphs);
     void plot();
 

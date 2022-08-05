@@ -42,7 +42,7 @@ private:
     QSettings* mpSettings;
     ConvergenceViewer* mpConvergenceViewer;
     KLPGraphViewer* mpKLPGraphViewer;
-    MapGraphs mGraphs;
+    PointerGraph mpGraph;
 };
 
 //! Initialize viewers
@@ -64,41 +64,19 @@ void TestViewers::testConvergenceViewer()
 //! Create graphs of different types
 void TestViewers::testGraphs()
 {
-    const int kNumGraphs = 4;
-    // Create multiple graphs
-    for (int i = 0; i != kNumGraphs; ++i)
-    {
-        auto pGraph = std::make_shared<Graph>(tr("Тест %1").arg(i));
-        mGraphs.insert({i, pGraph});
-    }
-    // Parameter - time - speed
-    mGraphs[0]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
-                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new KinematicsGraphData(KinematicsGraphData::kSpeed));
-    mGraphs[0]->setAxesLabels(tr("Параметр"), tr("Время"), tr("Скорость"));
-    // Natural length - time - displacement
-    mGraphs[1]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
-                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
-    mGraphs[1]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Перемещение"));
-    // Time - kinetic energy
-    mGraphs[2]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new EnergyGraphData(EnergyGraphData::enKinetic));
-    mGraphs[2]->setAxesLabels(tr("Время"), tr("Кинетическая энергия"));
-    // Natural length - time - error of displacement
-    mGraphs[3]->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
-                        new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
-                        new EstimationGraphData(EstimationGraphData::esDisplacement));
-    mGraphs[3]->setAxesLabels(tr("Накопленная длина"), tr("Время"), tr("Ошибка перемещения"));
+    mpGraph = std::make_shared<Graph>(tr("Test"));
+    mpGraph->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
+                     new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                     new KinematicsGraphData(KinematicsGraphData::kDisplacement, AbstractGraphData::dFirst));
+    QCOMPARE(3, mpGraph->indicesUniqueData().size());
 }
 
 //! Slice graph data
 void TestViewers::testDataSlicer()
 {
     KLP::PointerResult pResult = std::make_shared<KLP::Result>(mkTestDataPath + "dynamic-impulse-2.klp");
-    PointerGraph pGraph = mGraphs[1];
-    QCOMPARE(true, pGraph->createDataSlicer(GraphDataSlicer::sdX, pResult));
-    auto& dataSlicer = pGraph->dataSlicer();
+    QCOMPARE(true, mpGraph->createDataSlicer(GraphDataSlicer::sdX, pResult));
+    auto& dataSlicer = mpGraph->dataSlicer();
     QVERIFY(fuzzyCompare(dataSlicer.setClosestValue(0.5), 0.52, 1e-3));
 }
 
@@ -111,7 +89,7 @@ void TestViewers::testKLPGraphViewer()
     for (QString& path : pathFiles)
         path = mkTestDataPath + path;
     mpKLPGraphViewer->openResults(pathFiles);
-    mpKLPGraphViewer->setGraphs(std::move(mGraphs));
+    mpKLPGraphViewer->setStandardGraphs();
     mpKLPGraphViewer->show();
 }
 

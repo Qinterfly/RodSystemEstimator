@@ -15,15 +15,19 @@
 #include "DockAreaWidget.h"
 #include "ads_globals.h"
 
-#include "central/uiconstants.h"
-#include "klp/result.h"
-#include "apputilities.h"
 #include "klpgraphviewer.h"
+#include "apputilities.h"
+#include "central/uiconstants.h"
+#include "extendedgraphplot.h"
+#include "klp/result.h"
 #include "figuremanager.h"
 #include "resultlistmodel.h"
 #include "graphlistmodel.h"
 #include "graph.h"
-#include "extendedgraphplot.h"
+#include "spacetimegraphdata.h"
+#include "kinematicsgraphdata.h"
+#include "energygraphdata.h"
+#include "estimationgraphdata.h"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -270,6 +274,50 @@ void KLPGraphViewer::showResultInfo(KLP::ResultInfo const& info)
     mpTextInfo->append(tr("Общее число записей: %1").arg(info.numTotalRecords));
     mpTextInfo->append(tr("Число записей по времени: %1").arg(info.numTimeRecords));
     mpTextInfo->append(tr("Идентифиактор проекта: %1").arg(info.ID));
+}
+
+//! Create a predefined set of graphs
+void KLPGraphViewer::setStandardGraphs()
+{
+    const int kNumGraphs = 4;
+    MapGraphs graphs;
+    // Create multiple graphs
+    for (int i = 0; i != kNumGraphs; ++i)
+    {
+        auto pGraph = std::make_shared<Graph>(QString::number(i));
+        graphs.insert({i, pGraph});
+    }
+    auto iterGraph = graphs.begin();
+    PointerGraph pGraph;
+    // Parameter - time - speed
+    pGraph = (iterGraph++)->second;
+    pGraph->setName(tr("Скорость"));
+    pGraph->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stParameter),
+                    new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                    new KinematicsGraphData(KinematicsGraphData::kSpeed));
+    pGraph->setAxesLabels(tr("Параметр, м/м"), tr("Время, с"), tr("Скорость, м/с"));
+    // Natural length - time - displacement
+    pGraph = (iterGraph++)->second;
+    pGraph->setName(tr("Перемещение"));
+    pGraph->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
+                    new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                    new KinematicsGraphData(KinematicsGraphData::kDisplacement));
+    pGraph->setAxesLabels(tr("Накопленная длина, м"), tr("Время, с"), tr("Перемещение, м"));
+    // Time - kinetic energy
+    pGraph = (iterGraph++)->second;
+    pGraph->setName(tr("Кинетическая энергия"));
+    pGraph->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                    new EnergyGraphData(EnergyGraphData::enKinetic));
+    pGraph->setAxesLabels(tr("Время, с"), tr("Кинетическая энергия, Дж"));
+    // Natural length - time - error of displacement
+    pGraph = (iterGraph++)->second;
+    pGraph->setName(tr("Оценка ошибки перемещения"));
+    pGraph->setData(new SpaceTimeGraphData(SpaceTimeGraphData::stAccumulatedNaturalLength),
+                    new SpaceTimeGraphData(SpaceTimeGraphData::stTime),
+                    new EstimationGraphData(EstimationGraphData::esDisplacement));
+    pGraph->setAxesLabels(tr("Накопленная длина, м"), tr("Время, с"), tr("Ошибка перемещения, м"));
+    // Assign the resulting graphs
+    setGraphs(std::move(graphs));
 }
 
 //! Plot the resulting set of graphs

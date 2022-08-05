@@ -16,6 +16,7 @@ namespace RSE
 namespace Viewers
 {
 
+//! Class to enrich user interactions with the QCustomPlot widget
 class ExtendedGraphPlot : public QCustomPlot
 {
     Q_OBJECT

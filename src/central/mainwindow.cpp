@@ -670,6 +670,7 @@ void MainWindow::showResults()
     if (mpGraphViewer)
         mpGraphViewer.reset();
     mpGraphViewer = std::make_shared<Viewers::KLPGraphViewer>(mpIO->lastPath(), *mpSettings);
+    mpGraphViewer->setStandardGraphs();
     mpGraphViewer->show();
 }
 
